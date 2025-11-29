@@ -1,0 +1,101 @@
+### --- ANDROID / ANDROID STUDIO --- ###
+*.iml
+*.hprof
+*.orig
+*.rej
+*.swp
+*~
+
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local config (EXPLICITLY EXCLUDED)
+local.properties
+gradle.properties
+
+# Android Studio generated
+/.idea/
+.idea/*
+
+# Except essential IDEA configs (optional)
+!.idea/codeStyles/
+!.idea/fileTemplates/
+!.idea/runConfigurations/
+
+# Logs
+*.log
+
+# Keystore files (VERY IMPORTANT)
+*.jks
+*.keystore
+
+# Signed APK / AAB
+*.apk
+*.ap_
+*.aab
+
+# Captures
+captures/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# Crashlytics / Firebase
+app/google-services.json
+app/google-services.plist
+**/google-services.json
+**/GoogleService-Info.plist
+firebase-debug.log
+
+# Native build
+obj/
+.externalNativeBuild/
+
+### --- KOTLIN MULTIPLATFORM --- ###
+# KMP shared module build
+*/build/
+*/out/
+
+# KMP cocoapods integration
+cocoapods/
+Pods/
+podfile.lock
+.gradle.kts
+*.xcworkspace/
+*.xcuserdata/
+**/DerivedData/
+
+# Kotlin/Native cache
+.k2/
+*.knm
+
+# KMP iOS frameworks
+*.framework/
+*.xcframework/
+
+### --- KTOR --- ###
+# Local certificates or dev-only configs
+certs/
+*.pem
+
+### --- KOIN --- ###
+# Normally no special files, but exclude logs or debug configs
+koin-debug.log
+
+### --- MISC --- ###
+.DS_Store
+Thumbs.db
+
+# Jetpack Compose previews
+.idea/deploymentTargetSelector.xml
+.idea/androidTestResultsUserPreferences.xml
+
+# Local environment files
+.env
+.env.*
