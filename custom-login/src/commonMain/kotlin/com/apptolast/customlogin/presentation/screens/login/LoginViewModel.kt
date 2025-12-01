@@ -25,7 +25,10 @@ data class LoginUiState(
  * ViewModel for the Login screen.
  * Handles business logic and exposes state to the UI.
  */
-class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
+class LoginViewModel(
+    private val loginConfig: LoginConfig,
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
@@ -35,7 +38,7 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     private fun loadConfig() {
-//        _uiState.update { it.copy(config = authRepository.getLoginConfig()) }
+        _uiState.update { it.copy(config = loginConfig) }
     }
 
     fun login(email: String, password: String) {

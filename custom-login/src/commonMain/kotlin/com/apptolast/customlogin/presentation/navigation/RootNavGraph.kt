@@ -4,6 +4,7 @@ import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.compose.NavHost
@@ -21,43 +22,85 @@ fun RootNavGraph() {
     // The animation spec must be for an IntOffset, not an Int.
     val animationSpec = tween<IntOffset>(durationMillis = 400, easing = EaseInOut)
 
-    NavHost(
-        navController = navController,
-        startDestination = startDestination
-    ) {
-        navigation<AuthGraph>(
-            startDestination = WelcomeRoute,
+    Surface {
+        NavHost(
+            navController = navController,
+            startDestination = startDestination
         ) {
-            composable<WelcomeRoute>(
-                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = animationSpec) },
-                exitTransition = { slideOutHorizontally(targetOffsetX = { -it }, animationSpec = animationSpec) },
-                popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }, animationSpec = animationSpec) },
-                popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = animationSpec) }
+            navigation<AuthGraph>(
+                startDestination = WelcomeRoute,
             ) {
-                WelcomeScreen(
-                    onNavigateToLogin = { navController.navigate(LoginRoute) },
-                    onNavigateToRegister = { /* navController.navigate(RegisterRoute) */ }
-                )
-            }
-            composable<LoginRoute>(
-                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = animationSpec) },
-                exitTransition = { slideOutHorizontally(targetOffsetX = { -it }, animationSpec = animationSpec) },
-                popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }, animationSpec = animationSpec) },
-                popExitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = animationSpec) }
-            ) {
-                LoginRoute(
-                    onLoginSuccess = {
-                        navController.navigate(HomeGraph) {
-                            popUpTo(AuthGraph) { inclusive = true }
-                        }
+                composable<WelcomeRoute>(
+                    enterTransition = {
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = animationSpec
+                        )
+                    },
+                    exitTransition = {
+                        slideOutHorizontally(
+                            targetOffsetX = { -it },
+                            animationSpec = animationSpec
+                        )
+                    },
+                    popEnterTransition = {
+                        slideInHorizontally(
+                            initialOffsetX = { -it },
+                            animationSpec = animationSpec
+                        )
+                    },
+                    popExitTransition = {
+                        slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = animationSpec
+                        )
                     }
-                )
+                ) {
+                    WelcomeScreen(
+                        onNavigateToLogin = { navController.navigate(LoginRoute) },
+                        onNavigateToRegister = { /* navController.navigate(RegisterRoute) */ }
+                    )
+                }
+                composable<LoginRoute>(
+                    enterTransition = {
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = animationSpec
+                        )
+                    },
+                    exitTransition = {
+                        slideOutHorizontally(
+                            targetOffsetX = { -it },
+                            animationSpec = animationSpec
+                        )
+                    },
+                    popEnterTransition = {
+                        slideInHorizontally(
+                            initialOffsetX = { -it },
+                            animationSpec = animationSpec
+                        )
+                    },
+                    popExitTransition = {
+                        slideOutHorizontally(
+                            targetOffsetX = { it },
+                            animationSpec = animationSpec
+                        )
+                    }
+                ) {
+                    LoginRoute(
+                        onLoginSuccess = {
+                            navController.navigate(HomeGraph) {
+                                popUpTo(AuthGraph) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+                // TODO: Add composable<RegisterRoute> with similar animations
             }
-            // TODO: Add composable<RegisterRoute> with similar animations
-        }
 
 //        navigation<HomeGraph>(startDestination = HomeRoute) {
             // ...
 //        }
+        }
     }
 }

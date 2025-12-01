@@ -1,6 +1,7 @@
 package com.apptolast.customlogin.domain.repository
 
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.domain.model.LoginConfig
 
 /**
  * Interface for authentication-related operations.

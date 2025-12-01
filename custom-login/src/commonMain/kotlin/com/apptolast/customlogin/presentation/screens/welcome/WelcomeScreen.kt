@@ -53,100 +53,90 @@ fun WelcomeScreen(
         showContent = true
     }
 
-    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = { Text(appName) },
-//                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
-//            )
-//        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Título principal
+        AnimatedVisibility(
+            visible = showContent,
+            enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
+                initialOffsetY = { it / 2 },
+                animationSpec = tween(300)
+            ),
+            exit = fadeOut() + slideOutVertically()
         ) {
-            // Título principal
-            AnimatedVisibility(
-                visible = showContent,
-                enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
-                    initialOffsetY = { it / 2 },
-                    animationSpec = tween(300)
-                ),
-                exit = fadeOut() + slideOutVertically()
-            ) {
-                Text(
-                    text = "Welcome!",
-                    style = MaterialTheme.typography.headlineLarge
+            Text(
+                text = "Welcome!",
+                style = MaterialTheme.typography.headlineLarge
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Subtítulo / descripción
+        AnimatedVisibility(
+            visible = showContent,
+            enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
+                initialOffsetY = { it / 3 },
+                animationSpec = tween(300)
+            )
+        ) {
+            Text(
+                text = "Create an account to get started or sign in if you already have one.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 8.dp),
+                maxLines = 3
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Botón de crear cuenta
+        AnimatedVisibility(
+            visible = showContent,
+            enter = fadeIn(animationSpec = tween(700)) + slideInVertically(
+                initialOffsetY = { it / 2 },
+                animationSpec = tween(700)
+            )
+        ) {
+            Button(
+                onClick = onNavigateToRegister,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
+            ) {
+                Text("Create Account")
             }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-            // Subtítulo / descripción
-            AnimatedVisibility(
-                visible = showContent,
-                enter = fadeIn(animationSpec = tween(300)) + slideInVertically(
-                    initialOffsetY = { it / 3 },
-                    animationSpec = tween(300)
-                )
+        // Botón de iniciar sesión
+        AnimatedVisibility(
+            visible = showContent,
+            enter = fadeIn(animationSpec = tween(800)) + slideInVertically(
+                initialOffsetY = { it / 2 },
+                animationSpec = tween(800)
+            )
+        ) {
+            TextButton(
+                onClick = onNavigateToLogin,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = "Create an account to get started or sign in if you already have one.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    maxLines = 3
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Botón de crear cuenta
-            AnimatedVisibility(
-                visible = showContent,
-                enter = fadeIn(animationSpec = tween(700)) + slideInVertically(
-                    initialOffsetY = { it / 2 },
-                    animationSpec = tween(700)
-                )
-            ) {
-                Button(
-                    onClick = onNavigateToRegister,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(44.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) {
-                    Text("Create Account")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Botón de iniciar sesión
-            AnimatedVisibility(
-                visible = showContent,
-                enter = fadeIn(animationSpec = tween(800)) + slideInVertically(
-                    initialOffsetY = { it / 2 },
-                    animationSpec = tween(800)
-                )
-            ) {
-                TextButton(
-                    onClick = onNavigateToLogin,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Already have an account? Sign In")
-                }
+                Text("Already have an account? Sign In")
             }
         }
     }
+
 }
