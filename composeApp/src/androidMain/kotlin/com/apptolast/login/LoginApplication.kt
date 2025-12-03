@@ -1,28 +1,38 @@
+// composeApp/src/androidMain/kotlin/com/apptolast/login/MyApplication.kt
 package com.apptolast.login
 
 import android.app.Application
-import com.apptolast.customlogin.di.initKoin
+import com.apptolast.customlogin.di.initLoginKoin
+import com.apptolast.customlogin.domain.model.LoginConfig
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.initialize
 import org.koin.android.ext.koin.androidContext
-import org.koin.android.ext.koin.androidLogger
 
-/**
- * Main Application class for the Android app.
- * This is the entry point for initializing app-wide components like Koin and Firebase.
- */
 class LoginApplication : Application() {
-
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Initialize Firebase using the GitLive method
+        // 1. Inicializar Firebase (GitLive)
         Firebase.initialize(this)
 
-        // 2. Initialize Koin with all the necessary modules
-        initKoin {
-            androidLogger() // Enable Android-specific logging for Koin
-            androidContext(this@LoginApplication) // Provide the Android context
-        }
+        // 2. Inicializar Koin con la config de login
+        initLoginKoin(
+            appDeclaration = { androidContext(this@LoginApplication) },
+            config = LoginConfig().copy(
+                appName = "SuperApp",
+//                drawableResource = Res.drawable.compose_multiplatform,
+                subtitle = "Bienvenido a la app definitiva",
+                googleEnabled = true,
+                appleEnabled = true,
+                passwordMinLength = 8,
+                signInWithGoogleText = "Continuar con Google",
+                onGoogleSignIn = {
+                    println("Google Sign-In clicked")
+                },
+                onForgotPassword = {
+                    println("Forgot password clicked")
+                }
+            )
+        )
     }
 }

@@ -1,106 +1,96 @@
 package com.apptolast.customlogin.presentation.navigation
 
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.IntOffset
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
 import com.apptolast.customlogin.presentation.screens.login.LoginRoute
+import com.apptolast.customlogin.presentation.screens.register.RegisterRoute
 import com.apptolast.customlogin.presentation.screens.welcome.WelcomeScreen
 
 @Composable
-fun RootNavGraph() {
+fun RootNavGraph(
+    onLoginSuccess: () -> Unit = {}
+) {
     val navController = rememberNavController()
-    val startDestination = AuthGraph
-
-    // The animation spec must be for an IntOffset, not an Int.
-    val animationSpec = tween<IntOffset>(durationMillis = 400, easing = EaseInOut)
 
     Surface {
         NavHost(
             navController = navController,
-            startDestination = startDestination
+            startDestination = WelcomeRoute,
+            enterTransition = { NavTransitions.enter },
+            exitTransition = { NavTransitions.exit },
+            popEnterTransition = { NavTransitions.popEnter },
+            popExitTransition = { NavTransitions.popExit }
         ) {
-            navigation<AuthGraph>(
-                startDestination = WelcomeRoute,
-            ) {
-                composable<WelcomeRoute>(
-                    enterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { it },
-                            animationSpec = animationSpec
-                        )
-                    },
-                    exitTransition = {
-                        slideOutHorizontally(
-                            targetOffsetX = { -it },
-                            animationSpec = animationSpec
-                        )
-                    },
-                    popEnterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { -it },
-                            animationSpec = animationSpec
-                        )
-                    },
-                    popExitTransition = {
-                        slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = animationSpec
-                        )
-                    }
-                ) {
-                    WelcomeScreen(
-                        onNavigateToLogin = { navController.navigate(LoginRoute) },
-                        onNavigateToRegister = { /* navController.navigate(RegisterRoute) */ }
-                    )
-                }
-                composable<LoginRoute>(
-                    enterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { it },
-                            animationSpec = animationSpec
-                        )
-                    },
-                    exitTransition = {
-                        slideOutHorizontally(
-                            targetOffsetX = { -it },
-                            animationSpec = animationSpec
-                        )
-                    },
-                    popEnterTransition = {
-                        slideInHorizontally(
-                            initialOffsetX = { -it },
-                            animationSpec = animationSpec
-                        )
-                    },
-                    popExitTransition = {
-                        slideOutHorizontally(
-                            targetOffsetX = { it },
-                            animationSpec = animationSpec
-                        )
-                    }
-                ) {
-                    LoginRoute(
-                        onLoginSuccess = {
-                            navController.navigate(HomeGraph) {
-                                popUpTo(AuthGraph) { inclusive = true }
-                            }
+
+            // ---------- WELCOME SCREEN ----------
+            composable<WelcomeRoute> {
+                WelcomeScreen(
+                    onNavigateToLogin = {
+                        navController.navigate(LoginRoute) {
+                            // No añadir Welcome al back stack
+                            // Para que al presionar back desde Login no vuelva a Welcome
+                            launchSingleTop = true
                         }
-                    )
-                }
-                // TODO: Add composable<RegisterRoute> with similar animations
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate(RegisterRoute) {
+                            launchSingleTop = true
+                        }
+                    }
+                )
             }
 
-//        navigation<HomeGraph>(startDestination = HomeRoute) {
-            // ...
-//        }
+            // ---------- LOGIN SCREEN ----------
+            composable<LoginRoute> {
+                LoginRoute(
+                    onLoginSuccess = {
+                        // Limpiar el back stack y notificar al consumidor
+                        navController.navigate(WelcomeRoute) {
+                            popUpTo(navController.graph.startDestinationId) {
+                                inclusive = true
+                            }
+                        }
+                        onLoginSuccess()
+                    },
+                    onNavigateToRegister = {
+                        // Si ya estamos en Login y queremos ir a Register
+                        navController.navigate(RegisterRoute) {
+                            // Reemplazar Login con Register
+                            popUpTo(LoginRoute) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            // ---------- REGISTER SCREEN ----------
+            composable<RegisterRoute> {
+                RegisterRoute(
+                    onRegisterSuccess = {
+                        // Después de registrarse exitosamente, ir a login
+                        navController.navigate(LoginRoute) {
+                            popUpTo(RegisterRoute) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToLogin = {
+                        // Si ya tiene cuenta, volver a Login
+                        navController.navigate(LoginRoute) {
+                            popUpTo(RegisterRoute) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
         }
     }
 }

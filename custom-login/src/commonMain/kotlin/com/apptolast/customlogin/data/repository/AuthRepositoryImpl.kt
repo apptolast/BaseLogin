@@ -14,7 +14,21 @@ class AuthRepositoryImpl(
         password: String
     ): AuthResult = runCatching {
         firebaseAuth.signInWithEmailAndPassword(email, password)
-        val user = firebaseAuth.currentUser ?: error("User not found after login.")
-        AuthResult.Success(user = User(user.uid, user.email))
+        firebaseAuth.currentUser?.let { user ->
+            // Optionally set display name if needed using user.updateProfile...
+            AuthResult.Success(user = User(user.uid, user.email))
+        } ?: error("User not found after login.")
     }.getOrElse { AuthResult.Error(it.message.orEmpty(), it) }
+
+    override suspend fun createUserWithEmail(
+        email: String, password: String,
+        displayName: String?
+    ): AuthResult = runCatching {
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+        firebaseAuth.currentUser?.let { user ->
+            // Optionally set display name if needed using user.updateProfile...
+            AuthResult.Success(user = User(user.uid, user.email))
+        } ?: error("User not found after registration.")
+    }.getOrElse { AuthResult.Error(it.message.orEmpty(), it) }
+
 }

@@ -12,16 +12,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * Represents the state of the Login screen.
- */
-data class LoginUiState(
-    val config: LoginConfig = LoginConfig(),
-    val isLoading: Boolean = false,
-    val user: User? = null,
-    val errorMessage: String? = null
-)
-
-/**
  * ViewModel for the Login screen.
  * Handles business logic and exposes state to the UI.
  */
@@ -41,7 +31,7 @@ class LoginViewModel(
         _uiState.update { it.copy(config = loginConfig) }
     }
 
-    fun login(email: String, password: String) {
+    fun signInWithEmail(email: String, password: String) {
         viewModelScope.launch {
             // Reset state before new login attempt
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }

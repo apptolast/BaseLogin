@@ -13,4 +13,5 @@ interface AuthRepository {
      * @return AuthResult indicating success or failure.
      */
     suspend fun signInWithEmail(email: String, password: String): AuthResult
+    suspend fun createUserWithEmail(email: String, password: String, displayName: String? = null): AuthResult
 }

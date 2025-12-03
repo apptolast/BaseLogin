@@ -41,15 +41,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.apptolast.customlogin.presentation.screens.login.components.DividerContent
-import com.apptolast.customlogin.presentation.screens.login.components.HeaderContent
-import com.apptolast.customlogin.presentation.screens.login.components.RegisterLinkButtonContent
+import com.apptolast.customlogin.presentation.screens.components.DividerContent
+import com.apptolast.customlogin.presentation.screens.components.HeaderContent
+import com.apptolast.customlogin.presentation.screens.components.RegisterLinkButtonContent
+import org.jetbrains.compose.resources.DrawableResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginRoute(
     viewModel: LoginViewModel = koinViewModel(),
-    onLoginSuccess: () -> Unit
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -59,15 +61,17 @@ fun LoginRoute(
         }
     }
 
-    LoginScreen(
-        appName = uiState.config.appName,
-        appSubtitle = uiState.config.subtitle,
-        appLogoUrl = uiState.config.appLogoUrl,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
-        onLoginClick = viewModel::login,
-        onNavigateToRegister = {},
-    )
+    uiState.config.drawableResource?.let {
+        LoginScreen(
+            appName = uiState.config.appName,
+            appSubtitle = uiState.config.subtitle,
+            drawableResource = it,
+            isLoading = uiState.isLoading,
+            errorMessage = uiState.errorMessage,
+            onLoginClick = viewModel::signInWithEmail,
+            onNavigateToRegister = onNavigateToRegister,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,7 +79,7 @@ fun LoginRoute(
 fun LoginScreen(
     appName: String,
     appSubtitle: String,
-    appLogoUrl: String,
+    drawableResource: DrawableResource,
     isLoading: Boolean,
     errorMessage: String?,
     onLoginClick: (String, String) -> Unit,
@@ -97,9 +101,8 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Logo a la izquierda del título y subtítulo
         HeaderContent(
-            appLogoUrl = appLogoUrl,
+            drawableResource = drawableResource,
             appName = appName,
             appSubtitle = appSubtitle
         )

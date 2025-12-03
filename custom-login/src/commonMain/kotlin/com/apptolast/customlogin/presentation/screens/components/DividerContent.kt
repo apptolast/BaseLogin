@@ -1,4 +1,4 @@
-package com.apptolast.customlogin.presentation.screens.login.components
+package com.apptolast.customlogin.presentation.screens.components
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth

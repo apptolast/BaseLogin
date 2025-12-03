@@ -1,15 +1,12 @@
 package com.apptolast.customlogin.di
 
-import com.apptolast.customlogin.LoginSDK
 import com.apptolast.customlogin.domain.model.LoginConfig
 import org.koin.dsl.module
 
 /**
- * Koin module for providing default application-level configurations.
- * This can be overridden by the consuming application to provide custom branding.
+ * Provides LoginConfig for dependency injection.
+ * Uses provided config or falls back to default.
  */
-val configModule = module {
-    // Provides the default login screen configuration.
-    // This will be overridden if the consuming app provides its own LoginConfig bean.
-        single { LoginSDK.config }
+fun configModule(config: LoginConfig) = module {
+    single { config }
 }
