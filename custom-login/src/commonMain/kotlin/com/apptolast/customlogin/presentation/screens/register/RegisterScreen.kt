@@ -218,29 +218,6 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        DividerContent()
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Google Register
-        OutlinedButton(
-            onClick = { /* TODO */ },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading,
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ),
-            border = BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
-            )
-        ) {
-            Text("Sign up with Google", style = MaterialTheme.typography.labelLarge)
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
         // LOGIN LINK
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
