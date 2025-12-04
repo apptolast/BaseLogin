@@ -1,21 +1,21 @@
 Pod::Spec.new do |spec|
-    spec.name                     = 'composeApp'
+    spec.name                     = 'ComposeApp'
     spec.version                  = '1.0.0'
-    spec.homepage                 = 'https.apptolast.com'
+    spec.homepage                 = 'https://apptolast.com'
     spec.source                   = { :http=> ''}
     spec.authors                  = ''
     spec.license                  = ''
     spec.summary                  = 'Login con firebase'
-    spec.vendored_frameworks      = 'build/cocoapods/framework/composeApp.framework'
+    spec.vendored_frameworks      = 'build/cocoapods/framework/ComposeApp.framework'
     spec.libraries                = 'c++'
-    spec.ios.deployment_target    = '18.2'
+    spec.ios.deployment_target    = '26.1'
     spec.dependency 'FirebaseAuth'
     spec.dependency 'FirebaseCore'
                 
-    if !Dir.exist?('build/cocoapods/framework/composeApp.framework') || Dir.empty?('build/cocoapods/framework/composeApp.framework')
+    if !Dir.exist?('build/cocoapods/framework/ComposeApp.framework') || Dir.empty?('build/cocoapods/framework/ComposeApp.framework')
         raise "
 
-        Kotlin framework 'composeApp' doesn't exist yet, so a proper Xcode project can't be generated.
+        Kotlin framework 'ComposeApp' doesn't exist yet, so a proper Xcode project can't be generated.
         'pod install' should be executed after running ':generateDummyFramework' Gradle task:
 
             ./gradlew :composeApp:generateDummyFramework
@@ -29,12 +29,12 @@ Pod::Spec.new do |spec|
                 
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':composeApp',
-        'PRODUCT_MODULE_NAME' => 'composeApp',
+        'PRODUCT_MODULE_NAME' => 'ComposeApp',
     }
                 
     spec.script_phases = [
         {
-            :name => 'Build composeApp',
+            :name => 'Build ComposeApp',
             :execution_position => :before_compile,
             :shell_path => '/bin/sh',
             :script => <<-SCRIPT
@@ -51,5 +51,5 @@ Pod::Spec.new do |spec|
             SCRIPT
         }
     ]
-    spec.resources = ['build\compose\cocoapods\compose-resources']
+    spec.resources = ['build/compose/cocoapods/compose-resources']
 end
