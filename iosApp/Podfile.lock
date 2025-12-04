@@ -1,7 +1,17 @@
 PODS:
+  - AppCheckCore (11.2.0):
+    - GoogleUtilities/Environment (~> 8.0)
+    - GoogleUtilities/UserDefaults (~> 8.0)
+    - PromisesObjC (~> 2.4)
   - ComposeApp (1.0.0):
     - FirebaseAuth
     - FirebaseCore
+  - FirebaseAppCheck (12.3.0):
+    - AppCheckCore (~> 11.0)
+    - FirebaseAppCheckInterop (~> 12.3.0)
+    - FirebaseCore (~> 12.3.0)
+    - GoogleUtilities/Environment (~> 8.1)
+    - GoogleUtilities/UserDefaults (~> 8.1)
   - FirebaseAppCheckInterop (12.3.0)
   - FirebaseAuth (12.3.0):
     - FirebaseAppCheckInterop (~> 12.3.0)
@@ -42,14 +52,21 @@ PODS:
   - GoogleUtilities/Reachability (8.1.0):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
+  - GoogleUtilities/UserDefaults (8.1.0):
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Privacy
   - GTMSessionFetcher/Core (5.0.0)
+  - PromisesObjC (2.4.0)
   - RecaptchaInterop (101.0.0)
 
 DEPENDENCIES:
   - ComposeApp (from `../composeApp`)
+  - FirebaseAppCheck
 
 SPEC REPOS:
   trunk:
+    - AppCheckCore
+    - FirebaseAppCheck
     - FirebaseAppCheckInterop
     - FirebaseAuth
     - FirebaseAuthInterop
@@ -58,6 +75,7 @@ SPEC REPOS:
     - FirebaseCoreInternal
     - GoogleUtilities
     - GTMSessionFetcher
+    - PromisesObjC
     - RecaptchaInterop
 
 EXTERNAL SOURCES:
@@ -65,7 +83,9 @@ EXTERNAL SOURCES:
     :path: "../composeApp"
 
 SPEC CHECKSUMS:
+  AppCheckCore: cc8fd0a3a230ddd401f326489c99990b013f0c4f
   ComposeApp: 5b8e0fd09b4ea1e0a15cef7da2d8a123f57bf4d3
+  FirebaseAppCheck: 6eb6a1c5eff6e709e3e199d27df2ae92895f1524
   FirebaseAppCheckInterop: 3a8527abb8bb89fb1bd2bd3d1d7b463c0ceb0cbf
   FirebaseAuth: 4fdd7ee2da745f79145124f5191639d2ea756a77
   FirebaseAuthInterop: a7c394818a93d374c543ca085f3a46ab7c71372e
@@ -74,8 +94,9 @@ SPEC CHECKSUMS:
   FirebaseCoreInternal: a9e1ff270f217489d9258563b693d11a312903bf
   GoogleUtilities: 00c88b9a86066ef77f0da2fab05f65d7768ed8e1
   GTMSessionFetcher: 02d6e866e90bc236f48a703a041dfe43e6221a29
+  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
 
-PODFILE CHECKSUM: 8108f3cfcbc7ac1ca72de72ddd7a5b4459f94c6e
+PODFILE CHECKSUM: f9685ea8eff0eceb3e7dfd069af47951b7d9c63e
 
 COCOAPODS: 1.16.2

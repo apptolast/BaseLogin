@@ -3,4 +3,5 @@ target 'iosApp' do
   platform :ios, '26.1'
 
   pod 'ComposeApp', :path => '../composeApp'
+  pod 'FirebaseAppCheck'
 end
