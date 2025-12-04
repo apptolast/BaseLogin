@@ -3,17 +3,13 @@ package com.apptolast.login
 import androidx.compose.ui.window.ComposeUIViewController
 import com.apptolast.customlogin.di.initLoginKoin
 import com.apptolast.customlogin.domain.model.LoginConfig
-import dev.gitlive.firebase.Firebase
-import dev.gitlive.firebase.initialize
 import login.composeapp.generated.resources.Res
 import login.composeapp.generated.resources.compose_multiplatform
 
 fun MainViewController() = ComposeUIViewController {
 
-    // 1. Inicializar Firebase (GitLive)
-    Firebase.initialize()
-
-    // 2. Inicializar Koin con la config de login
+    // Inicializar Koin con la config de login
+    // Nota: Firebase ya está inicializado en iOSApp.swift (AppDelegate)
     initLoginKoin(
         config = LoginConfig(
             appName = "SuperApp",
