@@ -40,6 +40,10 @@ kotlin {
 
                 // GitLive Firebase (common)
                 implementation(libs.firebase.auth)
+
+                // Firebase App Check (Android native)
+                implementation(libs.firebase.appcheck.playintegrity)
+                implementation(libs.firebase.appcheck.debug)
             }
         }
     }
