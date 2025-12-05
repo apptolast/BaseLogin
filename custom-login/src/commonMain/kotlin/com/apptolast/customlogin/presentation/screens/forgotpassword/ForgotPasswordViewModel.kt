@@ -1,4 +1,4 @@
-package com.apptolast.customlogin.presentation.screens.login
+package com.apptolast.customlogin.presentation.screens.forgotpassword
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,22 +11,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel for the Login screen.
- * Handles business logic and exposes state to the UI.
+ * ViewModel for the Forgot Password screen.
  */
-class LoginViewModel(
+class ForgotPasswordViewModel(
     private val loginConfig: LoginConfig,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(LoginUiState())
+    private val _uiState = MutableStateFlow(ForgotPasswordUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        loadConfig()
-    }
-
-    private fun loadConfig() {
         _uiState.update { it.copy(config = loginConfig) }
     }
 
@@ -34,32 +29,31 @@ class LoginViewModel(
         _uiState.update {
             it.copy(
                 email = email,
-                emailError = null,
+                emailError = validateEmail(email),
                 errorMessage = null
             )
         }
     }
 
-    fun onPasswordChange(password: String) {
-        _uiState.update {
-            it.copy(
-                password = password,
-                passwordError = null,
-                errorMessage = null
-            )
-        }
-    }
+    fun sendPasswordResetEmail() {
+        val email = _uiState.value.email.trim()
 
-    fun signInWithEmail(email: String, password: String) {
+        // Validate email
+        val emailError = validateEmail(email)
+        if (emailError != null) {
+            _uiState.update { it.copy(emailError = emailError) }
+            return
+        }
+
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            when (val result = authRepository.signInWithEmail(email, password)) {
-                is AuthResult.Success -> {
+            when (val result = authRepository.sendPasswordResetEmail(email)) {
+                is AuthResult.PasswordResetSent -> {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            user = result.session
+                            isEmailSent = true
                         )
                     }
                 }
@@ -69,15 +63,6 @@ class LoginViewModel(
                         it.copy(
                             isLoading = false,
                             errorMessage = result.error.message
-                        )
-                    }
-                }
-
-                is AuthResult.RequiresEmailVerification -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "Please verify your email before signing in"
                         )
                     }
                 }
@@ -94,10 +79,22 @@ class LoginViewModel(
         }
     }
 
-    fun signInWithProvider(providerId: String) {
-        // TODO: Implement OAuth provider sign-in
+    fun resetState() {
         _uiState.update {
-            it.copy(errorMessage = "OAuth sign-in not yet implemented for $providerId")
+            ForgotPasswordUiState(config = loginConfig)
         }
+    }
+
+    private fun validateEmail(email: String): String? {
+        return when {
+            email.isBlank() -> "Email is required"
+            !isValidEmail(email) -> "Invalid email format"
+            else -> null
+        }
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
+        return email.matches(emailRegex)
     }
 }

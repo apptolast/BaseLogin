@@ -5,20 +5,35 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.apptolast.customlogin.presentation.screens.login.LoginRoute
-import com.apptolast.customlogin.presentation.screens.register.RegisterRoute
+import androidx.navigation.toRoute
 import com.apptolast.customlogin.presentation.screens.welcome.WelcomeScreen
+import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
+import com.apptolast.customlogin.presentation.screens.forgotpassword.ForgotPasswordRoute as ForgotPasswordScreen
+import com.apptolast.customlogin.presentation.screens.login.LoginRoute as LoginScreen
+import com.apptolast.customlogin.presentation.screens.register.RegisterRoute as RegisterScreen
+import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordRoute as ResetPasswordScreen
 
+/**
+ * Root navigation graph for the authentication flow.
+ *
+ * @param startDestination The initial destination (default: WelcomeRoute)
+ * @param slots Custom slots for all auth screens
+ * @param onLoginSuccess Callback when login is successful
+ * @param onRegisterSuccess Callback when registration is successful
+ */
 @Composable
 fun RootNavGraph(
-    onLoginSuccess: () -> Unit = {}
+    startDestination: Any = WelcomeRoute,
+    slots: AuthScreenSlots = AuthScreenSlots(),
+    onLoginSuccess: () -> Unit = {},
+    onRegisterSuccess: () -> Unit = {}
 ) {
     val navController = rememberNavController()
 
     Surface {
         NavHost(
             navController = navController,
-            startDestination = WelcomeRoute,
+            startDestination = startDestination,
             enterTransition = { NavTransitions.enter },
             exitTransition = { NavTransitions.exit },
             popEnterTransition = { NavTransitions.popEnter },
@@ -30,8 +45,6 @@ fun RootNavGraph(
                 WelcomeScreen(
                     onNavigateToLogin = {
                         navController.navigate(LoginRoute) {
-                            // No añadir Welcome al back stack
-                            // Para que al presionar back desde Login no vuelva a Welcome
                             launchSingleTop = true
                         }
                     },
@@ -45,9 +58,8 @@ fun RootNavGraph(
 
             // ---------- LOGIN SCREEN ----------
             composable<LoginRoute> {
-                LoginRoute(
+                LoginScreen(
                     onLoginSuccess = {
-                        // Limpiar el back stack y notificar al consumidor
                         navController.navigate(WelcomeRoute) {
                             popUpTo(navController.graph.startDestinationId) {
                                 inclusive = true
@@ -56,12 +68,15 @@ fun RootNavGraph(
                         onLoginSuccess()
                     },
                     onNavigateToRegister = {
-                        // Si ya estamos en Login y queremos ir a Register
                         navController.navigate(RegisterRoute) {
-                            // Reemplazar Login con Register
                             popUpTo(LoginRoute) {
                                 inclusive = true
                             }
+                            launchSingleTop = true
+                        }
+                    },
+                    onNavigateToForgotPassword = {
+                        navController.navigate(ForgotPasswordRoute) {
                             launchSingleTop = true
                         }
                     }
@@ -70,20 +85,57 @@ fun RootNavGraph(
 
             // ---------- REGISTER SCREEN ----------
             composable<RegisterRoute> {
-                RegisterRoute(
+                RegisterScreen(
                     onRegisterSuccess = {
-                        // Después de registrarse exitosamente, ir a login
                         navController.navigate(LoginRoute) {
                             popUpTo(RegisterRoute) {
                                 inclusive = true
                             }
                             launchSingleTop = true
                         }
+                        onRegisterSuccess()
                     },
                     onNavigateToLogin = {
-                        // Si ya tiene cuenta, volver a Login
                         navController.navigate(LoginRoute) {
                             popUpTo(RegisterRoute) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            // ---------- FORGOT PASSWORD SCREEN ----------
+            composable<ForgotPasswordRoute> {
+                ForgotPasswordScreen(
+                    slots = slots.forgotPassword,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onSuccess = {
+                        navController.navigate(LoginRoute) {
+                            popUpTo(ForgotPasswordRoute) {
+                                inclusive = true
+                            }
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            // ---------- RESET PASSWORD SCREEN ----------
+            composable<ResetPasswordRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<ResetPasswordRoute>()
+                ResetPasswordScreen(
+                    resetCode = route.code,
+                    slots = slots.resetPassword,
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onSuccess = {
+                        navController.navigate(LoginRoute) {
+                            popUpTo(0) {
                                 inclusive = true
                             }
                             launchSingleTop = true
@@ -93,4 +145,20 @@ fun RootNavGraph(
             }
         }
     }
+}
+
+/**
+ * Simplified auth navigation that starts directly at login.
+ */
+@Composable
+fun AuthNavHost(
+    slots: AuthScreenSlots = AuthScreenSlots(),
+    onAuthSuccess: () -> Unit = {}
+) {
+    RootNavGraph(
+        startDestination = LoginRoute,
+        slots = slots,
+        onLoginSuccess = onAuthSuccess,
+        onRegisterSuccess = {}
+    )
 }
