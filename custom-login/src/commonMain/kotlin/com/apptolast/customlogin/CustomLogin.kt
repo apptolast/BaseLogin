@@ -4,8 +4,9 @@ import androidx.compose.runtime.Composable
 import com.apptolast.customlogin.domain.model.LoginConfig
 import com.apptolast.customlogin.domain.provider.AuthProvider
 import com.apptolast.customlogin.domain.provider.AuthProviderRegistry
-import com.apptolast.customlogin.presentation.navigation.AuthNavHost
+import com.apptolast.customlogin.presentation.navigation.LoginRoute
 import com.apptolast.customlogin.presentation.navigation.RootNavGraph
+import com.apptolast.customlogin.presentation.navigation.WelcomeRoute
 import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
 import com.apptolast.customlogin.presentation.theme.AuthTheme
 import com.apptolast.customlogin.presentation.theme.AuthThemeProvider
@@ -77,18 +78,12 @@ object CustomLogin {
         onAuthSuccess: () -> Unit
     ) {
         AuthThemeProvider(theme = theme) {
-            if (showWelcome) {
-                RootNavGraph(
-                    slots = slots,
-                    onLoginSuccess = onAuthSuccess,
-                    onRegisterSuccess = {}
-                )
-            } else {
-                AuthNavHost(
-                    slots = slots,
-                    onAuthSuccess = onAuthSuccess
-                )
-            }
+            RootNavGraph(
+                startDestination = if (showWelcome) WelcomeRoute else LoginRoute,
+                slots = slots,
+                onLoginSuccess = onAuthSuccess,
+                onRegisterSuccess = {}
+            )
         }
     }
 

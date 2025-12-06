@@ -146,19 +146,3 @@ fun RootNavGraph(
         }
     }
 }
-
-/**
- * Simplified auth navigation that starts directly at login.
- */
-@Composable
-fun AuthNavHost(
-    slots: AuthScreenSlots = AuthScreenSlots(),
-    onAuthSuccess: () -> Unit = {}
-) {
-    RootNavGraph(
-        startDestination = LoginRoute,
-        slots = slots,
-        onLoginSuccess = onAuthSuccess,
-        onRegisterSuccess = {}
-    )
-}

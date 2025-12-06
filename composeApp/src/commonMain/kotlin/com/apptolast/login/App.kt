@@ -93,7 +93,7 @@ fun App() {
 private fun createCustomTheme(): AuthTheme {
     return AuthTheme(
         colors = AuthColors.Light.copy(
-            primary = Color(0xFF1976D2),
+            primary = MaterialTheme.colorScheme.primary,
             onPrimary = Color.White,
             secondary = Color(0xFF03DAC6),
             link = Color(0xFF1976D2)
@@ -111,7 +111,6 @@ private fun createCustomSlots(
     onGoogleSignIn: () -> Unit
 ): AuthScreenSlots {
     return AuthScreenSlots(
-
         login = LoginScreenSlots(
             // Custom logo
             logo = {

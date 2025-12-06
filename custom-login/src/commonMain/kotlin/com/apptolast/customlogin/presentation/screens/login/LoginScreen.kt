@@ -64,7 +64,7 @@ fun LoginRoute(
         }
     }
 
-    uiState.config.drawableResource?.let {
+    uiState.config.drawableResource.let {
         LoginScreen(
             appName = uiState.config.appName,
             appSubtitle = uiState.config.subtitle,
@@ -90,7 +90,7 @@ fun LoginScreen(
     showForgotPassword: Boolean = true,
     onLoginClick: (String, String) -> Unit,
     onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit = {}
+    onNavigateToForgotPassword: () -> Unit = {},
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
