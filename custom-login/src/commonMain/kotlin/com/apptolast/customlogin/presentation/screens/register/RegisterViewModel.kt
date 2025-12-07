@@ -1,4 +1,3 @@
-// customlogin/src/androidMain/.../presentation/screens/register/RegisterViewModel.kt
 package com.apptolast.customlogin.presentation.screens.register
 
 import androidx.lifecycle.ViewModel
@@ -21,7 +20,6 @@ class RegisterViewModel(
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState = _uiState.asStateFlow()
 
-    // One-shot events (snack, navigation triggers, etc.)
     private val _events = Channel<RegisterEvent>()
     val events = _events.receiveAsFlow()
 
@@ -41,23 +39,41 @@ class RegisterViewModel(
         }
 
         viewModelScope.launch {
-            // Reset state before new login attempt
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            when (val result = authRepository.createUserWithEmail(email, password)) {
+            when (val result = authRepository.createUserWithEmail(email, password, fullName)) {
                 is AuthResult.Success -> {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            user = result.user
+                            user = result.session
                         )
                     }
                 }
-                is AuthResult.Error -> {
+
+                is AuthResult.Failure -> {
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            errorMessage = result.message
+                            errorMessage = result.error.message
+                        )
+                    }
+                }
+
+                is AuthResult.RequiresEmailVerification -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Please check your email to verify your account"
+                        )
+                    }
+                }
+
+                else -> {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Registration failed"
                         )
                     }
                 }
@@ -73,26 +89,27 @@ class RegisterViewModel(
     ): Map<RegisterUiState.Field, String> {
         val errors = mutableMapOf<RegisterUiState.Field, String>()
 
-        if (fullName.isBlank()) errors[RegisterUiState.Field.FULL_NAME] = "Full name is required"
-//        if (!isValidEmail(email)) errors[RegisterUiState.Field.EMAIL] = "Invalid email"
-        if (password.length < 8) errors[RegisterUiState.Field.PASSWORD] = "Password must be at least 8 characters"
-        if (password != confirmPassword) errors[RegisterUiState.Field.CONFIRM_PASSWORD] = "Passwords do not match"
+        if (fullName.isBlank()) {
+            errors[RegisterUiState.Field.FULL_NAME] = "Full name is required"
+        }
+        if (email.isBlank() || !isValidEmail(email)) {
+            errors[RegisterUiState.Field.EMAIL] = "Invalid email"
+        }
+        if (password.length < loginConfig.passwordMinLength) {
+            errors[RegisterUiState.Field.PASSWORD] =
+                "Password must be at least ${loginConfig.passwordMinLength} characters"
+        }
+        if (password != confirmPassword) {
+            errors[RegisterUiState.Field.CONFIRM_PASSWORD] = "Passwords do not match"
+        }
 
         return errors
     }
 
-//    private fun isValidEmail(email: String): Boolean {
-//        val pattern = Pattern.compile(
-//            "[a-zA-Z0-9+._%\\-]{1,256}" +
-//                    "@" +
-//                    "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
-//                    "(" +
-//                    "\\." +
-//                    "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
-//                    ")+"
-//        )
-//        return pattern.matcher(email).matches()
-//    }
+    private fun isValidEmail(email: String): Boolean {
+        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
+        return email.matches(emailRegex)
+    }
 
     sealed class RegisterEvent {
         data class ShowMessage(val message: String) : RegisterEvent()

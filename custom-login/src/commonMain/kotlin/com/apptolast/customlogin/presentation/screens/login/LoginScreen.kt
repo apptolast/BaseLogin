@@ -3,6 +3,7 @@ package com.apptolast.customlogin.presentation.screens.login
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,6 +54,7 @@ fun LoginRoute(
     viewModel: LoginViewModel = koinViewModel(),
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -61,15 +64,17 @@ fun LoginRoute(
         }
     }
 
-    uiState.config.drawableResource?.let {
+    uiState.config.drawableResource.let {
         LoginScreen(
             appName = uiState.config.appName,
             appSubtitle = uiState.config.subtitle,
             drawableResource = it,
             isLoading = uiState.isLoading,
             errorMessage = uiState.errorMessage,
+            showForgotPassword = uiState.config.showForgotPassword,
             onLoginClick = viewModel::signInWithEmail,
             onNavigateToRegister = onNavigateToRegister,
+            onNavigateToForgotPassword = onNavigateToForgotPassword
         )
     }
 }
@@ -82,8 +87,10 @@ fun LoginScreen(
     drawableResource: DrawableResource,
     isLoading: Boolean,
     errorMessage: String?,
+    showForgotPassword: Boolean = true,
     onLoginClick: (String, String) -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit = {},
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -144,6 +151,25 @@ fun LoginScreen(
             enabled = !isLoading
         )
 
+        // Forgot password link
+        if (showForgotPassword) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(
+                    onClick = onNavigateToForgotPassword,
+                    enabled = !isLoading
+                ) {
+                    Text(
+                        text = "Forgot password?",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+
         errorMessage?.let {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -153,7 +179,7 @@ fun LoginScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Login button
         Button(

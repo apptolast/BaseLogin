@@ -6,26 +6,36 @@ import com.apptolast.customlogin.domain.model.LoginConfig
 import login.composeapp.generated.resources.Res
 import login.composeapp.generated.resources.compose_multiplatform
 
-fun MainViewController() = ComposeUIViewController {
-
-    // Inicializar Koin con la config de login
-    // Nota: Firebase ya está inicializado en iOSApp.swift (AppDelegate)
-    initLoginKoin(
-        config = LoginConfig(
-            appName = "SuperApp",
-            drawableResource = Res.drawable.compose_multiplatform,
-            subtitle = "Bienvenido a la app definitiva",
-            googleEnabled = true,
-            appleEnabled = true,
-            passwordMinLength = 8,
-            onGoogleSignIn = {
-                println("Google Sign-In clicked")
-            },
-            onForgotPassword = {
-                println("Forgot password clicked")
-            }
-        )
-    )
-
+/**
+ * Creates the main iOS view controller.
+ * Note: Firebase should be initialized in iOSApp.swift (AppDelegate) before this.
+ */
+fun MainViewController() = ComposeUIViewController(
+    configure = {
+        // Initialize Koin once when the controller is configured
+        initKoinIfNeeded()
+    }
+) {
     App()
+}
+
+private var koinInitialized = false
+
+private fun initKoinIfNeeded() {
+    if (!koinInitialized) {
+        initLoginKoin(
+            config = LoginConfig(
+                appName = "Sample Login App",
+                drawableResource = Res.drawable.compose_multiplatform,
+                subtitle = "Sign in to continue",
+                emailEnabled = true,
+                googleEnabled = true,
+                appleEnabled = true,
+                showRegisterLink = true,
+                showForgotPassword = true,
+                passwordMinLength = 6
+            )
+        )
+        koinInitialized = true
+    }
 }

@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun WelcomeScreen(
@@ -145,4 +146,13 @@ fun WelcomeScreen(
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun WelcomeScreenPreview() {
+    WelcomeScreen(
+        onNavigateToLogin = {},
+        onNavigateToRegister = {}
+    )
 }

@@ -13,3 +13,6 @@ data object RegisterRoute
 
 @Serializable
 data object ForgotPasswordRoute
+
+@Serializable
+data class ResetPasswordRoute(val code: String = "")

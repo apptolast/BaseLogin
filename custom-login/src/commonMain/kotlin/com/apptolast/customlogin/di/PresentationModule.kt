@@ -1,7 +1,9 @@
 package com.apptolast.customlogin.di
 
+import com.apptolast.customlogin.presentation.screens.forgotpassword.ForgotPasswordViewModel
 import com.apptolast.customlogin.presentation.screens.login.LoginViewModel
 import com.apptolast.customlogin.presentation.screens.register.RegisterViewModel
+import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -11,4 +13,6 @@ import org.koin.dsl.module
 val presentationModule = module {
     viewModelOf(::LoginViewModel)
     viewModelOf(::RegisterViewModel)
+    viewModelOf(::ForgotPasswordViewModel)
+    viewModelOf(::ResetPasswordViewModel)
 }
