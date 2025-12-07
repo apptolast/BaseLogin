@@ -157,7 +157,7 @@ fun LoginScreen(
 
         // Login button
         Button(
-            onClick = { onLoginClick(email, password) },
+            onClick = { onLoginClick(email.trim(), password) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading && email.isNotBlank() && password.isNotBlank()
         ) {

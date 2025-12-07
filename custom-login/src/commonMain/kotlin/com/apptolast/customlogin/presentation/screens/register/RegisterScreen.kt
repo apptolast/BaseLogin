@@ -1,6 +1,5 @@
 package com.apptolast.customlogin.presentation.screens.register
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,13 +20,11 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,7 +41,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.apptolast.customlogin.presentation.screens.components.DividerContent
 import com.apptolast.customlogin.presentation.screens.components.HeaderContent
 import org.jetbrains.compose.resources.DrawableResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -197,7 +193,7 @@ fun RegisterScreen(
 
         // REGISTER BUTTON
         Button(
-            onClick = { onRegisterClick(name, email, password, confirmPassword) },
+            onClick = { onRegisterClick(name.trim(), email.trim(), password, confirmPassword) },
             modifier = Modifier.fillMaxWidth(),
             enabled = !isLoading
                     && email.isNotBlank()

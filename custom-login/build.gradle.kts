@@ -15,15 +15,9 @@ kotlin {
         }
     }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "CustomLogin"
-            isStatic = true
-        }
-    }
+    // iOS targets - framework is exported through composeApp's CocoaPods
+    iosArm64()
+    iosSimulatorArm64()
 
     sourceSets {
         val commonMain by getting {

@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.google.services) // Required for native Firebase SDK
+    alias(libs.plugins.kotlin.cocoapods)
 }
 
 kotlin {
@@ -16,17 +17,8 @@ kotlin {
         }
     }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "ComposeApp"
-            isStatic = true
-            // The new login module will be exported here
-            export(project(":custom-login"))
-        }
-    }
+    iosArm64()
+    iosSimulatorArm64()
 
     sourceSets {
         val commonMain by getting {
@@ -38,7 +30,7 @@ kotlin {
                 implementation(compose.components.uiToolingPreview)
                 
                 // Add dependency to our new login module
-                implementation(project(":custom-login"))
+                api(project(":custom-login"))
             }
         }
         val androidMain by getting {
@@ -48,7 +40,33 @@ kotlin {
 
                 // GitLive Firebase (common)
                 implementation(libs.firebase.auth)
+
+                // Firebase App Check (Android native)
+                implementation(libs.firebase.appcheck.playintegrity)
+                implementation(libs.firebase.appcheck.debug)
             }
+        }
+    }
+
+    cocoapods {
+        name = "ComposeApp"
+        version = "1.0.0"
+        summary = "Login con firebase"
+        homepage = "https://apptolast.com"
+        ios.deploymentTarget = "26.1"
+
+        framework {
+            baseName = "ComposeApp"
+            isStatic = true
+            export(project(":custom-login"))
+        }
+
+        pod("FirebaseCore") {
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+
+        pod("FirebaseAuth") {
+            extraOpts += listOf("-compiler-option", "-fmodules")
         }
     }
 }
