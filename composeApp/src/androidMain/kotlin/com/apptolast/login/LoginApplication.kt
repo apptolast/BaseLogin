@@ -2,13 +2,10 @@ package com.apptolast.login
 
 import android.app.Application
 import com.apptolast.customlogin.di.initLoginKoin
-import com.apptolast.customlogin.domain.model.LoginConfig
 import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.initialize
-import login.composeapp.generated.resources.Res
-import login.composeapp.generated.resources.compose_multiplatform
 import org.koin.android.ext.koin.androidContext
 
 class LoginApplication : Application() {
@@ -27,27 +24,27 @@ class LoginApplication : Application() {
         // 3. Initialize Koin with custom login config
         initLoginKoin(
             appDeclaration = { androidContext(this@LoginApplication) },
-            config = LoginConfig(
-                appName = "Sample Login App",
-                subtitle = "Sign in to continue",
-                drawableResource = Res.drawable.compose_multiplatform,
-
-                // Enable features
-                emailEnabled = true,
-                googleEnabled = true,
-                appleEnabled = false,
-                showRegisterLink = true,
-                showForgotPassword = true,
-
-                // Validation
-                passwordMinLength = 6,
-
-                // Custom labels
-                signInButtonText = "Sign In",
-                signInWithGoogleText = "Continue with Google",
-                registerLinkText = "Don't have an account? Sign up",
-                forgotPasswordText = "Forgot password?"
-            )
+//            config = LoginConfig(
+//                appName = "Sample Login App",
+//                subtitle = "Sign in to continue",
+//                drawableResource = Res.drawable.compose_multiplatform,
+//
+//                // Enable features
+//                emailEnabled = true,
+//                googleEnabled = true,
+//                appleEnabled = false,
+//                showRegisterLink = true,
+//                showForgotPassword = true,
+//
+//                // Validation
+//                passwordMinLength = 6,
+//
+//                // Custom labels
+//                signInButtonText = "Sign In",
+//                signInWithGoogleText = "Continue with Google",
+//                registerLinkText = "Don't have an account? Sign up",
+//                forgotPasswordText = "Forgot password?"
+//            )
         )
     }
 }

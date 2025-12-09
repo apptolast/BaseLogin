@@ -1,6 +1,5 @@
 package com.apptolast.customlogin.di
 
-import com.apptolast.customlogin.domain.model.LoginConfig
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 
@@ -12,7 +11,7 @@ import org.koin.dsl.KoinAppDeclaration
  */
 fun initLoginKoin(
     appDeclaration: KoinAppDeclaration? = null,
-    config: LoginConfig = LoginConfig(),
+//    config: LoginConfig = LoginConfig(),
 ) {
     startKoin {
         // Platform-specific configuration (optional)
@@ -21,7 +20,7 @@ fun initLoginKoin(
         modules(
             dataModule,
             presentationModule,
-            configModule(config),
+//            configModule(config),
         )
     }
 }

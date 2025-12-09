@@ -3,7 +3,6 @@ package com.apptolast.customlogin.presentation.screens.resetpassword
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.model.AuthResult
-import com.apptolast.customlogin.domain.model.LoginConfig
 import com.apptolast.customlogin.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +14,7 @@ import kotlinx.coroutines.launch
  * Handles the password reset confirmation flow.
  */
 class ResetPasswordViewModel(
-    private val loginConfig: LoginConfig,
+//    private val loginConfig: LoginConfig,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
@@ -153,10 +152,10 @@ class ResetPasswordViewModel(
     }
 
     private fun validatePassword(password: String): String? {
-        val minLength = loginConfig.passwordMinLength
+//        val minLength = loginConfig.passwordMinLength
         return when {
             password.isBlank() -> "Password is required"
-            password.length < minLength -> "Password must be at least $minLength characters"
+//            password.length < minLength -> "Password must be at least $minLength characters"
             !password.any { it.isUpperCase() } -> "Password must contain an uppercase letter"
             !password.any { it.isLowerCase() } -> "Password must contain a lowercase letter"
             !password.any { it.isDigit() } -> "Password must contain a number"

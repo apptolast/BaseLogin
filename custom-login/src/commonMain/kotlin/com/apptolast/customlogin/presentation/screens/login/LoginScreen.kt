@@ -1,229 +1,133 @@
 package com.apptolast.customlogin.presentation.screens.login
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.apptolast.customlogin.presentation.screens.components.DividerContent
-import com.apptolast.customlogin.presentation.screens.components.HeaderContent
-import com.apptolast.customlogin.presentation.screens.components.RegisterLinkButtonContent
-import org.jetbrains.compose.resources.DrawableResource
+import com.apptolast.customlogin.presentation.theme.DefaultDivider
+import com.apptolast.customlogin.presentation.theme.DefaultEmailField
+import com.apptolast.customlogin.presentation.theme.DefaultHeader
+import com.apptolast.customlogin.presentation.theme.DefaultPasswordField
+import com.apptolast.customlogin.presentation.theme.DefaultRegisterLink
+import com.apptolast.customlogin.presentation.theme.DefaultSubmitButton
+import com.apptolast.customlogin.presentation.theme.DefaultTextLink
+import com.apptolast.customlogin.presentation.theme.LoginScreenSlots
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun LoginRoute(
+fun LoginScreen(
     viewModel: LoginViewModel = koinViewModel(),
+    loginSlots: LoginScreenSlots = LoginScreenSlots(),
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit = {}
+    onNavigateToResetPassword: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.user) {
-        if (uiState.user != null) {
-            onLoginSuccess()
-        }
+//        uiState.user?.let(onLoginSuccess())
     }
 
-    uiState.config.drawableResource.let {
-        LoginScreen(
-            appName = uiState.config.appName,
-            appSubtitle = uiState.config.subtitle,
-            drawableResource = it,
-            isLoading = uiState.isLoading,
-            errorMessage = uiState.errorMessage,
-            showForgotPassword = uiState.config.showForgotPassword,
-            onLoginClick = viewModel::signInWithEmail,
-            onNavigateToRegister = onNavigateToRegister,
-            onNavigateToForgotPassword = onNavigateToForgotPassword
-        )
-    }
+    LoginContent(
+        loginSlots = loginSlots,
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
+        onLoginClick = viewModel::signInWithEmail,
+        onNavigateToRegister = onNavigateToRegister,
+        onNavigateToForgotPassword = onNavigateToResetPassword
+    )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    appName: String,
-    appSubtitle: String,
-    drawableResource: DrawableResource,
+fun LoginContent(
+    loginSlots: LoginScreenSlots,
     isLoading: Boolean,
     errorMessage: String?,
-    showForgotPassword: Boolean = true,
     onLoginClick: (String, String) -> Unit,
     onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit = {},
+    onNavigateToForgotPassword: () -> Unit,
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var isPasswordVisible by remember { mutableStateOf(false) }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
-            .padding(top = 24.dp, start = 16.dp, end = 16.dp)
+            .padding(24.dp)
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        HeaderContent(
-            drawableResource = drawableResource,
-            appName = appName,
-            appSubtitle = appSubtitle
-        )
+        loginSlots.header ?: DefaultHeader()
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Email
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Password
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password") },
-            trailingIcon = {
-                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                    Icon(
-                        imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (isPasswordVisible) "Hide password" else "Show password"
-                    )
-                }
-            },
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-        )
-
-        // Forgot password link
-        if (showForgotPassword) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(
-                    onClick = onNavigateToForgotPassword,
-                    enabled = !isLoading
-                ) {
-                    Text(
-                        text = "Forgot password?",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        }
-
-        errorMessage?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
+        (loginSlots.emailField ?: { _, _, _, _ ->
+            DefaultEmailField(
+                value = email,
+                onValueChange = { email = it },
+                error = errorMessage,
+                enabled = !isLoading
             )
-        }
+        }).invoke(email, { email = it }, errorMessage, !isLoading)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        (loginSlots.passwordField ?: { _, _, _, _ ->
+            DefaultPasswordField(
+                value = password,
+                onValueChange = { password = it },
+                error = errorMessage,
+                enabled = !isLoading
+            )
+        }).invoke(password, { password = it }, errorMessage, !isLoading)
+
+        (loginSlots.forgotPasswordLink ?: {
+            DefaultTextLink(
+                text = "Forgot Password?",
+                onClick = onNavigateToForgotPassword,
+            )
+        }).invoke(onNavigateToForgotPassword)
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Login button
-        Button(
-            onClick = { onLoginClick(email.trim(), password) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading && email.isNotBlank() && password.isNotBlank()
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Sign In")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Divider OR
-        DividerContent()
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Google Sign-In placeholder
-        OutlinedButton(
-            onClick = { /* TODO: Google Sign-In */ },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading,
-            colors = ButtonDefaults.outlinedButtonColors(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ),
-            border = BorderStroke(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+        (loginSlots.submitButton ?: { _, _, _, text ->
+            DefaultSubmitButton(
+                onClick = { onLoginClick(email, password) },
+                isLoading = isLoading,
+                enabled = email.isNotBlank() && password.isNotBlank(),
+                text = text
             )
-        ) {
-            Text(text = "Sign in with Google", style = MaterialTheme.typography.labelLarge)
-        }
+        }).invoke(
+            { onLoginClick(email, password) },
+            isLoading,
+            email.isNotBlank() && password.isNotBlank(),
+            "Sign In"
+        )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        (loginSlots.socialProviders ?: {
+            DefaultDivider(text = "OR")
+        }).invoke { /* onProviderClick */ }
 
-        // Register link
-        RegisterLinkButtonContent(onNavigateToRegister)
+        (loginSlots.registerLink ?: {
+            DefaultRegisterLink(onRegisterClick = onNavigateToRegister)
+        }).invoke(onNavigateToRegister)
     }
 }

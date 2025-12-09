@@ -3,7 +3,6 @@ package com.apptolast.customlogin.presentation.screens.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.model.AuthResult
-import com.apptolast.customlogin.domain.model.LoginConfig
 import com.apptolast.customlogin.domain.repository.AuthRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +13,7 @@ import kotlinx.coroutines.launch
 
 class RegisterViewModel(
     private val authRepository: AuthRepository,
-    private val loginConfig: LoginConfig,
+//    private val loginConfig: LoginConfig,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -28,7 +27,7 @@ class RegisterViewModel(
     }
 
     private fun loadConfig() {
-        _uiState.update { it.copy(config = loginConfig) }
+//        _uiState.update { it.copy(config = loginConfig) }
     }
 
     fun createUserWithEmail(fullName: String, email: String, password: String, confirmPassword: String) {
@@ -95,10 +94,10 @@ class RegisterViewModel(
         if (email.isBlank() || !isValidEmail(email)) {
             errors[RegisterUiState.Field.EMAIL] = "Invalid email"
         }
-        if (password.length < loginConfig.passwordMinLength) {
-            errors[RegisterUiState.Field.PASSWORD] =
-                "Password must be at least ${loginConfig.passwordMinLength} characters"
-        }
+//        if (password.length < loginConfig.passwordMinLength) {
+//            errors[RegisterUiState.Field.PASSWORD] =
+//                "Password must be at least ${loginConfig.passwordMinLength} characters"
+//        }
         if (password != confirmPassword) {
             errors[RegisterUiState.Field.CONFIRM_PASSWORD] = "Passwords do not match"
         }

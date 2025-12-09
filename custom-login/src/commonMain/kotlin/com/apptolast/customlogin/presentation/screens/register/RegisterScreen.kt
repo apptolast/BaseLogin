@@ -5,27 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,25 +18,29 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.apptolast.customlogin.presentation.screens.components.HeaderContent
-import org.jetbrains.compose.resources.DrawableResource
+import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
+import com.apptolast.customlogin.presentation.theme.DefaultNameField
+import com.apptolast.customlogin.presentation.theme.DefaultEmailField
+import com.apptolast.customlogin.presentation.theme.DefaultHeader
+import com.apptolast.customlogin.presentation.theme.DefaultPasswordField
+import com.apptolast.customlogin.presentation.theme.DefaultSubmitButton
+import com.apptolast.customlogin.presentation.theme.DefaultTermsCheckbox
+import com.apptolast.customlogin.presentation.theme.RegisterScreenSlots
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun RegisterRoute(
+fun RegisterScreen(
     viewModel: RegisterViewModel = koinViewModel(),
+    registerSlots: RegisterScreenSlots = RegisterScreenSlots(),
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-    val uiState = viewModel.uiState.collectAsState().value
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.user) {
         if (uiState.user != null) {
@@ -59,10 +48,8 @@ fun RegisterRoute(
         }
     }
 
-    RegisterScreen(
-        appName = uiState.config.appName,
-        appSubtitle = uiState.config.subtitle,
-        drawableResource = uiState.config.drawableResource,
+    RegisterContent(
+        registerSlots = registerSlots,
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,
         onRegisterClick = viewModel::createUserWithEmail,
@@ -70,23 +57,20 @@ fun RegisterRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RegisterScreen(
-    appName: String,
-    appSubtitle: String,
-    drawableResource: DrawableResource,
+fun RegisterContent(
+    registerSlots: RegisterScreenSlots = RegisterScreenSlots(),
     isLoading: Boolean,
     errorMessage: String?,
     onRegisterClick: (String, String, String, String) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var isPasswordVisible by remember { mutableStateOf(false) }
-    var isConfirmVisible by remember { mutableStateOf(false) }
+
+    var name by rememberSaveable { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var confirmPassword by rememberSaveable { mutableStateOf("") }
+    var termsAccepted by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -97,124 +81,93 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        registerSlots.header ?: DefaultHeader()
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        HeaderContent(
-            drawableResource = drawableResource,
-            appName = appName,
-            appSubtitle = appSubtitle
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // FULL NAME
-        OutlinedTextField(
+        // Name Field
+        (registerSlots.nameField?.invoke(
+            name,
+            { name = it },
+            errorMessage,
+            !isLoading
+        ) ?: DefaultNameField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Full name") },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Name") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            error = errorMessage,
             enabled = !isLoading
-        )
+        ))
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // EMAIL
-        OutlinedTextField(
+        // Email Field
+        (registerSlots.emailField?.invoke(
+            email,
+            { email = it },
+            errorMessage,
+            !isLoading
+        ) ?: DefaultEmailField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            error = errorMessage,
             enabled = !isLoading
-        )
+        ))
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // PASSWORD
-        OutlinedTextField(
+        // Password Field
+        (registerSlots.passwordField?.invoke(
+            password,
+            { password = it },
+            errorMessage,
+            !isLoading
+        ) ?: DefaultPasswordField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password") },
-            trailingIcon = {
-                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                    Icon(
-                        imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = null
-                    )
-                }
-            },
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
+            error = errorMessage,
             enabled = !isLoading
-        )
+        ))
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // CONFIRM PASSWORD
-        OutlinedTextField(
+        // Confirm Password Field
+        (registerSlots.confirmPasswordField?.invoke(
+            confirmPassword,
+            { confirmPassword = it },
+            errorMessage,
+            !isLoading,
+        ) ?: DefaultPasswordField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
-            label = { Text("Confirm password") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Confirm Password") },
-            trailingIcon = {
-                IconButton(onClick = { isConfirmVisible = !isConfirmVisible }) {
-                    Icon(
-                        imageVector = if (isConfirmVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = null
-                    )
-                }
-            },
-            visualTransformation = if (isConfirmVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-        )
-
-        // Error
-        errorMessage?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // REGISTER BUTTON
-        Button(
-            onClick = { onRegisterClick(name.trim(), email.trim(), password, confirmPassword) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-                    && email.isNotBlank()
-                    && password.isNotBlank()
-                    && confirmPassword.isNotBlank()
-                    && name.isNotBlank()
-                    && password == confirmPassword
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Register")
-            }
-        }
+            error = errorMessage,
+            enabled = !isLoading,
+        ))
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // LOGIN LINK
+        // Terms and Conditions
+        (registerSlots.termsCheckbox?.invoke(termsAccepted) { termsAccepted = it }
+            ?: DefaultTermsCheckbox(
+                checked = termsAccepted,
+                onCheckedChange = { termsAccepted = it }
+            ))
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Submit Button
+//        FIXME: Refactor logic to viewmodel
+        val canRegister =
+            name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank() && password == confirmPassword && termsAccepted
+        (registerSlots.submitButton ?: DefaultSubmitButton(
+            onClick = { onRegisterClick(name, email, password, confirmPassword) },
+            isLoading = isLoading,
+            enabled = canRegister,
+            text = "Register"
+        ))
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Login Link
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = "Already have an account?",
@@ -222,7 +175,7 @@ fun RegisterScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             TextButton(onClick = onNavigateToLogin) {
-                Text("Login")
+                Text("Sign In")
             }
         }
     }

@@ -50,7 +50,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ResetPasswordRoute(
     resetCode: String = "",
     viewModel: ResetPasswordViewModel = koinViewModel(),
-    slots: ResetPasswordScreenSlots = ResetPasswordScreenSlots(),
+    resetPasswordSlots: ResetPasswordScreenSlots = ResetPasswordScreenSlots(),
     onNavigateBack: () -> Unit,
     onSuccess: () -> Unit = {}
 ) {
@@ -71,36 +71,36 @@ fun ResetPasswordRoute(
     }
 
     ResetPasswordScreen(
+        resetPasswordSlots = resetPasswordSlots,
         newPassword = uiState.newPassword,
         confirmPassword = uiState.confirmPassword,
-        onNewPasswordChange = viewModel::onNewPasswordChange,
-        onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
         passwordError = uiState.passwordError,
         confirmPasswordError = uiState.confirmPasswordError,
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,
         isPasswordReset = uiState.isPasswordReset,
+        onNewPasswordChange = viewModel::onNewPasswordChange,
+        onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
         onResetClick = viewModel::resetPassword,
         onNavigateBack = onNavigateBack,
-        slots = slots
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResetPasswordScreen(
+    resetPasswordSlots: ResetPasswordScreenSlots = ResetPasswordScreenSlots(),
     newPassword: String,
     confirmPassword: String,
-    onNewPasswordChange: (String) -> Unit,
-    onConfirmPasswordChange: (String) -> Unit,
     passwordError: String?,
     confirmPasswordError: String?,
     isLoading: Boolean,
     errorMessage: String?,
     isPasswordReset: Boolean,
+    onNewPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
     onResetClick: () -> Unit,
     onNavigateBack: () -> Unit,
-    slots: ResetPasswordScreenSlots = ResetPasswordScreenSlots()
 ) {
     Scaffold(
         topBar = {
@@ -123,7 +123,7 @@ fun ResetPasswordScreen(
         ) { passwordReset ->
             if (passwordReset) {
                 // Success state
-                slots.successContent?.invoke() ?: SuccessContent(
+                resetPasswordSlots.successContent ?: SuccessContent(
                     onContinue = onNavigateBack
                 )
             } else {
@@ -136,20 +136,16 @@ fun ResetPasswordScreen(
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Spacer(modifier = Modifier.height(32.dp))
 
-                    // Header
-                    slots.header?.invoke() ?: DefaultHeader()
+                    resetPasswordSlots.header ?: DefaultHeader()
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Description
-                    slots.description?.invoke() ?: DefaultDescription()
+                    resetPasswordSlots.description?.invoke() ?: DefaultDescription()
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // New password field
-                    slots.passwordField?.invoke(
+                    resetPasswordSlots.passwordField?.invoke(
                         newPassword,
                         onNewPasswordChange,
                         passwordError,
@@ -164,8 +160,7 @@ fun ResetPasswordScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Confirm password field
-                    slots.confirmPasswordField?.invoke(
+                    resetPasswordSlots.confirmPasswordField?.invoke(
                         confirmPassword,
                         onConfirmPasswordChange,
                         confirmPasswordError,
@@ -178,7 +173,6 @@ fun ResetPasswordScreen(
                         label = "Confirm New Password"
                     )
 
-                    // Error message
                     errorMessage?.let {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -201,7 +195,7 @@ fun ResetPasswordScreen(
                             passwordError == null &&
                             confirmPasswordError == null
 
-                    slots.submitButton?.invoke(
+                    resetPasswordSlots.submitButton?.invoke(
                         onResetClick,
                         isLoading,
                         isValid,

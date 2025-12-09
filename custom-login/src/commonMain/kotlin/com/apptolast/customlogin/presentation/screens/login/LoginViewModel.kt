@@ -3,7 +3,6 @@ package com.apptolast.customlogin.presentation.screens.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.model.AuthResult
-import com.apptolast.customlogin.domain.model.LoginConfig
 import com.apptolast.customlogin.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +14,7 @@ import kotlinx.coroutines.launch
  * Handles business logic and exposes state to the UI.
  */
 class LoginViewModel(
-    private val loginConfig: LoginConfig,
+//    private val loginConfig: LoginConfig,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
@@ -27,7 +26,7 @@ class LoginViewModel(
     }
 
     private fun loadConfig() {
-        _uiState.update { it.copy(config = loginConfig) }
+//        _uiState.update { it.copy(config = loginConfig) }
     }
 
     fun onEmailChange(email: String) {
