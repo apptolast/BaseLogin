@@ -3,115 +3,99 @@ package com.apptolast.customlogin.presentation.screens.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.model.AuthResult
-import com.apptolast.customlogin.domain.model.LoginConfig
 import com.apptolast.customlogin.domain.repository.AuthRepository
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel for the Register screen.
+ * Handles business logic and exposes state to the UI.
+ */
 class RegisterViewModel(
     private val authRepository: AuthRepository,
-    private val loginConfig: LoginConfig,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _events = Channel<RegisterEvent>()
-    val events = _events.receiveAsFlow()
-
-    init {
-        loadConfig()
+    fun onFullNameChange(name: String) {
+        _uiState.update { it.copy(fullName = name, fullNameError = null, errorMessage = null) }
     }
 
-    private fun loadConfig() {
-        _uiState.update { it.copy(config = loginConfig) }
+    fun onEmailChange(email: String) {
+        _uiState.update { it.copy(email = email, emailError = null, errorMessage = null) }
     }
 
-    fun createUserWithEmail(fullName: String, email: String, password: String, confirmPassword: String) {
-        val errors = validate(fullName, email, password, confirmPassword)
-        if (errors.isNotEmpty()) {
-            _uiState.value = _uiState.value.copy(validationErrors = errors)
-            return
-        }
+    fun onPasswordChange(password: String) {
+        _uiState.update { it.copy(password = password, passwordError = null, errorMessage = null) }
+    }
+
+    fun onConfirmPasswordChange(confirmPassword: String) {
+        _uiState.update { it.copy(confirmPassword = confirmPassword, confirmPasswordError = null, errorMessage = null) }
+    }
+
+    fun onTermsAcceptedChange(accepted: Boolean) {
+        _uiState.update { it.copy(termsAccepted = accepted, errorMessage = null) }
+    }
+
+    fun createUserWithEmail() = with(_uiState) {
+
+        if (!validate(value)) return@with
 
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            update { it.copy(isLoading = true, errorMessage = null) }
 
-            when (val result = authRepository.createUserWithEmail(email, password, fullName)) {
+            when (val result = authRepository.createUserWithEmail(value.email, value.password, value.fullName)) {
                 is AuthResult.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            user = result.session
-                        )
-                    }
+                    update { it.copy(isLoading = false, user = result.session) }
                 }
-
                 is AuthResult.Failure -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = result.error.message
-                        )
-                    }
+                    update { it.copy(isLoading = false, errorMessage = result.error.message) }
                 }
-
                 is AuthResult.RequiresEmailVerification -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "Please check your email to verify your account"
-                        )
-                    }
+                    update { it.copy(isLoading = false, errorMessage = "Please check your email to verify your account") }
                 }
-
                 else -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "Registration failed"
-                        )
-                    }
+                    update { it.copy(isLoading = false, errorMessage = "Registration failed") }
                 }
             }
         }
     }
 
-    private fun validate(
-        fullName: String,
-        email: String,
-        password: String,
-        confirmPassword: String
-    ): Map<RegisterUiState.Field, String> {
-        val errors = mutableMapOf<RegisterUiState.Field, String>()
-
-        if (fullName.isBlank()) {
-            errors[RegisterUiState.Field.FULL_NAME] = "Full name is required"
-        }
-        if (email.isBlank() || !isValidEmail(email)) {
-            errors[RegisterUiState.Field.EMAIL] = "Invalid email"
-        }
-        if (password.length < loginConfig.passwordMinLength) {
-            errors[RegisterUiState.Field.PASSWORD] =
-                "Password must be at least ${loginConfig.passwordMinLength} characters"
-        }
-        if (password != confirmPassword) {
-            errors[RegisterUiState.Field.CONFIRM_PASSWORD] = "Passwords do not match"
+    private fun validate(state: RegisterUiState): Boolean {
+        val fullNameError = when {
+            state.fullName.isBlank() -> "Full name is required"
+            else -> null
         }
 
-        return errors
-    }
+        val emailError = when {
+            state.email.isBlank() -> "Email cannot be empty"
+            !"^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex().matches(state.email) -> "Invalid email format"
+            else -> null
+        }
 
-    private fun isValidEmail(email: String): Boolean {
-        val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$".toRegex()
-        return email.matches(emailRegex)
-    }
+        val passwordError = when {
+            state.password.length < 6 -> "Password must be at least 6 characters"
+            else -> null
+        }
 
-    sealed class RegisterEvent {
-        data class ShowMessage(val message: String) : RegisterEvent()
+        val confirmPasswordError = when {
+            state.confirmPassword.isBlank() -> "Please confirm your password"
+            state.password != state.confirmPassword -> "Passwords do not match"
+            else -> null
+        }
+
+        _uiState.update {
+            it.copy(
+                fullNameError = fullNameError,
+                emailError = emailError,
+                passwordError = passwordError,
+                confirmPasswordError = confirmPasswordError
+            )
+        }
+
+        return fullNameError == null && emailError == null && passwordError == null && confirmPasswordError == null
     }
 }

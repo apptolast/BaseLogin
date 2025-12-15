@@ -13,7 +13,7 @@ import org.koin.dsl.module
  * Koin module for data layer dependencies.
  * Provides repository implementations and their dependencies.
  */
-val dataModule = module {
+internal val dataModule = module {
     // Firebase Auth instance from GitLive
     single { Firebase.auth }
 

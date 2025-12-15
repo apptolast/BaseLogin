@@ -38,7 +38,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun WelcomeScreen(
     onNavigateToLogin: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
 ) {
     var headerVisible by remember { mutableStateOf(false) }
     var buttonsVisible by remember { mutableStateOf(false) }
@@ -153,6 +153,6 @@ fun WelcomeScreen(
 fun WelcomeScreenPreview() {
     WelcomeScreen(
         onNavigateToLogin = {},
-        onNavigateToRegister = {}
+        onNavigateToRegister = {},
     )
 }
