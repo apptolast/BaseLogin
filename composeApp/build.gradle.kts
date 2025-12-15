@@ -35,6 +35,21 @@ kotlin {
 
                 // Add navigation dependency for NavGraphBuilder
                 implementation(libs.navigation.compose)
+
+                // Material Icons
+                implementation(compose.materialIconsExtended)
+                implementation(compose.ui)
+
+                // Coil for KMP
+                implementation(libs.coil.compose)
+                implementation(libs.coil.network)
+
+                // Koin
+                implementation(project.dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose)
+                implementation(libs.koin.compose.viewmodel)
+                implementation(libs.koin.compose.viewmodel.navigation)
             }
         }
         val androidMain by getting {

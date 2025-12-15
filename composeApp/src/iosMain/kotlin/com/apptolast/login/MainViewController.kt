@@ -24,17 +24,17 @@ private var koinInitialized = false
 private fun initKoinIfNeeded() {
     if (!koinInitialized) {
         initLoginKoin(
-            config = LoginConfig(
-                appName = "Sample Login App",
-                drawableResource = Res.drawable.compose_multiplatform,
-                subtitle = "Sign in to continue",
-                emailEnabled = true,
-                googleEnabled = true,
-                appleEnabled = true,
-                showRegisterLink = true,
-                showForgotPassword = true,
-                passwordMinLength = 6
-            )
+//            config = LoginConfig(
+//                appName = "Sample Login App",
+//                drawableResource = Res.drawable.compose_multiplatform,
+//                subtitle = "Sign in to continue",
+//                emailEnabled = true,
+//                googleEnabled = true,
+//                appleEnabled = true,
+//                showRegisterLink = true,
+//                showForgotPassword = true,
+//                passwordMinLength = 6
+//            )
         )
         koinInitialized = true
     }

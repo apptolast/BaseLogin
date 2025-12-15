@@ -89,7 +89,6 @@ private fun LoginContent(
     onNavigateToRegister: () -> Unit,
     onNavigateToForgotPassword: () -> Unit,
 ) {
-
     slots.formContainer {
         slots.header()
 

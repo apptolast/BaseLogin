@@ -2,17 +2,18 @@ package com.apptolast.login
 
 import android.app.Application
 import com.apptolast.customlogin.di.initLoginKoin
+import com.apptolast.login.di.appModule
 import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.initialize
 import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 
 class LoginApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // 1. Initialize Firebase
         Firebase.initialize(this)
 
         // 2. Configure App Check
@@ -21,30 +22,9 @@ class LoginApplication : Application() {
             DebugAppCheckProviderFactory.getInstance()
         )
 
-        // 3. Initialize Koin with custom login config
-        initLoginKoin(
-            appDeclaration = { androidContext(this@LoginApplication) },
-//            config = LoginConfig(
-//                appName = "Sample Login App",
-//                subtitle = "Sign in to continue",
-//                drawableResource = Res.drawable.compose_multiplatform,
-//
-//                // Enable features
-//                emailEnabled = true,
-//                googleEnabled = true,
-//                appleEnabled = false,
-//                showRegisterLink = true,
-//                showForgotPassword = true,
-//
-//                // Validation
-//                passwordMinLength = 6,
-//
-//                // Custom labels
-//                signInButtonText = "Sign In",
-//                signInWithGoogleText = "Continue with Google",
-//                registerLinkText = "Don't have an account? Sign up",
-//                forgotPasswordText = "Forgot password?"
-//            )
-        )
+        initLoginKoin {
+            androidContext(this@LoginApplication)
+            modules(appModule)
+        }
     }
 }

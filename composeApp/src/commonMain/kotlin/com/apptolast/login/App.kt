@@ -40,7 +40,7 @@ import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
 import com.apptolast.customlogin.presentation.theme.LoginScreenSlots
 import com.apptolast.login.home.navigation.HomeRoute
 import com.apptolast.login.home.navigation.HomeRoutesFlow
-import com.apptolast.login.home.presentation.screens.HomeScreen
+import com.apptolast.login.home.presentation.home.HomeScreen
 import com.apptolast.login.theme.SampleAppTheme
 
 /**
@@ -78,22 +78,27 @@ fun App() {
                     },
                 )
 
-                homeRoutesFlow(onLogoutSuccess = {
-                    isAuthenticated = false
-                    currentSession = null
-                    navController.navigate(AuthRoutesFlow)
-                })
+                homeRoutesFlow(
+                    userSession = currentSession,
+                    onLogoutSuccess = {
+                        isAuthenticated = false
+                        currentSession = null
+                        navController.navigate(AuthRoutesFlow)
+                    }
+                )
             }
         }
     }
 }
 
-private fun NavGraphBuilder.homeRoutesFlow(onLogoutSuccess: () -> Unit) {
+private fun NavGraphBuilder.homeRoutesFlow(userSession: UserSession?, onLogoutSuccess: () -> Unit) {
     navigation<HomeRoutesFlow>(
         startDestination = HomeRoute
     ) {
         composable<HomeRoute> {
-            HomeScreen(onLogout = onLogoutSuccess)
+            HomeScreen(
+                onNavigateToAuth = onLogoutSuccess,
+            )
         }
     }
 }
@@ -108,6 +113,12 @@ private fun createCustomSlots() = AuthScreenSlots(
         // implementation provided by the custom-login module.
         submitButton = { onClick, isLoading, enabled, text ->
             MyCustomSubmitButton(onClick, isLoading, enabled, text)
+        },
+        socialProviders = { onClick ->
+            GoogleSignInButton(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     )
 )
