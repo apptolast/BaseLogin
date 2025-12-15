@@ -1,25 +1,24 @@
 package com.apptolast.customlogin.presentation.screens.resetpassword
 
 /**
- * UI state for the Reset Password screen.
+ * Represents the state of the Reset Password screen.
+ *
+ * @property resetCode The code received from the password reset link.
+ * @property newPassword The new password entered by the user.
+ * @property confirmPassword The confirmation password entered by the user.
+ * @property passwordError An optional error message for the new password field.
+ * @property confirmPasswordError An optional error message for the confirm password field.
+ * @property isLoading Indicates if a request is in progress.
+ * @property isPasswordReset Indicates if the password has been reset successfully.
+ * @property errorMessage A general error message to display.
  */
 data class ResetPasswordUiState(
+    val resetCode: String = "",
     val newPassword: String = "",
     val confirmPassword: String = "",
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
     val passwordError: String? = null,
     val confirmPasswordError: String? = null,
+    val isLoading: Boolean = false,
     val isPasswordReset: Boolean = false,
-    val resetCode: String = ""
-) {
-    val isValid: Boolean
-        get() = newPassword.isNotBlank() &&
-                confirmPassword.isNotBlank() &&
-                passwordError == null &&
-                confirmPasswordError == null &&
-                newPassword == confirmPassword
-
-    val passwordsMatch: Boolean
-        get() = newPassword == confirmPassword
-}
+    val errorMessage: String? = null
+)

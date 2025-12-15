@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data object AuthRoutesFlow
+
 @Serializable
 data object WelcomeRoute
 
@@ -14,4 +15,7 @@ data object LoginRoute
 data object RegisterRoute
 
 @Serializable
-data object ResetPasswordRoute
+data object ForgotPasswordRoute
+
+@Serializable
+data class ResetPasswordRoute(val resetCode: String)

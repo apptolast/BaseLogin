@@ -24,8 +24,15 @@ sealed interface AuthResult {
 
     /**
      * Represents that password reset email was sent successfully.
+     * This is a success state for the `sendPasswordResetEmail` operation.
      */
     data object PasswordResetSent : AuthResult
+
+    /**
+     * Represents that the password was successfully reset.
+     * This is a terminal success state for the `confirmPasswordReset` operation.
+     */
+    data object PasswordResetSuccess : AuthResult
 }
 
 /**
@@ -50,6 +57,10 @@ sealed class AuthError(open val message: String, open val cause: Throwable? = nu
 
     data class InvalidEmail(
         override val message: String = "Invalid email format"
+    ) : AuthError(message)
+
+    data class InvalidResetCode(
+        override val message: String = "Invalid or expired password reset code"
     ) : AuthError(message)
 
     data class NetworkError(

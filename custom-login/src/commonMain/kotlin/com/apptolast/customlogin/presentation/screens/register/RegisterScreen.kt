@@ -2,7 +2,6 @@ package com.apptolast.customlogin.presentation.screens.register
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -10,173 +9,178 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
-import com.apptolast.customlogin.presentation.theme.DefaultNameField
-import com.apptolast.customlogin.presentation.theme.DefaultEmailField
-import com.apptolast.customlogin.presentation.theme.DefaultHeader
-import com.apptolast.customlogin.presentation.theme.DefaultPasswordField
-import com.apptolast.customlogin.presentation.theme.DefaultSubmitButton
-import com.apptolast.customlogin.presentation.theme.DefaultTermsCheckbox
+import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.presentation.theme.RegisterScreenSlots
+import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.register_screen_register_button
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * A composable function that represents the main entry point for the Register screen.
+ * It connects the ViewModel to the UI content and handles authentication success navigation.
+ *
+ * @param viewModel The [RegisterViewModel] instance for this screen.
+ * @param registerSlots An instance of [RegisterScreenSlots] to customize the UI components.
+ * @param onAuthSuccess A callback invoked upon successful authentication, providing the [UserSession].
+ * @param onNavigateToLogin A callback to navigate back to the login screen.
+ */
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel = koinViewModel(),
     registerSlots: RegisterScreenSlots = RegisterScreenSlots(),
-    onRegisterSuccess: () -> Unit,
+    onAuthSuccess: (UserSession) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(uiState.user) {
-        if (uiState.user != null) {
-            onRegisterSuccess()
+    with(uiState) {
+        LaunchedEffect(user) {
+            user?.let { onAuthSuccess(it) }
         }
-    }
 
-    RegisterContent(
-        registerSlots = registerSlots,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
-        onRegisterClick = viewModel::createUserWithEmail,
-        onNavigateToLogin = onNavigateToLogin
-    )
+        RegisterContent(
+            slots = registerSlots,
+            fullName = fullName,
+            email = email,
+            password = password,
+            confirmPassword = confirmPassword,
+            termsAccepted = termsAccepted,
+            fullNameError = fullNameError,
+            emailError = emailError,
+            passwordError = passwordError,
+            confirmPasswordError = confirmPasswordError,
+            errorMessage = errorMessage,
+            isLoading = isLoading,
+            onFullNameChange = viewModel::onFullNameChange,
+            onEmailChange = viewModel::onEmailChange,
+            onPasswordChange = viewModel::onPasswordChange,
+            onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
+            onTermsAcceptedChange = viewModel::onTermsAcceptedChange,
+            onRegisterClick = viewModel::createUserWithEmail,
+            onNavigateToLogin = onNavigateToLogin
+        )
+    }
 }
 
+/**
+ * A private composable that defines the layout and UI of the Register screen.
+ * It is stateless regarding business logic and receives all data and callbacks as parameters.
+ *
+ * @param slots The [RegisterScreenSlots] instance defining the UI components.
+ * @param fullName The current full name value.
+ * @param email The current email value.
+ * @param password The current password value.
+ * @param confirmPassword The current confirm password value.
+ * @param termsAccepted The current terms accepted value.
+ * @param fullNameError An optional error for the full name field.
+ * @param emailError An optional error for the email field.
+ * @param passwordError An optional error for the password field.
+ * @param confirmPasswordError An optional error for the confirm password field.
+ * @param errorMessage A general error message to display.
+ * @param isLoading A boolean indicating if a loading operation is in progress.
+ * @param onFullNameChange A callback for full name input changes.
+ * @param onEmailChange A callback for email input changes.
+ * @param onPasswordChange A callback for password input changes.
+ * @param onConfirmPasswordChange A callback for confirm password input changes.
+ * @param onTermsAcceptedChange A callback for terms accepted input changes.
+ * @param onRegisterClick A callback invoked when the register button is clicked.
+ * @param onNavigateToLogin A callback to navigate to the login screen.
+ */
 @Composable
-fun RegisterContent(
-    registerSlots: RegisterScreenSlots = RegisterScreenSlots(),
-    isLoading: Boolean,
+private fun RegisterContent(
+    slots: RegisterScreenSlots,
+    fullName: String,
+    email: String,
+    password: String,
+    confirmPassword: String,
+    termsAccepted: Boolean,
+    fullNameError: String?,
+    emailError: String?,
+    passwordError: String?,
+    confirmPasswordError: String?,
     errorMessage: String?,
-    onRegisterClick: (String, String, String, String) -> Unit,
+    isLoading: Boolean,
+    onFullNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
+    onTermsAcceptedChange: (Boolean) -> Unit,
+    onRegisterClick: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
 
-    var name by rememberSaveable { mutableStateOf("") }
-    var email by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-    var confirmPassword by rememberSaveable { mutableStateOf("") }
-    var termsAccepted by rememberSaveable { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .padding(top = 24.dp, start = 16.dp, end = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        registerSlots.header ?: DefaultHeader()
+    slots.formContainer {
+        slots.header()
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Name Field
-        (registerSlots.nameField?.invoke(
-            name,
-            { name = it },
-            errorMessage,
+        slots.nameField(
+            fullName,
+            onFullNameChange,
+            fullNameError ?: errorMessage,
             !isLoading
-        ) ?: DefaultNameField(
-            value = name,
-            onValueChange = { name = it },
-            error = errorMessage,
-            enabled = !isLoading
-        ))
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Email Field
-        (registerSlots.emailField?.invoke(
+        slots.emailField(
             email,
-            { email = it },
-            errorMessage,
+            onEmailChange,
+            emailError,
             !isLoading
-        ) ?: DefaultEmailField(
-            value = email,
-            onValueChange = { email = it },
-            error = errorMessage,
-            enabled = !isLoading
-        ))
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Password Field
-        (registerSlots.passwordField?.invoke(
+        slots.passwordField(
             password,
-            { password = it },
-            errorMessage,
+            onPasswordChange,
+            passwordError,
             !isLoading
-        ) ?: DefaultPasswordField(
-            value = password,
-            onValueChange = { password = it },
-            error = errorMessage,
-            enabled = !isLoading
-        ))
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Confirm Password Field
-        (registerSlots.confirmPasswordField?.invoke(
+        slots.confirmPasswordField(
             confirmPassword,
-            { confirmPassword = it },
-            errorMessage,
-            !isLoading,
-        ) ?: DefaultPasswordField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            error = errorMessage,
-            enabled = !isLoading,
-        ))
+            onConfirmPasswordChange,
+            confirmPasswordError,
+            !isLoading
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Terms and Conditions
-        (registerSlots.termsCheckbox?.invoke(termsAccepted) { termsAccepted = it }
-            ?: DefaultTermsCheckbox(
-                checked = termsAccepted,
-                onCheckedChange = { termsAccepted = it }
-            ))
+        slots.termsCheckbox(
+            termsAccepted,
+            onTermsAcceptedChange
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Submit Button
-//        FIXME: Refactor logic to viewmodel
-        val canRegister =
-            name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && confirmPassword.isNotBlank() && password == confirmPassword && termsAccepted
-        (registerSlots.submitButton ?: DefaultSubmitButton(
-            onClick = { onRegisterClick(name, email, password, confirmPassword) },
-            isLoading = isLoading,
-            enabled = canRegister,
-            text = "Register"
-        ))
+        val isFormValid = fullName.isNotBlank() &&
+                email.isNotBlank() &&
+                password.isNotBlank() &&
+                confirmPassword.isNotBlank() &&
+                password == confirmPassword &&
+                termsAccepted
 
-        Spacer(modifier = Modifier.height(8.dp))
+        slots.submitButton(
+            onRegisterClick,
+            isLoading,
+            isFormValid && !isLoading,
+            stringResource(Res.string.register_screen_register_button)
+        )
 
-        // Login Link
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "Already have an account?",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            TextButton(onClick = onNavigateToLogin) {
-                Text("Sign In")
-            }
-        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        slots.loginLink(onNavigateToLogin)
     }
 }

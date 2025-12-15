@@ -11,10 +11,9 @@ import kotlinx.coroutines.launch
 
 /**
  * ViewModel for the Reset Password screen.
- * Handles the password reset confirmation flow.
+ * Handles the business logic and exposes state for the password reset flow.
  */
 class ResetPasswordViewModel(
-//    private val loginConfig: LoginConfig,
     private val authRepository: AuthRepository
 ) : ViewModel() {
 
@@ -22,74 +21,42 @@ class ResetPasswordViewModel(
     val uiState = _uiState.asStateFlow()
 
     /**
-     * Set the reset code from deep link or email.
+     * Sets the password reset code obtained from the navigation arguments.
      */
     fun setResetCode(code: String) {
         _uiState.update { it.copy(resetCode = code) }
     }
 
+    /**
+     * Updates the new password value in the UI state.
+     */
     fun onNewPasswordChange(password: String) {
-        _uiState.update {
-            it.copy(
-                newPassword = password,
-                passwordError = validatePassword(password),
-                confirmPasswordError = if (it.confirmPassword.isNotBlank() && password != it.confirmPassword) {
-                    "Passwords do not match"
-                } else null,
-                errorMessage = null
-            )
-        }
+        _uiState.update { it.copy(newPassword = password, passwordError = null, errorMessage = null) }
     }
 
+    /**
+     * Updates the confirm password value in the UI state.
+     */
     fun onConfirmPasswordChange(confirmPassword: String) {
-        _uiState.update {
-            it.copy(
-                confirmPassword = confirmPassword,
-                confirmPasswordError = if (confirmPassword != it.newPassword) {
-                    "Passwords do not match"
-                } else null,
-                errorMessage = null
-            )
-        }
+        _uiState.update { it.copy(confirmPassword = confirmPassword, confirmPasswordError = null, errorMessage = null) }
     }
 
+    /**
+     * Executes the password reset flow.
+     * It validates the input and calls the repository to confirm the password reset.
+     */
     fun resetPassword() {
         val state = _uiState.value
 
-        // Validate passwords
-        val passwordError = validatePassword(state.newPassword)
-        if (passwordError != null) {
-            _uiState.update { it.copy(passwordError = passwordError) }
-            return
-        }
-
-        if (state.newPassword != state.confirmPassword) {
-            _uiState.update { it.copy(confirmPasswordError = "Passwords do not match") }
-            return
-        }
-
-        if (state.resetCode.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Invalid reset code") }
-            return
-        }
+        if (!validate(state)) return
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
-            when (val result = authRepository.confirmPasswordReset(
-                code = state.resetCode,
-                newPassword = state.newPassword
-            )) {
-                is AuthResult.PasswordResetSent,
-                is AuthResult.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isPasswordReset = true
-                        )
-                    }
+            when (val result = authRepository.confirmPasswordReset(state.resetCode, state.newPassword)) {
+                is AuthResult.PasswordResetSuccess -> {
+                    _uiState.update { it.copy(isLoading = false, isPasswordReset = true) }
                 }
-
                 is AuthResult.Failure -> {
                     _uiState.update {
                         it.copy(
@@ -98,7 +65,6 @@ class ResetPasswordViewModel(
                         )
                     }
                 }
-
                 else -> {
                     _uiState.update {
                         it.copy(
@@ -111,59 +77,26 @@ class ResetPasswordViewModel(
         }
     }
 
-    /**
-     * Update password for already authenticated user.
-     */
-    fun updatePassword() {
-        val state = _uiState.value
-
-        val passwordError = validatePassword(state.newPassword)
-        if (passwordError != null) {
-            _uiState.update { it.copy(passwordError = passwordError) }
-            return
-        }
-
-        if (state.newPassword != state.confirmPassword) {
-            _uiState.update { it.copy(confirmPasswordError = "Passwords do not match") }
-            return
-        }
-
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            authRepository.updatePassword(state.newPassword)
-                .onSuccess {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            isPasswordReset = true
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = error.message ?: "Failed to update password"
-                        )
-                    }
-                }
-        }
-    }
-
-    private fun validatePassword(password: String): String? {
-//        val minLength = loginConfig.passwordMinLength
-        return when {
-            password.isBlank() -> "Password is required"
-//            password.length < minLength -> "Password must be at least $minLength characters"
-            !password.any { it.isUpperCase() } -> "Password must contain an uppercase letter"
-            !password.any { it.isLowerCase() } -> "Password must contain a lowercase letter"
-            !password.any { it.isDigit() } -> "Password must contain a number"
+    private fun validate(state: ResetPasswordUiState): Boolean {
+        val passwordError = when {
+            state.newPassword.isBlank() -> "Password cannot be empty"
+            // Add other password strength rules here if needed
             else -> null
         }
-    }
 
-    fun resetState() {
-        _uiState.update { ResetPasswordUiState() }
+        val confirmPasswordError = when {
+            state.confirmPassword.isBlank() -> "Please confirm your password"
+            state.newPassword != state.confirmPassword -> "Passwords do not match"
+            else -> null
+        }
+
+        _uiState.update {
+            it.copy(
+                passwordError = passwordError,
+                confirmPasswordError = confirmPasswordError
+            )
+        }
+
+        return passwordError == null && confirmPasswordError == null
     }
 }

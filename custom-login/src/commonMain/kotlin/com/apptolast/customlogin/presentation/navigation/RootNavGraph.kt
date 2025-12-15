@@ -4,11 +4,14 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.toRoute
+import com.apptolast.customlogin.domain.model.UserSession
+import com.apptolast.customlogin.presentation.screens.forgotpassword.ForgotPasswordScreen
 import com.apptolast.customlogin.presentation.screens.login.LoginScreen
 import com.apptolast.customlogin.presentation.screens.register.RegisterScreen
+import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordScreen
 import com.apptolast.customlogin.presentation.screens.welcome.WelcomeScreen
 import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
-import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordRoute as ResetPasswordScreen
 
 /**
  * Root navigation graph for the authentication flow.
@@ -18,18 +21,17 @@ import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswor
  * @param slots Custom slots for all auth screens
  * @param onAuthSuccess Callback when login is successful
  */
-
 fun NavGraphBuilder.authRoutesFlow(
     navController: NavHostController,
     startDestination: Any = WelcomeRoute,
     slots: AuthScreenSlots = AuthScreenSlots(),
-    onAuthSuccess: () -> Unit = {},
+    onAuthSuccess: (UserSession) -> Unit = {},
 ) {
 
     navigation<AuthRoutesFlow>(startDestination = startDestination) {
 
         // ---------- WELCOME SCREEN ----------
-        composable<WelcomeRoute> { 
+        composable<WelcomeRoute> {
             WelcomeScreen(
                 onNavigateToLogin = {
                     navController.navigate(LoginRoute) {
@@ -48,7 +50,7 @@ fun NavGraphBuilder.authRoutesFlow(
         composable<LoginRoute> {
             LoginScreen(
                 loginSlots = slots.login,
-                onLoginSuccess = onAuthSuccess,
+                onAuthSuccess = onAuthSuccess,
                 onNavigateToRegister = {
                     navController.navigate(RegisterRoute) {
                         popUpTo(LoginRoute) {
@@ -58,7 +60,8 @@ fun NavGraphBuilder.authRoutesFlow(
                     }
                 },
                 onNavigateToResetPassword = {
-                    navController.navigate(ResetPasswordRoute) {
+                    // Navigate to the new Forgot Password screen
+                    navController.navigate(ForgotPasswordRoute) {
                         launchSingleTop = true
                     }
                 },
@@ -69,7 +72,7 @@ fun NavGraphBuilder.authRoutesFlow(
         composable<RegisterRoute> {
             RegisterScreen(
                 registerSlots = slots.register,
-                onRegisterSuccess = onAuthSuccess,
+                onAuthSuccess = onAuthSuccess,
                 onNavigateToLogin = {
                     navController.navigate(LoginRoute) {
                         popUpTo(RegisterRoute) {
@@ -81,11 +84,21 @@ fun NavGraphBuilder.authRoutesFlow(
             )
         }
 
+        // ---------- FORGOT PASSWORD SCREEN ----------
+        composable<ForgotPasswordRoute> {
+            ForgotPasswordScreen(
+                slots = slots.forgotPassword,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
         // ---------- RESET PASSWORD SCREEN ----------
-        composable<ResetPasswordRoute> { /*backStackEntry ->*/
-//            val route = backStackEntry.toRoute<ResetPasswordRoute>()
+        composable<ResetPasswordRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<ResetPasswordRoute>()
             ResetPasswordScreen(
-                resetCode = "1234",
+                resetCode = route.resetCode,
                 resetPasswordSlots = slots.resetPassword,
                 onNavigateBack = {
                     navController.popBackStack()

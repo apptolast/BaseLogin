@@ -1,18 +1,17 @@
 package com.apptolast.login
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -43,9 +42,6 @@ import com.apptolast.login.home.navigation.HomeRoute
 import com.apptolast.login.home.navigation.HomeRoutesFlow
 import com.apptolast.login.home.presentation.screens.HomeScreen
 import com.apptolast.login.theme.SampleAppTheme
-import login.composeapp.generated.resources.Res
-import login.composeapp.generated.resources.compose_multiplatform
-import org.jetbrains.compose.resources.painterResource
 
 /**
  * Main App composable demonstrating the CustomLogin library usage.
@@ -59,7 +55,6 @@ fun App() {
 
         val startDestination =
             if (isAuthenticated && currentSession != null) HomeRoutesFlow else AuthRoutesFlow
-
 
         val navController = rememberNavController()
 
@@ -75,16 +70,19 @@ fun App() {
                 authRoutesFlow(
                     navController = navController,
                     startDestination = LoginRoute,
-//                    slots = createCustomSlots(
-//                        onGoogleSignIn = {
-//                            // TODO: Implement Google Sign-In
-//                            println("Google Sign-In clicked")
-//                        }
-//                    ),
-                    onAuthSuccess = { navController.navigate(HomeRoutesFlow) },
+                    slots = createCustomSlots(), // Pass our custom slots here
+                    onAuthSuccess = { userSession ->
+                        isAuthenticated = true
+                        currentSession = userSession
+                        navController.navigate(HomeRoutesFlow)
+                    },
                 )
 
-                homeRoutesFlow(onLogoutSuccess = { navController.navigate(AuthRoutesFlow) })
+                homeRoutesFlow(onLogoutSuccess = {
+                    isAuthenticated = false
+                    currentSession = null
+                    navController.navigate(AuthRoutesFlow)
+                })
             }
         }
     }
@@ -101,42 +99,55 @@ private fun NavGraphBuilder.homeRoutesFlow(onLogoutSuccess: () -> Unit) {
 }
 
 /**
- * Create custom slots with Google Sign-In button.
+ * Creates a custom slot configuration for the authentication screens.
  */
-//private fun createCustomSlots(
-//    onGoogleSignIn: () -> Unit
-//) = AuthScreenSlots(
-//    login = LoginScreenSlots(
-//        // Custom logo
-//        header = {
-//            Column(
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                modifier = Modifier.padding(vertical = 16.dp)
-//            ) {
-//                Image(
-//                    painter = painterResource(Res.drawable.compose_multiplatform),
-//                    contentDescription = "App Logo",
-//                    modifier = Modifier.size(80.dp)
-//                )
-//            }
-//        },
-//        // Social providers with Google button
-//        socialProviders = { onProviderClick ->
-//            Column(
-//                modifier = Modifier.fillMaxWidth(),
-//                verticalArrangement = Arrangement.spacedBy(12.dp)
-//            ) {
-//                // Google Sign-In Button
-//                GoogleSignInButton(
-//                    onClick = {
-//                        onGoogleSignIn()
-//                        onProviderClick("google")
-//                    }
-//                )
-//            }
-//        }
-//    ),
-//)
+private fun createCustomSlots() = AuthScreenSlots(
+    login = LoginScreenSlots(
+        // We override ONLY the submitButton slot.
+        // All other slots (header, emailField, etc.) will use the default
+        // implementation provided by the custom-login module.
+        submitButton = { onClick, isLoading, enabled, text ->
+            MyCustomSubmitButton(onClick, isLoading, enabled, text)
+        }
+    )
+)
+
+/**
+ * A custom submit button with a different style.
+ * It MUST have the same signature as the slot it replaces.
+ */
+@Composable
+fun MyCustomSubmitButton(
+    onClick: () -> Unit,
+    isLoading: Boolean,
+    enabled: Boolean,
+    text: String
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp), // Taller button
+        enabled = enabled && !isLoading,
+        shape = RoundedCornerShape(16.dp), // More rounded corners
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.secondary, // Use secondary color
+            contentColor = MaterialTheme.colorScheme.onSecondary
+        )
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = MaterialTheme.colorScheme.onSecondary
+            )
+        } else {
+            Text(
+                text = text.uppercase(), // Uppercase text
+                style = MaterialTheme.typography.titleMedium // Larger text
+            )
+        }
+    }
+}
 
 /**
  * Google Sign-In button following Google's branding guidelines.
@@ -163,10 +174,8 @@ fun GoogleSignInButton(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Google "G" logo placeholder (you would use actual Google icon)
             Box(
-                modifier = Modifier
-                    .size(20.dp),
+                modifier = Modifier.size(20.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
