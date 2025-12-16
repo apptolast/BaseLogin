@@ -2,18 +2,14 @@ package com.apptolast.customlogin.presentation.theme.defaultslots
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
@@ -35,8 +31,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.HeaderContent
-import login.custom_login.generated.resources.atl_isotipo_basic
 import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.atl_isotipo_basic
 import login.custom_login.generated.resources.common_continue_button
 import login.custom_login.generated.resources.forgot_password_screen_description
 import login.custom_login.generated.resources.forgot_password_screen_success_description
@@ -248,28 +244,4 @@ fun DefaultSuccessContent(
             }
         }
     }
-}
-
-/**
- * Default container for authentication screens.
- * Provides a vertically scrollable column with standard padding and arrangement.
- *
- * @param modifier The modifier to be applied to the container.
- * @param content The content to be placed inside the container.
- */
-@Composable
-fun DefaultAuthContainer(
-    modifier: Modifier = Modifier,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .imePadding()
-            .padding(top = 24.dp, start = 24.dp, end = 24.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-        content = content
-    )
 }

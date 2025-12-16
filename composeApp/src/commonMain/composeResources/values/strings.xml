@@ -7,4 +7,9 @@
     <string name="home_screen_email_verified">Verified</string>
     <string name="home_screen_email_not_verified">Not Verified</string>
     <string name="home_screen_sign_out_button">Sign Out</string>
+
+    <!-- Google Button-->
+    <string name="login_google_button">Sign in with Google</string>
+    <string name="login_loading_text"> "Signing in..."</string>
+
 </resources>

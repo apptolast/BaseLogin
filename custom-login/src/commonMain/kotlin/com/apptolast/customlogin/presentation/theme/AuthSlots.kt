@@ -1,8 +1,7 @@
 package com.apptolast.customlogin.presentation.theme
 
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultForgotPasswordDescription
 import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultForgotPasswordHeader
 import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultForgotPasswordLink
@@ -26,7 +25,7 @@ import org.jetbrains.compose.resources.stringResource
  * Default implementations are provided for convenience.
  */
 data class LoginScreenSlots(
-    val formContainer: @Composable (@Composable ColumnScope.() -> Unit) -> Unit = { content -> DefaultAuthContainer { content() } },
+    val layoutVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     val header: @Composable () -> Unit = { DefaultHeader() },
     val emailField: @Composable (
         value: String,
@@ -55,19 +54,19 @@ data class LoginScreenSlots(
         )
     },
     val submitButton: @Composable (
-        onClick: () -> Unit,
-        isLoading: Boolean,
+        text: String,
         enabled: Boolean,
-        text: String
-    ) -> Unit = { onClick, isLoading, enabled, text ->
+        isLoading: Boolean,
+        onClick: () -> Unit,
+    ) -> Unit = { text, enabled, isLoading, onClick ->
         DefaultSubmitButton(
-            onClick = onClick,
-            isLoading = isLoading,
+            text = text,
             enabled = enabled,
-            text = text
+            isLoading = isLoading,
+            onClick = onClick,
         )
     },
-    val socialProviders: (@Composable (onProviderClick: (String) -> Unit) -> Unit)? = null,
+    val socialProviders: (@Composable (onProviderClick: (String) -> Unit) -> Unit)? = null, // TODO: El provider no puede ser un String, tiene que ser de un type (sealed class)
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
         DefaultForgotPasswordLink(onForgotPasswordClick = onClick)
     },
@@ -82,7 +81,7 @@ data class LoginScreenSlots(
  * Default implementations are provided for convenience.
  */
 data class RegisterScreenSlots(
-    val formContainer: @Composable (@Composable ColumnScope.() -> Unit) -> Unit = { content -> DefaultAuthContainer { content() } },
+    val layoutVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     val header: @Composable () -> Unit = { DefaultHeader() },
     val nameField: @Composable (
         value: String,
@@ -166,7 +165,7 @@ data class RegisterScreenSlots(
  * Default implementations are provided for convenience.
  */
 data class ForgotPasswordScreenSlots(
-    val formContainer: @Composable (@Composable ColumnScope.() -> Unit) -> Unit = { content -> DefaultAuthContainer { content() } },
+    val layoutVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     val header: @Composable () -> Unit = { DefaultForgotPasswordHeader() },
     val description: @Composable () -> Unit = { DefaultForgotPasswordDescription() },
     val emailField: @Composable (
@@ -203,7 +202,7 @@ data class ForgotPasswordScreenSlots(
  * Default implementations are provided for convenience.
  */
 data class ResetPasswordScreenSlots(
-    val formContainer: @Composable (@Composable ColumnScope.() -> Unit) -> Unit = { content -> DefaultAuthContainer { content() } },
+    val layoutVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     val header: @Composable () -> Unit = { DefaultResetPasswordHeader() },
     val description: @Composable () -> Unit = { DefaultResetPasswordDescription() },
     val passwordField: @Composable (

@@ -18,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.theme.ResetPasswordScreenSlots
 import kotlinx.coroutines.delay
 import login.custom_login.generated.resources.Res
@@ -131,7 +132,9 @@ private fun ResetPasswordContent(
             if (passwordReset) {
                 slots.successContent(onNavigateBack)
             } else {
-                slots.formContainer {
+                DefaultAuthContainer(
+                    verticalArrangement = slots.layoutVerticalArrangement,
+                ) {
                     slots.header()
 
                     Spacer(modifier = Modifier.height(16.dp))

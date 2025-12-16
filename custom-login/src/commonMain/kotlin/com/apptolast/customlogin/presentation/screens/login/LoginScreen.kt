@@ -9,10 +9,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.domain.model.UserSession
+import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.theme.LoginScreenSlots
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.login_screen_sign_in_button
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -44,10 +46,10 @@ fun LoginScreen(
             slots = loginSlots,
             email = email,
             password = password,
+            isLoading = isLoading,
             emailError = emailError,
             passwordError = passwordError,
             errorMessage = errorMessage,
-            isLoading = isLoading,
             onEmailChange = viewModel::onEmailChange,
             onPasswordChange = viewModel::onPasswordChange,
             onLoginClick = viewModel::signInWithEmail,
@@ -76,20 +78,24 @@ fun LoginScreen(
  */
 @Composable
 private fun LoginContent(
-    slots: LoginScreenSlots,
+    slots: LoginScreenSlots = LoginScreenSlots(),
     email: String,
     password: String,
-    emailError: String?,
-    passwordError: String?,
-    errorMessage: String?,
     isLoading: Boolean,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit,
-    onNavigateToRegister: () -> Unit,
-    onNavigateToForgotPassword: () -> Unit,
+    emailError: String? = null,
+    passwordError: String? = null,
+    errorMessage: String? = null,
+    onEmailChange: (String) -> Unit = {},
+    onPasswordChange: (String) -> Unit = {},
+    onLoginClick: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
+    onNavigateToForgotPassword: () -> Unit = {},
 ) {
-    slots.formContainer {
+
+    DefaultAuthContainer(
+        verticalArrangement = slots.layoutVerticalArrangement,
+    ) {
+
         slots.header()
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -117,14 +123,35 @@ private fun LoginContent(
         val isFormValid = email.isNotBlank() && password.isNotBlank()
 
         slots.submitButton(
-            onLoginClick,
-            isLoading,
+            stringResource(Res.string.login_screen_sign_in_button),
             isFormValid && !isLoading,
-            stringResource(Res.string.login_screen_sign_in_button)
+            isLoading,
+            onLoginClick,
         )
 
         slots.socialProviders?.invoke { /* onProviderClick */ }
 
         slots.registerLink(onNavigateToRegister)
     }
+}
+
+@Preview
+@Composable
+private fun LoginScreenPreview() {
+    LoginContent(
+        email = "test@apptolast.com",
+        password = "Password123",
+        isLoading = false,
+    )
+}
+
+
+@Preview
+@Composable
+private fun LoginScreenLoadingPreview() {
+    LoginContent(
+        email = "test@apptolast.com",
+        password = "Password123",
+        isLoading = true,
+    )
 }

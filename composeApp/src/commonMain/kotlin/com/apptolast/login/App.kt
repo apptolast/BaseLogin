@@ -1,19 +1,19 @@
 package com.apptolast.login
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,8 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
@@ -42,12 +41,19 @@ import com.apptolast.login.home.navigation.HomeRoute
 import com.apptolast.login.home.navigation.HomeRoutesFlow
 import com.apptolast.login.home.presentation.home.HomeScreen
 import com.apptolast.login.theme.SampleAppTheme
+import login.composeapp.generated.resources.Res
+import login.composeapp.generated.resources.google_icon
+import login.composeapp.generated.resources.login_google_button
+import login.composeapp.generated.resources.login_loading_text
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Main App composable demonstrating the CustomLogin library usage.
  */
 @Composable
 fun App() {
+
     SampleAppTheme {
 
         var isAuthenticated by remember { mutableStateOf(false) }
@@ -58,15 +64,18 @@ fun App() {
 
         val navController = rememberNavController()
 
-        Surface {
+        Scaffold { paddingValues ->
+
             NavHost(
                 navController = navController,
                 startDestination = startDestination,
                 enterTransition = { NavTransitions.enter },
                 exitTransition = { NavTransitions.exit },
                 popEnterTransition = { NavTransitions.popEnter },
-                popExitTransition = { NavTransitions.popExit }
+                popExitTransition = { NavTransitions.popExit },
+                modifier = Modifier.padding(paddingValues)
             ) {
+
                 authRoutesFlow(
                     navController = navController,
                     startDestination = LoginRoute,
@@ -108,16 +117,21 @@ private fun NavGraphBuilder.homeRoutesFlow(userSession: UserSession?, onLogoutSu
  */
 private fun createCustomSlots() = AuthScreenSlots(
     login = LoginScreenSlots(
+//        layoutVerticalArrangement = Arrangement.Top,
         // We override ONLY the submitButton slot.
         // All other slots (header, emailField, etc.) will use the default
         // implementation provided by the custom-login module.
-        submitButton = { onClick, isLoading, enabled, text ->
-            MyCustomSubmitButton(onClick, isLoading, enabled, text)
+        submitButton = { text, enabled, isLoading, onClick ->
+            MyCustomSubmitButton(
+                text = text,
+                enabled = enabled,
+                isLoading = isLoading,
+                onClick = onClick,
+            )
         },
         socialProviders = { onClick ->
-            GoogleSignInButton(
-                onClick = onClick,
-                modifier = Modifier.fillMaxWidth()
+            SignInWithGoogleButton(
+                onClick = { onClick("Google") }
             )
         }
     )
@@ -129,33 +143,39 @@ private fun createCustomSlots() = AuthScreenSlots(
  */
 @Composable
 fun MyCustomSubmitButton(
-    onClick: () -> Unit,
-    isLoading: Boolean,
+    text: String,
     enabled: Boolean,
-    text: String
+    isLoading: Boolean,
+    onClick: () -> Unit,
 ) {
-    Button(
-        onClick = onClick,
+    Surface(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp), // Taller button
-        enabled = enabled && !isLoading,
-        shape = RoundedCornerShape(16.dp), // More rounded corners
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary, // Use secondary color
-            contentColor = MaterialTheme.colorScheme.onSecondary
-        )
+            .fillMaxWidth(0.7f)
+            .clickable(
+                enabled = !isLoading,
+                onClick = onClick,
+            )
+            .padding(vertical = 16.dp),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface,
     ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(24.dp),
-                color = MaterialTheme.colorScheme.onSecondary
-            )
-        } else {
-            Text(
-                text = text.uppercase(), // Uppercase text
-                style = MaterialTheme.typography.titleMedium // Larger text
-            )
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(0.7f),
+            enabled = enabled && !isLoading,
+            shape = MaterialTheme.shapes.small,
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
+            } else {
+                Text(
+                    text = text.uppercase(), // Uppercase text
+                    style = MaterialTheme.typography.titleMedium // Larger text
+                )
+            }
         }
     }
 }
@@ -164,42 +184,43 @@ fun MyCustomSubmitButton(
  * Google Sign-In button following Google's branding guidelines.
  */
 @Composable
-fun GoogleSignInButton(
+fun SignInWithGoogleButton(
+    text: String = stringResource(Res.string.login_google_button),
+    loadingText: String = stringResource(Res.string.login_loading_text),
+    icon: Painter = painterResource(Res.drawable.google_icon),
+    isLoading: Boolean = false,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
 ) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(48.dp),
-        enabled = enabled,
-        shape = RoundedCornerShape(24.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = Color.White,
-            contentColor = Color(0xFF1F1F1F)
-        )
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth(0.7f)
+            .clickable(
+                enabled = !isLoading,
+                onClick = onClick,
+            ),
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
+        color = MaterialTheme.colorScheme.surface,
     ) {
         Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.padding(
+                start = 12.dp,
+                end = 16.dp,
+                top = 12.dp,
+                bottom = 12.dp,
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier.size(20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "G",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4285F4) // Google Blue
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
+            Image(
+                painter = icon,
+                contentDescription = "Google Button",
+                modifier = Modifier.size(24.dp),
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Continue with Google",
-                style = MaterialTheme.typography.labelLarge
+                text = if (isLoading) loadingText else text,
+                color = MaterialTheme.colorScheme.onSurface,
             )
         }
     }
