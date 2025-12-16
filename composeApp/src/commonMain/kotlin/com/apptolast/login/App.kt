@@ -65,7 +65,11 @@ fun App(splashViewModel: SplashViewModel? = koinViewModel()) {
         val splashState by splashViewModel?.splashState?.collectAsStateWithLifecycle()
             ?: remember { mutableStateOf(SplashState.Unauthenticated) }
 
-        // Initialize auth state from splash screen check
+        // Don't render anything until we know the actual auth state
+        // This prevents the "flash" of login screen when user is authenticated
+        if (splashState is SplashState.Loading) return@SampleAppTheme
+
+        // Initialize auth state from splash screen check (now we have definitive state)
         var isAuthenticated by remember(splashState) {
             mutableStateOf(splashState is SplashState.Authenticated)
         }
@@ -73,11 +77,7 @@ fun App(splashViewModel: SplashViewModel? = koinViewModel()) {
             mutableStateOf((splashState as? SplashState.Authenticated)?.session)
         }
 
-        val startDestination = if (isAuthenticated && currentSession != null) {
-            HomeRoutesFlow
-        } else {
-            AuthRoutesFlow
-        }
+        val startDestination = if (isAuthenticated) HomeRoutesFlow else AuthRoutesFlow
 
         val navController = rememberNavController()
 
