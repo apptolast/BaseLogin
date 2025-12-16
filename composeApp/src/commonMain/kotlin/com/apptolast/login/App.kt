@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -35,11 +36,14 @@ import com.apptolast.customlogin.presentation.navigation.AuthRoutesFlow
 import com.apptolast.customlogin.presentation.navigation.LoginRoute
 import com.apptolast.customlogin.presentation.navigation.NavTransitions
 import com.apptolast.customlogin.presentation.navigation.authRoutesFlow
+import com.apptolast.customlogin.presentation.screens.components.HeaderContent
 import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
 import com.apptolast.customlogin.presentation.theme.LoginScreenSlots
 import com.apptolast.login.home.navigation.HomeRoute
 import com.apptolast.login.home.navigation.HomeRoutesFlow
 import com.apptolast.login.home.presentation.home.HomeScreen
+import com.apptolast.login.splash.SplashState
+import com.apptolast.login.splash.SplashViewModel
 import com.apptolast.login.theme.SampleAppTheme
 import login.composeapp.generated.resources.Res
 import login.composeapp.generated.resources.google_icon
@@ -47,20 +51,33 @@ import login.composeapp.generated.resources.login_google_button
 import login.composeapp.generated.resources.login_loading_text
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Main App composable demonstrating the CustomLogin library usage.
+ * @param splashViewModel Optional ViewModel for splash screen integration (Android only).
  */
 @Composable
-fun App() {
+fun App(splashViewModel: SplashViewModel? = koinViewModel()) {
 
     SampleAppTheme {
 
-        var isAuthenticated by remember { mutableStateOf(false) }
-        var currentSession by remember { mutableStateOf<UserSession?>(null) }
+        val splashState by splashViewModel?.splashState?.collectAsStateWithLifecycle()
+            ?: remember { mutableStateOf(SplashState.Unauthenticated) }
 
-        val startDestination =
-            if (isAuthenticated && currentSession != null) HomeRoutesFlow else AuthRoutesFlow
+        // Initialize auth state from splash screen check
+        var isAuthenticated by remember(splashState) {
+            mutableStateOf(splashState is SplashState.Authenticated)
+        }
+        var currentSession by remember(splashState) {
+            mutableStateOf((splashState as? SplashState.Authenticated)?.session)
+        }
+
+        val startDestination = if (isAuthenticated && currentSession != null) {
+            HomeRoutesFlow
+        } else {
+            AuthRoutesFlow
+        }
 
         val navController = rememberNavController()
 
@@ -79,11 +96,13 @@ fun App() {
                 authRoutesFlow(
                     navController = navController,
                     startDestination = LoginRoute,
-                    slots = createCustomSlots(), // Pass our custom slots here
+                    slots = createCustomSlots(),
                     onAuthSuccess = { userSession ->
                         isAuthenticated = true
                         currentSession = userSession
-                        navController.navigate(HomeRoutesFlow)
+                        navController.navigate(HomeRoutesFlow) {
+                            popUpTo(AuthRoutesFlow) { inclusive = true }
+                        }
                     },
                 )
 
@@ -92,7 +111,9 @@ fun App() {
                     onLogoutSuccess = {
                         isAuthenticated = false
                         currentSession = null
-                        navController.navigate(AuthRoutesFlow)
+                        navController.navigate(AuthRoutesFlow) {
+                            popUpTo(HomeRoutesFlow) { inclusive = true }
+                        }
                     }
                 )
             }
@@ -118,6 +139,15 @@ private fun NavGraphBuilder.homeRoutesFlow(userSession: UserSession?, onLogoutSu
 private fun createCustomSlots() = AuthScreenSlots(
     login = LoginScreenSlots(
 //        layoutVerticalArrangement = Arrangement.Top,
+
+        header = @Composable {
+            HeaderContent(
+                drawableResource = Res.drawable.google_icon,
+                appName = "Login Demo",
+                appSubtitle = "This is the Login Demo App",
+            )
+        },
+
         // We override ONLY the submitButton slot.
         // All other slots (header, emailField, etc.) will use the default
         // implementation provided by the custom-login module.

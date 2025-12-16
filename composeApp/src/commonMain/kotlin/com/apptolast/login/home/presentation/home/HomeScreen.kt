@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +30,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -82,8 +84,9 @@ fun HomeScreen(
                     }
                 }
             )
-        }
-    ) { padding ->
+        },
+        modifier = Modifier.consumeWindowInsets(TopAppBarDefaults.windowInsets)
+    ) { paddingValues ->
         when {
             uiState.isLoading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -93,7 +96,7 @@ fun HomeScreen(
 
             uiState.userSession != null -> {
                 HomeContent(
-                    modifier = Modifier.padding(padding),
+                    modifier = Modifier.padding(paddingValues),
                     userSession = uiState.userSession!!,
                     onLogout = viewModel::signOut
                 )
