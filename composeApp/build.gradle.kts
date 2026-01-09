@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.google.services) // Required for native Firebase SDK
     alias(libs.plugins.kotlin.cocoapods)
+    alias(libs.plugins.kotlinx.serialization) // Required for type-safe navigation in this module
 }
 
 kotlin {
@@ -31,11 +32,30 @@ kotlin {
                 
                 // Add dependency to our new login module
                 api(project(":custom-login"))
+
+                // Add navigation dependency for NavGraphBuilder
+                implementation(libs.navigation.compose)
+
+                // Material Icons
+                implementation(compose.materialIconsExtended)
+                implementation(compose.ui)
+
+                // Coil for KMP
+                implementation(libs.coil.compose)
+                implementation(libs.coil.network)
+
+                // Koin
+                implementation(project.dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose)
+                implementation(libs.koin.compose.viewmodel)
+                implementation(libs.koin.compose.viewmodel.navigation)
             }
         }
         val androidMain by getting {
             dependencies {
                 implementation(libs.androidx.activity.compose)
+                implementation(libs.androidx.splashscreen)
                 implementation(libs.koin.android)
 
                 // GitLive Firebase (common)
@@ -61,11 +81,11 @@ kotlin {
             export(project(":custom-login"))
         }
 
-        pod("FirebaseCore") {
+        pod("FirebaseCore") {            
             extraOpts += listOf("-compiler-option", "-fmodules")
         }
 
-        pod("FirebaseAuth") {
+        pod("FirebaseAuth") {            
             extraOpts += listOf("-compiler-option", "-fmodules")
         }
     }

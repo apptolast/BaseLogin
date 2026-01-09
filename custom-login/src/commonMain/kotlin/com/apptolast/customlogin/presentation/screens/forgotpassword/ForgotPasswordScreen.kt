@@ -1,318 +1,146 @@
 package com.apptolast.customlogin.presentation.screens.forgotpassword
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.theme.ForgotPasswordScreenSlots
+import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.cd_navigate_back
+import login.custom_login.generated.resources.forgot_password_screen_send_button
+import login.custom_login.generated.resources.forgot_password_screen_title
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * A composable function that represents the main entry point for the Forgot Password screen.
+ * It connects the ViewModel to the UI content and handles UI state.
+ *
+ * @param viewModel The [ForgotPasswordViewModel] instance for this screen.
+ * @param slots An instance of [ForgotPasswordScreenSlots] to customize the UI components.
+ * @param onNavigateBack A callback to navigate to the previous screen.
+ */
 @Composable
-fun ForgotPasswordRoute(
+fun ForgotPasswordScreen(
     viewModel: ForgotPasswordViewModel = koinViewModel(),
     slots: ForgotPasswordScreenSlots = ForgotPasswordScreenSlots(),
-    onNavigateBack: () -> Unit,
-    onSuccess: () -> Unit = {}
+    onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    ForgotPasswordScreen(
-        email = uiState.email,
-        onEmailChange = viewModel::onEmailChange,
-        emailError = uiState.emailError,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
-        isEmailSent = uiState.isEmailSent,
-        onSendClick = viewModel::sendPasswordResetEmail,
-        onNavigateBack = onNavigateBack,
-        onSuccess = onSuccess,
-        slots = slots
-    )
+    with(uiState) {
+        ForgotPasswordContent(
+            slots = slots,
+            email = email,
+            emailError = emailError,
+            isLoading = isLoading,
+            isSuccess = isSuccessPasswordResetSent,
+            errorMessage = errorMessage,
+            onEmailChange = viewModel::onEmailChange,
+            onSendClick = viewModel::sendPasswordResetEmail,
+            onNavigateBack = onNavigateBack
+        )
+    }
 }
 
+/**
+ * A private composable that defines the layout and UI for the Forgot Password screen.
+ * It is stateless regarding business logic and field states, receiving all data and callbacks.
+ *
+ * @param slots The [ForgotPasswordScreenSlots] defining the UI components.
+ * @param email The current email value.
+ * @param emailError An optional error for the email field.
+ * @param isLoading A flag indicating if the screen is currently loading.
+ * @param isSuccess A flag indicating if a password reset email was sent successfully.
+ * @param errorMessage The error message to be displayed, if any.
+ * @param onEmailChange A callback for email input changes.
+ * @param onSendClick A callback invoked when the send button is clicked.
+ * @param onNavigateBack A callback to navigate to the previous screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgotPasswordScreen(
+private fun ForgotPasswordContent(
+    slots: ForgotPasswordScreenSlots,
     email: String,
-    onEmailChange: (String) -> Unit,
     emailError: String?,
     isLoading: Boolean,
+    isSuccess: Boolean,
     errorMessage: String?,
-    isEmailSent: Boolean,
+    onEmailChange: (String) -> Unit,
     onSendClick: () -> Unit,
-    onNavigateBack: () -> Unit,
-    onSuccess: () -> Unit = {},
-    slots: ForgotPasswordScreenSlots = ForgotPasswordScreenSlots()
+    onNavigateBack: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reset Password") },
+                title = {
+                    Text(stringResource(Res.string.forgot_password_screen_title))
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(Res.string.cd_navigate_back)
                         )
                     }
                 }
             )
-        }
+        },
+        modifier = Modifier.consumeWindowInsets(TopAppBarDefaults.windowInsets)
     ) { paddingValues ->
-        AnimatedContent(
-            targetState = isEmailSent,
-            modifier = Modifier.padding(paddingValues)
-        ) { emailSent ->
-            if (emailSent) {
-                // Success state
-                slots.successContent?.invoke(email) ?: SuccessContent(
-                    email = email,
-                    onBackToLogin = onNavigateBack
-                )
-            } else {
-                // Form state
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .imePadding()
-                        .padding(horizontal = 24.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.height(32.dp))
+        Box(modifier = Modifier.consumeWindowInsets(paddingValues)) {
+            AnimatedContent(
+                targetState = isSuccess,
+            ) { success ->
+                if (success) {
+                    slots.successContent()
+                } else {
+                    DefaultAuthContainer(
+                        verticalArrangement = slots.layoutVerticalArrangement,
+                    ) {
 
-                    // Header
-                    slots.header?.invoke() ?: DefaultHeader()
+                        slots.header()
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    // Description
-                    slots.description?.invoke() ?: DefaultDescription()
+                        slots.description()
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    // Email field
-                    slots.emailField?.invoke(email, onEmailChange, emailError, !isLoading)
-                        ?: DefaultEmailField(
-                            email = email,
-                            onEmailChange = onEmailChange,
-                            emailError = emailError,
-                            enabled = !isLoading
+                        slots.emailField(
+                            email,
+                            onEmailChange,
+                            emailError ?: errorMessage,
+                            !isLoading
                         )
 
-                    // Error message
-                    errorMessage?.let {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        slots.submitButton(
+                            onSendClick,
+                            isLoading,
+                            email.isNotBlank() && !isLoading,
+                            stringResource(Res.string.forgot_password_screen_send_button)
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Submit button
-                    slots.submitButton?.invoke(
-                        onSendClick,
-                        isLoading,
-                        email.isNotBlank(),
-                        "Send Reset Link"
-                    ) ?: DefaultSubmitButton(
-                        onClick = onSendClick,
-                        isLoading = isLoading,
-                        enabled = email.isNotBlank()
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Back to login link
-                    slots.backToLoginLink?.invoke(onNavigateBack) ?: BackToLoginLink(onNavigateBack)
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun DefaultHeader() {
-    Icon(
-        imageVector = Icons.Default.Email,
-        contentDescription = null,
-        modifier = Modifier.size(64.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
-    Spacer(modifier = Modifier.height(16.dp))
-    Text(
-        text = "Forgot Password?",
-        style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onSurface
-    )
-}
-
-@Composable
-private fun DefaultDescription() {
-    Text(
-        text = "Enter your email address and we'll send you a link to reset your password.",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center
-    )
-}
-
-@Composable
-private fun DefaultEmailField(
-    email: String,
-    onEmailChange: (String) -> Unit,
-    emailError: String?,
-    enabled: Boolean
-) {
-    OutlinedTextField(
-        value = email,
-        onValueChange = onEmailChange,
-        label = { Text("Email") },
-        leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email") },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-        singleLine = true,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = enabled,
-        isError = emailError != null,
-        supportingText = emailError?.let { { Text(it) } }
-    )
-}
-
-@Composable
-private fun DefaultSubmitButton(
-    onClick: () -> Unit,
-    isLoading: Boolean,
-    enabled: Boolean
-) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = enabled && !isLoading
-    ) {
-        if (isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(20.dp),
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        } else {
-            Text("Send Reset Link")
-        }
-    }
-}
-
-@Composable
-private fun BackToLoginLink(onClick: () -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Remember your password?",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        TextButton(onClick = onClick) {
-            Text("Sign In")
-        }
-    }
-}
-
-@Composable
-private fun SuccessContent(
-    email: String,
-    onBackToLogin: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = null,
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Email Sent!",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "We've sent a password reset link to:",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = email,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Please check your inbox and follow the instructions to reset your password.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = onBackToLogin,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Back to Sign In")
         }
     }
 }

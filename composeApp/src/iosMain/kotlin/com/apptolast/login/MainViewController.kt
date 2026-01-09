@@ -2,9 +2,7 @@ package com.apptolast.login
 
 import androidx.compose.ui.window.ComposeUIViewController
 import com.apptolast.customlogin.di.initLoginKoin
-import com.apptolast.customlogin.domain.model.LoginConfig
-import login.composeapp.generated.resources.Res
-import login.composeapp.generated.resources.compose_multiplatform
+import com.apptolast.login.di.appModule
 
 /**
  * Creates the main iOS view controller.
@@ -23,19 +21,9 @@ private var koinInitialized = false
 
 private fun initKoinIfNeeded() {
     if (!koinInitialized) {
-        initLoginKoin(
-            config = LoginConfig(
-                appName = "Sample Login App",
-                drawableResource = Res.drawable.compose_multiplatform,
-                subtitle = "Sign in to continue",
-                emailEnabled = true,
-                googleEnabled = true,
-                appleEnabled = true,
-                showRegisterLink = true,
-                showForgotPassword = true,
-                passwordMinLength = 6
-            )
-        )
+        initLoginKoin {
+            modules(appModule)
+        }
         koinInitialized = true
     }
 }

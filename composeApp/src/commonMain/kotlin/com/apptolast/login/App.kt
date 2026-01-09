@@ -1,22 +1,19 @@
 package com.apptolast.login
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,230 +23,235 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import com.apptolast.customlogin.CustomLogin
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
+import androidx.navigation.compose.rememberNavController
 import com.apptolast.customlogin.domain.model.UserSession
-import com.apptolast.customlogin.presentation.theme.AuthColors
+import com.apptolast.customlogin.presentation.navigation.AuthRoutesFlow
+import com.apptolast.customlogin.presentation.navigation.LoginRoute
+import com.apptolast.customlogin.presentation.navigation.NavTransitions
+import com.apptolast.customlogin.presentation.navigation.authRoutesFlow
+import com.apptolast.customlogin.presentation.screens.components.HeaderContent
 import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
-import com.apptolast.customlogin.presentation.theme.AuthShapes
-import com.apptolast.customlogin.presentation.theme.AuthSpacing
-import com.apptolast.customlogin.presentation.theme.AuthTheme
-import com.apptolast.customlogin.presentation.theme.AuthTypography
 import com.apptolast.customlogin.presentation.theme.LoginScreenSlots
+import com.apptolast.login.home.navigation.HomeRoute
+import com.apptolast.login.home.navigation.HomeRoutesFlow
+import com.apptolast.login.home.presentation.home.HomeScreen
+import com.apptolast.login.splash.SplashState
+import com.apptolast.login.splash.SplashViewModel
 import com.apptolast.login.theme.SampleAppTheme
 import login.composeapp.generated.resources.Res
-import login.composeapp.generated.resources.compose_multiplatform
+import login.composeapp.generated.resources.google_icon
+import login.composeapp.generated.resources.login_google_button
+import login.composeapp.generated.resources.login_loading_text
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Main App composable demonstrating the CustomLogin library usage.
+ * @param splashViewModel Optional ViewModel for splash screen integration (Android only).
  */
 @Composable
-fun App() {
-    SampleAppTheme {
-        var isAuthenticated by remember { mutableStateOf(false) }
-        var currentSession by remember { mutableStateOf<UserSession?>(null) }
+fun App(splashViewModel: SplashViewModel? = koinViewModel()) {
 
-        if (isAuthenticated && currentSession != null) {
-            // User is logged in - show home screen
-            HomeScreen(
-                session = currentSession!!,
-                onLogout = {
-                    isAuthenticated = false
-                    currentSession = null
-                }
-            )
-        } else {
-            // Show authentication flow
-            CustomLogin.AuthFlow(
-                theme = createCustomTheme(),
-                slots = createCustomSlots(
-                    onGoogleSignIn = {
-                        // TODO: Implement Google Sign-In
-                        println("Google Sign-In clicked")
+    SampleAppTheme {
+
+        val splashState by splashViewModel?.splashState?.collectAsStateWithLifecycle()
+            ?: remember { mutableStateOf(SplashState.Unauthenticated) }
+
+        // Don't render anything until we know the actual auth state
+        // This prevents the "flash" of login screen when user is authenticated
+        if (splashState is SplashState.Loading) return@SampleAppTheme
+
+        // Initialize auth state from splash screen check (now we have definitive state)
+        var isAuthenticated by remember(splashState) {
+            mutableStateOf(splashState is SplashState.Authenticated)
+        }
+        var currentSession by remember(splashState) {
+            mutableStateOf((splashState as? SplashState.Authenticated)?.session)
+        }
+
+        val startDestination = if (isAuthenticated) HomeRoutesFlow else AuthRoutesFlow
+
+        val navController = rememberNavController()
+
+        Scaffold { paddingValues ->
+
+            NavHost(
+                navController = navController,
+                startDestination = startDestination,
+                enterTransition = { NavTransitions.enter },
+                exitTransition = { NavTransitions.exit },
+                popEnterTransition = { NavTransitions.popEnter },
+                popExitTransition = { NavTransitions.popExit },
+                modifier = Modifier.padding(paddingValues)
+            ) {
+
+                authRoutesFlow(
+                    navController = navController,
+                    startDestination = LoginRoute,
+                    slots = createCustomSlots(),
+                    onAuthSuccess = { userSession ->
+                        isAuthenticated = true
+                        currentSession = userSession
+                        navController.navigate(HomeRoutesFlow) {
+                            popUpTo(AuthRoutesFlow) { inclusive = true }
+                        }
+                    },
+                )
+
+                homeRoutesFlow(
+                    userSession = currentSession,
+                    onLogoutSuccess = {
+                        isAuthenticated = false
+                        currentSession = null
+                        navController.navigate(AuthRoutesFlow) {
+                            popUpTo(HomeRoutesFlow) { inclusive = true }
+                        }
                     }
-                ),
-                showWelcome = false,
-                onAuthSuccess = {
-                    isAuthenticated = true
-                    // In a real app, get the session from the repository
-                    currentSession = UserSession(
-                        userId = "demo-user",
-                        email = "user@example.com",
-                        displayName = "Demo User"
-                    )
-                }
+                )
+            }
+        }
+    }
+}
+
+private fun NavGraphBuilder.homeRoutesFlow(userSession: UserSession?, onLogoutSuccess: () -> Unit) {
+    navigation<HomeRoutesFlow>(
+        startDestination = HomeRoute
+    ) {
+        composable<HomeRoute> {
+            HomeScreen(
+                onNavigateToAuth = onLogoutSuccess,
             )
         }
     }
 }
 
 /**
- * Create a custom theme for the auth screens.
+ * Creates a custom slot configuration for the authentication screens.
  */
-@Composable
-private fun createCustomTheme(): AuthTheme {
-    return AuthTheme(
-        colors = AuthColors.Light.copy(
-            primary = MaterialTheme.colorScheme.primary,
-            onPrimary = Color.White,
-            secondary = Color(0xFF03DAC6),
-            link = Color(0xFF1976D2)
-        ),
-        typography = AuthTypography.Default,
-        shapes = AuthShapes.Default,
-        spacing = AuthSpacing.Default
+private fun createCustomSlots() = AuthScreenSlots(
+    login = LoginScreenSlots(
+//        layoutVerticalArrangement = Arrangement.Top,
+
+        header = @Composable {
+            HeaderContent(
+                drawableResource = Res.drawable.google_icon,
+                appName = "Login Demo",
+                appSubtitle = "This is the Login Demo App",
+            )
+        },
+
+        // We override ONLY the submitButton slot.
+        // All other slots (header, emailField, etc.) will use the default
+        // implementation provided by the custom-login module.
+        submitButton = { text, enabled, isLoading, onClick ->
+            MyCustomSubmitButton(
+                text = text,
+                enabled = enabled,
+                isLoading = isLoading,
+                onClick = onClick,
+            )
+        },
+        socialProviders = { onClick ->
+            SignInWithGoogleButton(
+                onClick = { onClick("Google") }
+            )
+        }
     )
-}
+)
 
 /**
- * Create custom slots with Google Sign-In button.
+ * A custom submit button with a different style.
+ * It MUST have the same signature as the slot it replaces.
  */
-private fun createCustomSlots(
-    onGoogleSignIn: () -> Unit
-): AuthScreenSlots {
-    return AuthScreenSlots(
-        login = LoginScreenSlots(
-            // Custom logo
-            logo = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(vertical = 16.dp)
-                ) {
-                    Image(
-                        painter = painterResource(Res.drawable.compose_multiplatform),
-                        contentDescription = "App Logo",
-                        modifier = Modifier.size(80.dp)
-                    )
-                }
-            },
-            // Social providers with Google button
-            socialProviders = { onProviderClick ->
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    // Google Sign-In Button
-                    GoogleSignInButton(
-                        onClick = {
-                            onGoogleSignIn()
-                            onProviderClick("google")
-                        }
-                    )
-                }
+@Composable
+fun MyCustomSubmitButton(
+    text: String,
+    enabled: Boolean,
+    isLoading: Boolean,
+    onClick: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth(0.7f)
+            .clickable(
+                enabled = !isLoading,
+                onClick = onClick,
+            )
+            .padding(vertical = 16.dp),
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surface,
+    ) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth(0.7f),
+            enabled = enabled && !isLoading,
+            shape = MaterialTheme.shapes.small,
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onSecondary
+                )
+            } else {
+                Text(
+                    text = text.uppercase(), // Uppercase text
+                    style = MaterialTheme.typography.titleMedium // Larger text
+                )
             }
-        )
-    )
+        }
+    }
 }
 
 /**
  * Google Sign-In button following Google's branding guidelines.
  */
 @Composable
-fun GoogleSignInButton(
+fun SignInWithGoogleButton(
+    text: String = stringResource(Res.string.login_google_button),
+    loadingText: String = stringResource(Res.string.login_loading_text),
+    icon: Painter = painterResource(Res.drawable.google_icon),
+    isLoading: Boolean = false,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    enabled: Boolean = true
-) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(48.dp),
-        enabled = enabled,
-        shape = RoundedCornerShape(24.dp),
-        colors = ButtonDefaults.outlinedButtonColors(
-            containerColor = Color.White,
-            contentColor = Color(0xFF1F1F1F)
-        )
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Google "G" logo placeholder (you would use actual Google icon)
-            Box(
-                modifier = Modifier
-                    .size(20.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "G",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF4285F4) // Google Blue
-                )
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = "Continue with Google",
-                style = MaterialTheme.typography.labelLarge
-            )
-        }
-    }
-}
-
-/**
- * Home screen shown after successful authentication.
- */
-@Composable
-fun HomeScreen(
-    session: UserSession,
-    onLogout: () -> Unit
 ) {
     Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background
+        modifier = Modifier
+            .fillMaxWidth(0.7f)
+            .clickable(
+                enabled = !isLoading,
+                onClick = onClick,
+            ),
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outline),
+        color = MaterialTheme.colorScheme.surface,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+        Row(
+            modifier = Modifier.padding(
+                start = 12.dp,
+                end = 16.dp,
+                top = 12.dp,
+                bottom = 12.dp,
+            ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
         ) {
-            Text(
-                text = "🎉 Welcome!",
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold
+            Image(
+                painter = icon,
+                contentDescription = "Google Button",
+                modifier = Modifier.size(24.dp),
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = session.displayName ?: "User",
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.primary
+                text = if (isLoading) loadingText else text,
+                color = MaterialTheme.colorScheme.onSurface,
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = session.email ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            Text(
-                text = "You are now logged in!",
-                style = MaterialTheme.typography.bodyLarge
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Button(
-                onClick = onLogout,
-                modifier = Modifier.fillMaxWidth(0.6f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text("Sign Out")
-            }
         }
     }
 }

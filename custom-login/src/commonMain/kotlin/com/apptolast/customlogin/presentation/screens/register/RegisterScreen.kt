@@ -1,229 +1,181 @@
 package com.apptolast.customlogin.presentation.screens.register
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.apptolast.customlogin.presentation.screens.components.HeaderContent
-import org.jetbrains.compose.resources.DrawableResource
+import com.apptolast.customlogin.domain.model.UserSession
+import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
+import com.apptolast.customlogin.presentation.theme.RegisterScreenSlots
+import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.register_screen_register_button
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
-@Composable
-fun RegisterRoute(
-    viewModel: RegisterViewModel = koinViewModel(),
-    onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit
-) {
-    val uiState = viewModel.uiState.collectAsState().value
-
-    LaunchedEffect(uiState.user) {
-        if (uiState.user != null) {
-            onRegisterSuccess()
-        }
-    }
-
-    RegisterScreen(
-        appName = uiState.config.appName,
-        appSubtitle = uiState.config.subtitle,
-        drawableResource = uiState.config.drawableResource,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
-        onRegisterClick = viewModel::createUserWithEmail,
-        onNavigateToLogin = onNavigateToLogin
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * A composable function that represents the main entry point for the Register screen.
+ * It connects the ViewModel to the UI content and handles authentication success navigation.
+ *
+ * @param viewModel The [RegisterViewModel] instance for this screen.
+ * @param registerSlots An instance of [RegisterScreenSlots] to customize the UI components.
+ * @param onAuthSuccess A callback invoked upon successful authentication, providing the [UserSession].
+ * @param onNavigateToLogin A callback to navigate back to the login screen.
+ */
 @Composable
 fun RegisterScreen(
-    appName: String,
-    appSubtitle: String,
-    drawableResource: DrawableResource,
-    isLoading: Boolean,
-    errorMessage: String?,
-    onRegisterClick: (String, String, String, String) -> Unit,
+    viewModel: RegisterViewModel = koinViewModel(),
+    registerSlots: RegisterScreenSlots = RegisterScreenSlots(),
+    onAuthSuccess: (UserSession) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var confirmPassword by remember { mutableStateOf("") }
-    var isPasswordVisible by remember { mutableStateOf(false) }
-    var isConfirmVisible by remember { mutableStateOf(false) }
+    val uiState by viewModel.uiState.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .padding(top = 24.dp, start = 16.dp, end = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    with(uiState) {
+        LaunchedEffect(user) {
+            user?.let { onAuthSuccess(it) }
+        }
+
+        RegisterContent(
+            slots = registerSlots,
+            fullName = fullName,
+            email = email,
+            password = password,
+            confirmPassword = confirmPassword,
+            termsAccepted = termsAccepted,
+            fullNameError = fullNameError,
+            emailError = emailError,
+            passwordError = passwordError,
+            confirmPasswordError = confirmPasswordError,
+            errorMessage = errorMessage,
+            isLoading = isLoading,
+            onFullNameChange = viewModel::onFullNameChange,
+            onEmailChange = viewModel::onEmailChange,
+            onPasswordChange = viewModel::onPasswordChange,
+            onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
+            onTermsAcceptedChange = viewModel::onTermsAcceptedChange,
+            onRegisterClick = viewModel::createUserWithEmail,
+            onNavigateToLogin = onNavigateToLogin
+        )
+    }
+}
+
+/**
+ * A private composable that defines the layout and UI of the Register screen.
+ * It is stateless regarding business logic and receives all data and callbacks as parameters.
+ *
+ * @param slots The [RegisterScreenSlots] instance defining the UI components.
+ * @param fullName The current full name value.
+ * @param email The current email value.
+ * @param password The current password value.
+ * @param confirmPassword The current confirm password value.
+ * @param termsAccepted The current terms accepted value.
+ * @param fullNameError An optional error for the full name field.
+ * @param emailError An optional error for the email field.
+ * @param passwordError An optional error for the password field.
+ * @param confirmPasswordError An optional error for the confirm password field.
+ * @param errorMessage A general error message to display.
+ * @param isLoading A boolean indicating if a loading operation is in progress.
+ * @param onFullNameChange A callback for full name input changes.
+ * @param onEmailChange A callback for email input changes.
+ * @param onPasswordChange A callback for password input changes.
+ * @param onConfirmPasswordChange A callback for confirm password input changes.
+ * @param onTermsAcceptedChange A callback for terms accepted input changes.
+ * @param onRegisterClick A callback invoked when the register button is clicked.
+ * @param onNavigateToLogin A callback to navigate to the login screen.
+ */
+@Composable
+private fun RegisterContent(
+    slots: RegisterScreenSlots,
+    fullName: String,
+    email: String,
+    password: String,
+    confirmPassword: String,
+    termsAccepted: Boolean,
+    fullNameError: String?,
+    emailError: String?,
+    passwordError: String?,
+    confirmPasswordError: String?,
+    errorMessage: String?,
+    isLoading: Boolean,
+    onFullNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onConfirmPasswordChange: (String) -> Unit,
+    onTermsAcceptedChange: (Boolean) -> Unit,
+    onRegisterClick: () -> Unit,
+    onNavigateToLogin: () -> Unit
+) {
+
+    DefaultAuthContainer(
+        verticalArrangement = slots.layoutVerticalArrangement,
     ) {
+        slots.header()
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        HeaderContent(
-            drawableResource = drawableResource,
-            appName = appName,
-            appSubtitle = appSubtitle
+        slots.nameField(
+            fullName,
+            onFullNameChange,
+            fullNameError ?: errorMessage,
+            !isLoading
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        slots.emailField(
+            email,
+            onEmailChange,
+            emailError,
+            !isLoading
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        slots.passwordField(
+            password,
+            onPasswordChange,
+            passwordError,
+            !isLoading
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        slots.confirmPasswordField(
+            confirmPassword,
+            onConfirmPasswordChange,
+            confirmPasswordError,
+            !isLoading
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        slots.termsCheckbox(
+            termsAccepted,
+            onTermsAcceptedChange
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // FULL NAME
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Full name") },
-            leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Name") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
+        val isFormValid = fullName.isNotBlank() &&
+                email.isNotBlank() &&
+                password.isNotBlank() &&
+                confirmPassword.isNotBlank() &&
+                password == confirmPassword &&
+                termsAccepted
+
+        slots.submitButton(
+            onRegisterClick,
+            isLoading,
+            isFormValid && !isLoading,
+            stringResource(Res.string.register_screen_register_button)
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-        // EMAIL
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // PASSWORD
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password") },
-            trailingIcon = {
-                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                    Icon(
-                        imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = null
-                    )
-                }
-            },
-            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // CONFIRM PASSWORD
-        OutlinedTextField(
-            value = confirmPassword,
-            onValueChange = { confirmPassword = it },
-            label = { Text("Confirm password") },
-            leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Confirm Password") },
-            trailingIcon = {
-                IconButton(onClick = { isConfirmVisible = !isConfirmVisible }) {
-                    Icon(
-                        imageVector = if (isConfirmVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = null
-                    )
-                }
-            },
-            visualTransformation = if (isConfirmVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-        )
-
-        // Error
-        errorMessage?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                it,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // REGISTER BUTTON
-        Button(
-            onClick = { onRegisterClick(name.trim(), email.trim(), password, confirmPassword) },
-            modifier = Modifier.fillMaxWidth(),
-            enabled = !isLoading
-                    && email.isNotBlank()
-                    && password.isNotBlank()
-                    && confirmPassword.isNotBlank()
-                    && name.isNotBlank()
-                    && password == confirmPassword
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            } else {
-                Text("Register")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // LOGIN LINK
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = "Already have an account?",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            TextButton(onClick = onNavigateToLogin) {
-                Text("Login")
-            }
-        }
+        slots.loginLink(onNavigateToLogin)
     }
 }
