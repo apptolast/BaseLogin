@@ -3,6 +3,7 @@ package com.apptolast.customlogin.presentation.screens.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.domain.model.SocialProvider
 import com.apptolast.customlogin.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +33,30 @@ class LoginViewModel(
      */
     fun onPasswordChange(password: String) {
         _uiState.update { it.copy(password = password, passwordError = null, errorMessage = null) }
+    }
+
+    /**
+     * Handles social sign-in for different providers.
+     * @param provider The social provider to sign in with.
+     */
+    fun onSocialSignIn(provider: SocialProvider) {
+        when (provider) {
+            is SocialProvider.Google -> signInWithGoogle()
+            is SocialProvider.Phone -> signInWithPhone()
+            is SocialProvider.Custom -> signInWithCustom(provider.id)
+        }
+    }
+
+    private fun signInWithGoogle() {
+        // TODO: Implement Google sign-in logic
+    }
+
+    private fun signInWithPhone() {
+        // TODO: Implement Phone sign-in logic
+    }
+
+    private fun signInWithCustom(id: String) {
+        // TODO: Implement custom sign-in logic for $id
     }
 
     /**

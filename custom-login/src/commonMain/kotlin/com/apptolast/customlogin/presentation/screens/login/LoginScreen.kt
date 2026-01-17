@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.apptolast.customlogin.domain.model.SocialProvider
 import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.theme.LoginScreenSlots
@@ -53,6 +54,7 @@ fun LoginScreen(
             onEmailChange = viewModel::onEmailChange,
             onPasswordChange = viewModel::onPasswordChange,
             onLoginClick = viewModel::signInWithEmail,
+            onSocialProviderClick = viewModel::onSocialSignIn,
             onNavigateToRegister = onNavigateToRegister,
             onNavigateToForgotPassword = onNavigateToResetPassword
         )
@@ -73,6 +75,7 @@ fun LoginScreen(
  * @param onEmailChange A callback for email input changes.
  * @param onPasswordChange A callback for password input changes.
  * @param onLoginClick A callback invoked when the login button is clicked.
+ * @param onSocialProviderClick A callback invoked when a social provider button is clicked.
  * @param onNavigateToRegister A callback to navigate to the registration screen.
  * @param onNavigateToForgotPassword A callback to navigate to the reset password screen.
  */
@@ -88,6 +91,7 @@ private fun LoginContent(
     onEmailChange: (String) -> Unit = {},
     onPasswordChange: (String) -> Unit = {},
     onLoginClick: () -> Unit = {},
+    onSocialProviderClick: (SocialProvider) -> Unit = {},
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},
 ) {
@@ -129,7 +133,7 @@ private fun LoginContent(
             onLoginClick,
         )
 
-        slots.socialProviders?.invoke { /* onProviderClick */ }
+        slots.socialProviders?.let { it(onSocialProviderClick) }
 
         slots.registerLink(onNavigateToRegister)
     }

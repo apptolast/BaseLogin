@@ -54,6 +54,9 @@ import login.composeapp.generated.resources.home_screen_welcome
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -78,7 +81,7 @@ fun HomeScreen(
                 actions = {
                     IconButton(onClick = viewModel::signOut) {
                         Icon(
-                            Icons.AutoMirrored.Filled.Logout,
+                            imageVector = Icons.AutoMirrored.Filled.Logout,
                             contentDescription = stringResource(Res.string.home_screen_sign_out_button)
                         )
                     }

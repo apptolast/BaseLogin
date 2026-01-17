@@ -2,6 +2,7 @@ package com.apptolast.customlogin.presentation.theme
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
+import com.apptolast.customlogin.domain.model.SocialProvider
 import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultForgotPasswordDescription
 import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultForgotPasswordHeader
 import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultForgotPasswordLink
@@ -13,6 +14,7 @@ import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultResetPas
 import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultSubmitButton
 import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultSuccessContent
 import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultTermsCheckbox
+import com.apptolast.customlogin.presentation.theme.defaultslots.SocialLoginButtonsSection
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.register_screen_confirm_password_label
 import login.custom_login.generated.resources.reset_password_screen_confirm_new_password_label
@@ -66,7 +68,9 @@ data class LoginScreenSlots(
             onClick = onClick,
         )
     },
-    val socialProviders: (@Composable (onProviderClick: (String) -> Unit) -> Unit)? = null, // TODO: El provider no puede ser un String, tiene que ser de un type (sealed class)
+    val socialProviders: (@Composable ((SocialProvider) -> Unit) -> Unit)? = { onProviderClick ->
+        SocialLoginButtonsSection(onProviderClick = onProviderClick)
+    },
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
         DefaultForgotPasswordLink(onForgotPasswordClick = onClick)
     },
