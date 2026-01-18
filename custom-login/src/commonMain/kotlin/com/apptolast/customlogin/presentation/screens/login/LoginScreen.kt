@@ -1,11 +1,28 @@
 package com.apptolast.customlogin.presentation.screens.login
 
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.domain.model.SocialProvider
@@ -38,26 +55,82 @@ fun LoginScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     with(uiState) {
         LaunchedEffect(user) {
             user?.let { onAuthSuccess(it) }
         }
 
-        LoginContent(
-            slots = loginSlots,
-            email = email,
-            password = password,
-            isLoading = isLoading,
-            emailError = emailError,
-            passwordError = passwordError,
-            errorMessage = errorMessage,
-            onEmailChange = viewModel::onEmailChange,
-            onPasswordChange = viewModel::onPasswordChange,
-            onLoginClick = viewModel::signInWithEmail,
-            onSocialProviderClick = viewModel::onSocialSignIn,
-            onNavigateToRegister = onNavigateToRegister,
-            onNavigateToForgotPassword = onNavigateToResetPassword
-        )
+        LaunchedEffect(errorMessage) {
+            errorMessage?.let {
+                snackbarHostState.showSnackbar(
+                    message = it,
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Indefinite
+                )
+            }
+        }
+
+        Scaffold(snackbarHost = {
+            SnackbarHost(snackbarHostState) { snackBarData ->
+                CustomSnackBar(
+                    snackBarText = snackBarData.visuals.message,
+                    onDismiss = {
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        viewModel.onErrorMessageDismiss()
+                    }
+                )
+            }
+        }) {
+            LoginContent(
+                slots = loginSlots,
+                email = email,
+                password = password,
+                isLoading = isLoading,
+                emailError = emailError,
+                passwordError = passwordError,
+                errorMessage = errorMessage,
+                onEmailChange = viewModel::onEmailChange,
+                onPasswordChange = viewModel::onPasswordChange,
+                onLoginClick = viewModel::signInWithEmail,
+                onSocialProviderClick = viewModel::onSocialSignIn,
+                onNavigateToRegister = onNavigateToRegister,
+                onNavigateToForgotPassword = onNavigateToResetPassword,
+            )
+        }
+    }
+}
+
+@Composable
+private fun CustomSnackBar(
+    snackBarText: String,
+    onDismiss: () -> Unit,
+) {
+    Snackbar(
+        containerColor = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        action = {
+            IconButton(onClick = onDismiss) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        }
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = snackBarText)
+        }
     }
 }
 
@@ -96,9 +169,7 @@ private fun LoginContent(
     onNavigateToForgotPassword: () -> Unit = {},
 ) {
 
-    DefaultAuthContainer(
-        verticalArrangement = slots.layoutVerticalArrangement,
-    ) {
+    DefaultAuthContainer {
 
         slots.header()
 
@@ -107,7 +178,7 @@ private fun LoginContent(
         slots.emailField(
             email,
             onEmailChange,
-            emailError ?: errorMessage,
+            emailError,
             !isLoading
         )
 

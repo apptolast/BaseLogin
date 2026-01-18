@@ -193,10 +193,7 @@ private fun ProfileContent(
                     title = "Detalles de cuenta",
                     subtitle = "Gestiona tus datos"
                 )
-                HorizontalDivider(
-                    modifier =
-                        Modifier.padding(vertical = 8.dp), thickness = 0.5.dp
-                )
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
                 ProfileOptionItem(
                     icon =
                         Icons.Default.Settings,

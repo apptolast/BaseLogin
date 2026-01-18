@@ -36,6 +36,13 @@ class LoginViewModel(
     }
 
     /**
+     * Clears the general error message from the UI state.
+     */
+    fun onErrorMessageDismiss() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
+
+    /**
      * Handles social sign-in for different providers.
      * @param provider The social provider to sign in with.
      */

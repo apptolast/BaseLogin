@@ -27,7 +27,6 @@ import org.jetbrains.compose.resources.stringResource
  * Default implementations are provided for convenience.
  */
 data class LoginScreenSlots(
-    val layoutVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     val header: @Composable () -> Unit = { DefaultHeader() },
     val emailField: @Composable (
         value: String,
@@ -68,7 +67,7 @@ data class LoginScreenSlots(
             onClick = onClick,
         )
     },
-    val socialProviders: (@Composable ((SocialProvider) -> Unit) -> Unit)? = { onProviderClick ->
+    val socialProviders: (@Composable (isLoading: (SocialProvider) -> Unit) -> Unit)? = { onProviderClick ->
         SocialLoginButtonsSection(onProviderClick = onProviderClick)
     },
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->

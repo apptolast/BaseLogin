@@ -30,8 +30,7 @@ fun DefaultAuthContainer(
         modifier = modifier
             .fillMaxSize()
             .imePadding()
-            .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = verticalArrangement,
         content = content
