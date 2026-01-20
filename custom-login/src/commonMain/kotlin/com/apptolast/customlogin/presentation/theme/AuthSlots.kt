@@ -67,7 +67,7 @@ data class LoginScreenSlots(
             onClick = onClick,
         )
     },
-    val socialProviders: (@Composable (isLoading: (SocialProvider) -> Unit) -> Unit)? = { onProviderClick ->
+    val socialProviders: (@Composable (onProviderClick: (SocialProvider) -> Unit) -> Unit)? = { onProviderClick ->
         SocialLoginButtonsSection(onProviderClick = onProviderClick)
     },
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
