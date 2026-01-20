@@ -1,0 +1,48 @@
+<resources>
+    <!-- Common -->
+    <string name="common_error">Error</string>
+    <string name="common_email_label">Email</string>
+    <string name="common_password_label">Password</string>
+    <string name="common_full_name_label">Full Name</string>
+    <string name="common_continue_button">Continue</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_show_password">Show password</string>
+    <string name="cd_hide_password">Hide password</string>
+    <string name="cd_navigate_back">Back</string>
+
+    <!-- Login Screen -->
+    <string name="login_screen_sign_in_button">Sign In</string>
+    <string name="login_screen_forgot_password_link">Forgot Password?</string>
+    <string name="login_screen_no_account_text">Don't have an account?</string>
+    <string name="login_screen_sign_up_link">Sign Up</string>
+    <string name="login_google_button">Sign in with Google</string>
+    <string name="login_loading_text"> "Signing in..."</string>
+
+    <!-- Register Screen -->
+    <string name="register_screen_register_button">Register</string>
+    <string name="register_screen_confirm_password_label">Confirm Password</string>
+    <string name="register_screen_terms_prefix">I agree to the</string>
+    <string name="register_screen_terms_and_conditions">Terms &amp; Conditions</string>
+    <string name="register_screen_terms_conjunction">and</string>
+    <string name="register_screen_privacy_policy">Privacy Policy</string>
+    <string name="register_screen_already_have_account_text">Already have an account?</string>
+    <string name="register_screen_sign_in_link">Sign In</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_screen_title">Forgot Password</string>
+    <string name="forgot_password_screen_description">Enter your email address and we'll send you a link to reset your password.</string>
+    <string name="forgot_password_screen_send_button">Send Reset Link</string>
+    <string name="forgot_password_screen_success_title">Check Your Inbox</string>
+    <string name="forgot_password_screen_success_description">We've sent a password reset link to your email address.</string>
+
+    <!-- Reset Password Screen -->
+    <string name="reset_password_screen_title">Create New Password</string>
+    <string name="reset_password_screen_new_password_label">New Password</string>
+    <string name="reset_password_screen_confirm_new_password_label">Confirm New Password</string>
+    <string name="reset_password_screen_description">Your new password must be different from previously used passwords.</string>
+    <string name="reset_password_screen_reset_button">Reset Password</string>
+    <string name="reset_password_screen_success_title">Password Reset!</string>
+    <string name="reset_password_screen_success_description">You can now use your new password to log in to your account.</string>
+
+</resources>

@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 /**
  * Credentials used for authentication.
  */
+//FIXME: Check if we really need this class
 sealed interface Credentials {
     /**
      * Email and password authentication.

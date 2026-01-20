@@ -3,6 +3,9 @@ package com.apptolast.customlogin.presentation.navigation
 import kotlinx.serialization.Serializable
 
 @Serializable
+data object AuthRoutesFlow
+
+@Serializable
 data object WelcomeRoute
 
 @Serializable
@@ -15,4 +18,4 @@ data object RegisterRoute
 data object ForgotPasswordRoute
 
 @Serializable
-data class ResetPasswordRoute(val code: String = "")
+data class ResetPasswordRoute(val resetCode: String)

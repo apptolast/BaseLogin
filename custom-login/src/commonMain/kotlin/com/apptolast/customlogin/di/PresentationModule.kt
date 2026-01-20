@@ -10,7 +10,7 @@ import org.koin.dsl.module
 /**
  * Koin module for authentication-related presentation layer.
  */
-val presentationModule = module {
+internal val presentationModule = module {
     viewModelOf(::LoginViewModel)
     viewModelOf(::RegisterViewModel)
     viewModelOf(::ForgotPasswordViewModel)

@@ -234,7 +234,7 @@ class FirebaseAuthProvider(
                 providerId = PROVIDER_ID,
                 accessToken = accessToken ?: getIdToken(false),
                 refreshToken = null, // Firebase manages refresh internally
-                expiresAt = null
+                expiresAt = null,
             )
         } catch (e: Exception) {
             null
@@ -244,6 +244,7 @@ class FirebaseAuthProvider(
     /**
      * Convert FirebaseAuthException to AuthError.
      */
+//        FIXME:
     private fun FirebaseAuthException.toAuthError(): AuthError {
         val errorMessage = message ?: "Authentication error"
         return when {

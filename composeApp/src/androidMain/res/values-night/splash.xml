@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash Screen Theme (Night Mode) -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Background color for dark mode -->
+        <item name="windowSplashScreenBackground">#C1E1F1</item>
+        <!-- Splash screen icon -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <!-- Icon background -->
+        <item name="windowSplashScreenIconBackgroundColor">#C1E1F1</item>
+        <!-- Theme to apply after splash screen dismisses -->
+        <item name="postSplashScreenTheme">@style/Theme.AppCompat.Light.NoActionBar</item>
+    </style>
+</resources>
