@@ -25,15 +25,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.apptolast.customlogin.domain.model.SocialProvider
+import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.presentation.navigation.AuthRoutesFlow
 import com.apptolast.customlogin.presentation.navigation.LoginRoute
 import com.apptolast.customlogin.presentation.navigation.NavTransitions
 import com.apptolast.customlogin.presentation.navigation.authRoutesFlow
-import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
-import com.apptolast.customlogin.presentation.theme.LoginScreenSlots
-import com.apptolast.customlogin.presentation.theme.defaultslots.PhoneSocialButton
+import com.apptolast.customlogin.presentation.slots.AuthScreenSlots
+import com.apptolast.customlogin.presentation.slots.LoginScreenSlots
+import com.apptolast.customlogin.presentation.slots.defaultslots.GoogleSocialButton
+import com.apptolast.customlogin.presentation.slots.defaultslots.PhoneSocialButton
 import com.apptolast.login.home.navigation.HomeRoute
 import com.apptolast.login.home.navigation.HomeRoutesFlow
 import com.apptolast.login.home.presentation.home.ProfileScreen
@@ -84,8 +85,7 @@ fun App(splashViewModel: SplashViewModel? = koinViewModel()) {
                     navController = navController,
                     startDestination = LoginRoute,
 //                    slots = createCustomSlots(),
-                    onAuthSuccess = { userSession ->
-                        currentSession = userSession
+                    onNavigateToHome = {
                         navController.navigate(HomeRoutesFlow) {
                             popUpTo(AuthRoutesFlow) { inclusive = true }
                         }
@@ -94,7 +94,7 @@ fun App(splashViewModel: SplashViewModel? = koinViewModel()) {
 
                 homeRoutesFlow(
                     userSession = currentSession,
-                    onLogoutSuccess = {
+                    onNavigateToAuth = {
                         navController.navigate(AuthRoutesFlow) {
                             popUpTo(HomeRoutesFlow) { inclusive = true }
                         }
@@ -105,13 +105,13 @@ fun App(splashViewModel: SplashViewModel? = koinViewModel()) {
     }
 }
 
-private fun NavGraphBuilder.homeRoutesFlow(userSession: UserSession?, onLogoutSuccess: () -> Unit) {
+private fun NavGraphBuilder.homeRoutesFlow(userSession: UserSession?, onNavigateToAuth: () -> Unit) {
     navigation<HomeRoutesFlow>(
         startDestination = HomeRoute
     ) {
         composable<HomeRoute> {
             ProfileScreen(
-                onNavigateToAuth = onLogoutSuccess,
+                onNavigateToAuth = onNavigateToAuth,
             )
         }
     }
@@ -124,14 +124,9 @@ private fun createCustomSlots() = AuthScreenSlots(
     login = LoginScreenSlots(
         socialProviders = { onProviderClick ->
             Column {
-                MyCustomSubmitButton(
-                    text = "Custom Button",
-                    enabled = false,
-                    isLoading = false,
-                    onClick = onProviderClick,
-                )
+                GoogleSocialButton { onProviderClick(IdentityProvider.Google) }
                 Spacer(Modifier.height(8.dp))
-                PhoneSocialButton { onProviderClick(SocialProvider.Phone) }
+                PhoneSocialButton { onProviderClick(IdentityProvider.Phone) }
             }
         }
     )
@@ -146,21 +141,21 @@ fun MyCustomSubmitButton(
     text: String,
     enabled: Boolean,
     isLoading: Boolean,
-    onClick: (SocialProvider) -> Unit,
+    onClick: () -> Unit,
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth(0.7f)
             .clickable(
                 enabled = !isLoading,
-                onClick = { onClick(SocialProvider.Google) },
+                onClick = onClick,
             )
             .padding(vertical = 16.dp),
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surface,
     ) {
         Button(
-            onClick = { onClick(SocialProvider.Google) },
+            onClick = onClick,
             modifier = Modifier.fillMaxWidth(0.7f),
             enabled = enabled && !isLoading,
             shape = MaterialTheme.shapes.small,

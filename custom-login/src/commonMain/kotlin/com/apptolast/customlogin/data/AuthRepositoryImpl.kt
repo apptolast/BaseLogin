@@ -1,12 +1,13 @@
-package com.apptolast.customlogin.data.repository
+package com.apptolast.customlogin.data
 
+import com.apptolast.customlogin.domain.AuthProvider
+import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
+import com.apptolast.customlogin.domain.model.PasswordResetData
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.domain.model.UserSession
-import com.apptolast.customlogin.domain.provider.AuthProvider
-import com.apptolast.customlogin.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -31,30 +32,12 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun signInWithEmail(email: String, password: String): AuthResult {
-        return authProvider.signIn(Credentials.EmailPassword(email, password))
-    }
-
     override suspend fun signIn(credentials: Credentials): AuthResult {
         return authProvider.signIn(credentials)
     }
 
     override suspend fun signUp(data: SignUpData): AuthResult {
         return authProvider.signUp(data)
-    }
-
-    override suspend fun createUserWithEmail(
-        email: String,
-        password: String,
-        displayName: String?
-    ): AuthResult {
-        return authProvider.signUp(
-            SignUpData(
-                email = email,
-                password = password,
-                displayName = displayName
-            )
-        )
     }
 
     override suspend fun signOut(): Result<Unit> {
@@ -65,8 +48,8 @@ class AuthRepositoryImpl(
         return authProvider.sendPasswordResetEmail(email)
     }
 
-    override suspend fun confirmPasswordReset(code: String, newPassword: String): AuthResult {
-        return authProvider.confirmPasswordReset(code, newPassword)
+    override suspend fun confirmPasswordReset(data: PasswordResetData): AuthResult {
+        return authProvider.confirmPasswordReset(data.code, data.newPassword)
     }
 
     override suspend fun refreshSession(): AuthResult {

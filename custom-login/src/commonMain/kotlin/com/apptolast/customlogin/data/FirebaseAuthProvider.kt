@@ -1,15 +1,20 @@
-package com.apptolast.customlogin.data.provider
+package com.apptolast.customlogin.data
 
+import com.apptolast.customlogin.domain.AuthProvider
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
+import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.domain.model.UserSession
-import com.apptolast.customlogin.domain.provider.AuthProvider
+import com.apptolast.customlogin.getSocialIdToken
+import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseAuthException
 import dev.gitlive.firebase.auth.FirebaseUser
+import dev.gitlive.firebase.auth.GithubAuthProvider
+import dev.gitlive.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -27,7 +32,7 @@ class FirebaseAuthProvider(
     override suspend fun signIn(credentials: Credentials): AuthResult {
         return when (credentials) {
             is Credentials.EmailPassword -> signInWithEmail(credentials)
-            is Credentials.OAuthToken -> signInWithOAuth(credentials)
+            is Credentials.OAuthToken -> signInWithOAuth(credentials.provider)
             is Credentials.RefreshToken -> refreshSession()
         }
     }
@@ -48,11 +53,20 @@ class FirebaseAuthProvider(
         }
     }
 
-    private suspend fun signInWithOAuth(credentials: Credentials.OAuthToken): AuthResult {
+    private suspend fun signInWithOAuth(provider: IdentityProvider): AuthResult {
         return try {
-            // For OAuth tokens (Google, Apple, etc.), we need to create credentials
-            // This requires platform-specific handling through expect/actual
-            AuthResult.Failure(AuthError.OperationNotAllowed("OAuth sign-in requires platform-specific implementation"))
+            val idToken = getSocialIdToken(provider)
+                ?: return AuthResult.Failure(AuthError.Unknown("Social sign-in cancelled or failed."))
+
+            val credential = provider.toCredential(idToken)
+                ?: return AuthResult.Failure(AuthError.OperationNotAllowed("Provider not supported: ${provider.id}"))
+
+            val result = firebaseAuth.signInWithCredential(credential)
+            result.user?.toUserSession()?.let { session ->
+                AuthResult.Success(session)
+            } ?: AuthResult.Failure(AuthError.Unknown("No user returned after social sign in"))
+        } catch (e: FirebaseAuthException) {
+            AuthResult.Failure(e.toAuthError())
         } catch (e: Exception) {
             AuthResult.Failure(AuthError.Unknown(e.message ?: "OAuth sign in failed", e))
         }
@@ -103,8 +117,7 @@ class FirebaseAuthProvider(
     override suspend fun confirmPasswordReset(code: String, newPassword: String): AuthResult {
         return try {
             firebaseAuth.confirmPasswordReset(code, newPassword)
-            // After confirming, user needs to sign in again
-            AuthResult.PasswordResetSent
+            AuthResult.PasswordResetSuccess
         } catch (e: FirebaseAuthException) {
             AuthResult.Failure(e.toAuthError())
         } catch (e: Exception) {
@@ -199,24 +212,14 @@ class FirebaseAuthProvider(
     }
 
     override suspend fun reauthenticate(credentials: Credentials): AuthResult {
-        return when (credentials) {
-            is Credentials.EmailPassword -> {
-                try {
-                    val user = firebaseAuth.currentUser
-                        ?: return AuthResult.Failure(AuthError.SessionExpired())
-                    // Re-sign in the user
-                    firebaseAuth.signInWithEmailAndPassword(credentials.email, credentials.password)
-                    user.toUserSession()?.let { session ->
-                        AuthResult.Success(session)
-                    } ?: AuthResult.Failure(AuthError.Unknown("Reauthentication failed"))
-                } catch (e: FirebaseAuthException) {
-                    AuthResult.Failure(e.toAuthError())
-                } catch (e: Exception) {
-                    AuthResult.Failure(AuthError.Unknown(e.message ?: "Reauthentication failed", e))
-                }
-            }
+        return AuthResult.Failure(AuthError.OperationNotAllowed("Reauthentication not implemented in this provider"))
+    }
 
-            else -> AuthResult.Failure(AuthError.OperationNotAllowed("Unsupported credentials for reauthentication"))
+    private fun IdentityProvider.toCredential(idToken: String): AuthCredential? {
+        return when (this) {
+            is IdentityProvider.Google -> GoogleAuthProvider.credential(idToken, null)
+            is IdentityProvider.GitHub -> GithubAuthProvider.credential(idToken)
+            else -> null // Apple, Facebook, Phone have different flows
         }
     }
 
@@ -241,10 +244,6 @@ class FirebaseAuthProvider(
         }
     }
 
-    /**
-     * Convert FirebaseAuthException to AuthError.
-     */
-//        FIXME:
     private fun FirebaseAuthException.toAuthError(): AuthError {
         val errorMessage = message ?: "Authentication error"
         return when {

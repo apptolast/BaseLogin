@@ -1,10 +1,9 @@
 package com.apptolast.customlogin.di
 
-import com.apptolast.customlogin.data.provider.FirebaseAuthProvider
-import com.apptolast.customlogin.data.repository.AuthRepositoryImpl
-import com.apptolast.customlogin.domain.provider.AuthProvider
-import com.apptolast.customlogin.domain.provider.AuthProviderRegistry
-import com.apptolast.customlogin.domain.repository.AuthRepository
+import com.apptolast.customlogin.data.FirebaseAuthProvider
+import com.apptolast.customlogin.data.AuthRepositoryImpl
+import com.apptolast.customlogin.domain.AuthProvider
+import com.apptolast.customlogin.domain.AuthRepository
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
 import org.koin.dsl.module
@@ -19,13 +18,6 @@ internal val dataModule = module {
 
     // Firebase Auth Provider
     single<AuthProvider> { FirebaseAuthProvider(get()) }
-
-    // Register provider in registry
-    single {
-        AuthProviderRegistry.apply {
-            register(get<AuthProvider>(), isDefault = true)
-        }
-    }
 
     // Auth Repository using the default provider
     single<AuthRepository> { AuthRepositoryImpl(get()) }

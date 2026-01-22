@@ -1,39 +1,29 @@
-package com.apptolast.customlogin.domain.repository
+package com.apptolast.customlogin.domain
 
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.SignUpData
-import com.apptolast.customlogin.domain.model.UserSession
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Repository interface for authentication operations.
- * This abstraction allows the library to work with any authentication provider.
+ * Interface for authentication providers.
+ * Implement this interface to add support for different auth backends
+ * (Firebase, Supabase, custom backend, etc.)
  */
-interface AuthRepository {
+interface AuthProvider {
     /**
-     * Current provider ID being used.
+     * Unique identifier for this provider.
      */
-    val currentProviderId: String
+    val id: String
 
     /**
-     * Observe authentication state changes.
+     * Display name for UI purposes.
      */
-    fun observeAuthState(): Flow<AuthState>
+    val displayName: String
 
     /**
-     * Get the current user session, if authenticated.
-     */
-    suspend fun getCurrentSession(): UserSession?
-
-    /**
-     * Sign in with email and password.
-     */
-    suspend fun signInWithEmail(email: String, password: String): AuthResult
-
-    /**
-     * Sign in with any supported credentials.
+     * Sign in with the given credentials.
      */
     suspend fun signIn(credentials: Credentials): AuthResult
 
@@ -41,15 +31,6 @@ interface AuthRepository {
      * Create a new user account.
      */
     suspend fun signUp(data: SignUpData): AuthResult
-
-    /**
-     * Create a new user account with email/password.
-     */
-    suspend fun createUserWithEmail(
-        email: String,
-        password: String,
-        displayName: String? = null
-    ): AuthResult
 
     /**
      * Sign out the current user.
@@ -62,9 +43,14 @@ interface AuthRepository {
     suspend fun sendPasswordResetEmail(email: String): AuthResult
 
     /**
-     * Confirm password reset with verification code.
+     * Confirm password reset with code and new password.
      */
     suspend fun confirmPasswordReset(code: String, newPassword: String): AuthResult
+
+    /**
+     * Observe authentication state changes.
+     */
+    fun observeAuthState(): Flow<AuthState>
 
     /**
      * Refresh the current session.
@@ -72,17 +58,17 @@ interface AuthRepository {
     suspend fun refreshSession(): AuthResult
 
     /**
-     * Check if user is currently signed in.
+     * Check if a user is currently signed in.
      */
     suspend fun isSignedIn(): Boolean
 
     /**
-     * Get the current user's ID token for backend verification.
+     * Get the current user's ID token (for backend verification).
      */
     suspend fun getIdToken(forceRefresh: Boolean = false): String?
 
     /**
-     * Delete the current user's account.
+     * Delete the current user account.
      */
     suspend fun deleteAccount(): Result<Unit>
 
@@ -102,7 +88,12 @@ interface AuthRepository {
     suspend fun updatePassword(newPassword: String): Result<Unit>
 
     /**
-     * Send email verification to the current user.
+     * Send email verification.
      */
     suspend fun sendEmailVerification(): Result<Unit>
+
+    /**
+     * Re-authenticate the user (required before sensitive operations).
+     */
+    suspend fun reauthenticate(credentials: Credentials): AuthResult
 }

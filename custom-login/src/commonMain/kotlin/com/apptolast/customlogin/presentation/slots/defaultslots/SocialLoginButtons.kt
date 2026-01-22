@@ -1,4 +1,4 @@
-package com.apptolast.customlogin.presentation.theme.defaultslots
+package com.apptolast.customlogin.presentation.slots.defaultslots
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -21,7 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.dp
-import com.apptolast.customlogin.domain.model.SocialProvider
+import com.apptolast.customlogin.domain.model.IdentityProvider
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.google_icon
 import login.custom_login.generated.resources.login_google_button
@@ -36,7 +36,7 @@ import org.jetbrains.compose.resources.stringResource
  * @param content The composable content of the button.
  */
 data class SocialLoginButton(
-    val provider: SocialProvider,
+    val provider: IdentityProvider,
     val content: @Composable (onClick: () -> Unit) -> Unit
 )
 
@@ -47,7 +47,7 @@ data class SocialLoginButton(
  * @param onProviderClick A callback invoked when a social provider button is clicked.
  */
 @Composable
-fun SocialLoginButtonsSection(onProviderClick: (SocialProvider) -> Unit) {
+fun SocialLoginButtonsSection(onProviderClick: (IdentityProvider) -> Unit) {
     val socialButtons = defaultSocialLoginButtons()
 
     LazyColumn(
@@ -69,11 +69,11 @@ fun SocialLoginButtonsSection(onProviderClick: (SocialProvider) -> Unit) {
 @Composable
 fun defaultSocialLoginButtons(): List<SocialLoginButton> = listOf(
     SocialLoginButton(
-        provider = SocialProvider.Google,
+        provider = IdentityProvider.Google,
         content = { onClick -> GoogleSocialButton(onClick = onClick) }
     ),
     SocialLoginButton(
-        provider = SocialProvider.Phone,
+        provider = IdentityProvider.Phone,
         content = { onClick -> PhoneSocialButton(onClick = onClick) }
     )
 )

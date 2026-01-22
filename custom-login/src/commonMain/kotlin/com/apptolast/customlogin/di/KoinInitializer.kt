@@ -10,13 +10,11 @@ import org.koin.dsl.KoinAppDeclaration
  */
 fun initLoginKoin(appDeclaration: KoinAppDeclaration? = null) {
     startKoin {
-        // Platform-specific configuration (optional)
         appDeclaration?.invoke(this)
 
         modules(
             dataModule,
             presentationModule,
-//            configModule(config),
         )
     }
 }

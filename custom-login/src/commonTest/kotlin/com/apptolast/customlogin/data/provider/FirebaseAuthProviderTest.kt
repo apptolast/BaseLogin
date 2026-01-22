@@ -1,8 +1,8 @@
 package com.apptolast.customlogin.data.provider
 
+import com.apptolast.customlogin.data.FirebaseAuthProvider
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
-import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseUser
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest

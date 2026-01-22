@@ -1,4 +1,4 @@
-package com.apptolast.customlogin.presentation.theme.defaultslots
+package com.apptolast.customlogin.presentation.slots.defaultslots
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

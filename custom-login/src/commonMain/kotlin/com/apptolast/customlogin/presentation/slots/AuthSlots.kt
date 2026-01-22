@@ -1,20 +1,23 @@
-package com.apptolast.customlogin.presentation.theme
+package com.apptolast.customlogin.presentation.slots
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
-import com.apptolast.customlogin.domain.model.SocialProvider
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultForgotPasswordDescription
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultForgotPasswordHeader
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultForgotPasswordLink
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultHeader
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultLoginLink
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultRegisterLink
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultResetPasswordDescription
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultResetPasswordHeader
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultSubmitButton
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultSuccessContent
-import com.apptolast.customlogin.presentation.theme.defaultslots.DefaultTermsCheckbox
-import com.apptolast.customlogin.presentation.theme.defaultslots.SocialLoginButtonsSection
+import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultEmailField
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordDescription
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordHeader
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordLink
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultHeader
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultLoginLink
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultNameField
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultPasswordField
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultRegisterLink
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultResetPasswordDescription
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultResetPasswordHeader
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultSubmitButton
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultSuccessContent
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultTermsCheckbox
+import com.apptolast.customlogin.presentation.slots.defaultslots.SocialLoginButtonsSection
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.register_screen_confirm_password_label
 import login.custom_login.generated.resources.reset_password_screen_confirm_new_password_label
@@ -67,7 +70,7 @@ data class LoginScreenSlots(
             onClick = onClick,
         )
     },
-    val socialProviders: (@Composable (onProviderClick: (SocialProvider) -> Unit) -> Unit)? = { onProviderClick ->
+    val socialProviders: (@Composable (onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { onProviderClick ->
         SocialLoginButtonsSection(onProviderClick = onProviderClick)
     },
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->

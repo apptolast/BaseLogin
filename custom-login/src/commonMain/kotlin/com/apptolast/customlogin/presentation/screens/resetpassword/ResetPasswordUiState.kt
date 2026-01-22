@@ -9,8 +9,6 @@ package com.apptolast.customlogin.presentation.screens.resetpassword
  * @property passwordError An optional error message for the new password field.
  * @property confirmPasswordError An optional error message for the confirm password field.
  * @property isLoading Indicates if a request is in progress.
- * @property isPasswordReset Indicates if the password has been reset successfully.
- * @property errorMessage A general error message to display.
  */
 data class ResetPasswordUiState(
     val resetCode: String = "",
@@ -18,7 +16,5 @@ data class ResetPasswordUiState(
     val confirmPassword: String = "",
     val passwordError: String? = null,
     val confirmPasswordError: String? = null,
-    val isLoading: Boolean = false,
-    val isPasswordReset: Boolean = false,
-    val errorMessage: String? = null
+    val isLoading: Boolean = false
 )

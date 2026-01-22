@@ -2,6 +2,7 @@ package com.apptolast.customlogin.presentation.screens.resetpassword
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -10,17 +11,25 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
-import com.apptolast.customlogin.presentation.theme.ResetPasswordScreenSlots
+import com.apptolast.customlogin.presentation.slots.ResetPasswordScreenSlots
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.reset_password_screen_reset_button
@@ -36,80 +45,45 @@ import org.koin.compose.viewmodel.koinViewModel
  * @param viewModel The [ResetPasswordViewModel] for this screen.
  * @param resetPasswordSlots An instance of [ResetPasswordScreenSlots] to customize the UI.
  * @param onNavigateBack A callback to navigate to the previous screen.
- * @param onSuccess A callback invoked upon successful password reset.
+ * @param onNavigateToLogin A callback to navigate to the login screen after a successful reset.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResetPasswordScreen(
     resetCode: String = "",
     viewModel: ResetPasswordViewModel = koinViewModel(),
     resetPasswordSlots: ResetPasswordScreenSlots = ResetPasswordScreenSlots(),
     onNavigateBack: () -> Unit,
-    onSuccess: () -> Unit = onNavigateBack
+    onNavigateToLogin: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var isSuccess by remember { mutableStateOf(false) }
 
-    with(uiState) {
-
-        LaunchedEffect(resetCode) {
-            if (resetCode.isNotBlank()) {
-                viewModel.setResetCode(resetCode)
-            }
+    LaunchedEffect(resetCode) {
+        if (resetCode.isNotBlank()) {
+            viewModel.setResetCode(resetCode)
         }
-
-        LaunchedEffect(isPasswordReset) {
-            if (isPasswordReset) {
-                delay(2000)
-                onSuccess()
-            }
-        }
-
-        ResetPasswordContent(
-            slots = resetPasswordSlots,
-            isPasswordReset = isPasswordReset,
-            isLoading = isLoading,
-            newPassword = newPassword,
-            confirmPassword = confirmPassword,
-            passwordError = passwordError,
-            confirmPasswordError = confirmPasswordError,
-            onNewPasswordChange = viewModel::onNewPasswordChange,
-            onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
-            onResetClick = viewModel::resetPassword,
-            onNavigateBack = onNavigateBack
-        )
     }
-}
 
-/**
- * A private composable that defines the layout and UI for the Reset Password screen.
- * It is stateless regarding business logic and field states, receiving all data and callbacks.
- *
- * @param slots The [ResetPasswordScreenSlots] defining the UI components.
- * @param isPasswordReset A flag indicating if the password reset is complete.
- * @param isLoading A flag indicating if the screen is currently loading.
- * @param newPassword The current password input value.
- * @param confirmPassword The current confirm password input value.
- * @param passwordError An optional error message for the password input.
- * @param confirmPasswordError An optional error message for the confirm password input.
- * @param onNewPasswordChange A callback for new password input changes.
- * @param onConfirmPasswordChange A callback for confirm password input changes.
- * @param onResetClick A callback invoked when the reset button is clicked.
- * @param onNavigateBack A callback to navigate to the previous screen.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ResetPasswordContent(
-    slots: ResetPasswordScreenSlots,
-    isPasswordReset: Boolean,
-    isLoading: Boolean,
-    newPassword: String,
-    confirmPassword: String,
-    passwordError: String?,
-    confirmPasswordError: String?,
-    onNewPasswordChange: (String) -> Unit,
-    onConfirmPasswordChange: (String) -> Unit,
-    onResetClick: () -> Unit,
-    onNavigateBack: () -> Unit,
-) {
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is ResetPasswordEffect.NavigateToLogin -> {
+                    isSuccess = true
+                    delay(2000) // Keep success message on screen for a moment
+                    onNavigateToLogin()
+                }
+                is ResetPasswordEffect.ShowError -> {
+                    snackbarHostState.showSnackbar(
+                        message = effect.message,
+                        withDismissAction = true
+                    )
+                }
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -123,56 +97,94 @@ private fun ResetPasswordContent(
                     }
                 }
             )
-        }
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { snackBarData ->
+                CustomSnackBar(
+                    snackBarText = snackBarData.visuals.message,
+                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }
+                )
+            }
+        },
+        modifier = Modifier.consumeWindowInsets(TopAppBarDefaults.windowInsets)
     ) { paddingValues ->
-        AnimatedContent(
-            targetState = isPasswordReset,
+        ResetPasswordContent(
+            slots = resetPasswordSlots,
+            state = uiState,
+            isSuccess = isSuccess,
+            onAction = viewModel::onAction,
+            onNavigateBack = onNavigateBack,
             modifier = Modifier.padding(paddingValues)
-        ) { passwordReset ->
-            if (passwordReset) {
-                slots.successContent(onNavigateBack)
-            } else {
-                DefaultAuthContainer(
-                    verticalArrangement = slots.layoutVerticalArrangement,
-                ) {
-                    slots.header()
+        )
+    }
+}
 
-                    Spacer(modifier = Modifier.height(16.dp))
+/**
+ * A private composable that defines the layout and UI for the Reset Password screen.
+ * It is stateless regarding business logic and field states, receiving all data and callbacks.
+ *
+ * @param slots The [ResetPasswordScreenSlots] defining the UI components.
+ * @param state The current [ResetPasswordUiState] of the screen.
+ * @param isSuccess A flag indicating if the password reset is complete.
+ * @param onAction A callback to send actions to the ViewModel.
+ * @param onNavigateBack A callback to navigate to the previous screen.
+ */
+@Composable
+private fun ResetPasswordContent(
+    slots: ResetPasswordScreenSlots,
+    state: ResetPasswordUiState,
+    isSuccess: Boolean,
+    onAction: (ResetPasswordAction) -> Unit,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AnimatedContent(
+        targetState = isSuccess,
+        modifier = modifier
+    ) { passwordReset ->
+        if (passwordReset) {
+            slots.successContent(onNavigateBack)
+        } else {
+            DefaultAuthContainer(
+                verticalArrangement = slots.layoutVerticalArrangement,
+            ) {
+                slots.header()
 
-                    slots.description()
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                slots.description()
 
-                    slots.passwordField(
-                        newPassword,
-                        onNewPasswordChange,
-                        passwordError,
-                        !isLoading
-                    )
+                Spacer(modifier = Modifier.height(32.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                slots.passwordField(
+                    state.newPassword,
+                    { onAction(ResetPasswordAction.NewPasswordChanged(it)) },
+                    state.passwordError,
+                    !state.isLoading
+                )
 
-                    slots.confirmPasswordField(
-                        confirmPassword,
-                        onConfirmPasswordChange,
-                        confirmPasswordError,
-                        !isLoading
-                    )
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                slots.confirmPasswordField(
+                    state.confirmPassword,
+                    { onAction(ResetPasswordAction.ConfirmPasswordChanged(it)) },
+                    state.confirmPasswordError,
+                    !state.isLoading
+                )
 
-                    val isValid = newPassword.isNotBlank() &&
-                            confirmPassword.isNotBlank() &&
-                            passwordError == null &&
-                            confirmPasswordError == null
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    slots.submitButton(
-                        onResetClick,
-                        isLoading,
-                        isValid,
-                        stringResource(Res.string.reset_password_screen_reset_button)
-                    )
-                }
+                val isValid = state.newPassword.isNotBlank() &&
+                        state.confirmPassword.isNotBlank() &&
+                        state.passwordError == null &&
+                        state.confirmPasswordError == null
+
+                slots.submitButton(
+                    { onAction(ResetPasswordAction.ResetPasswordClicked) },
+                    state.isLoading,
+                    isValid && !state.isLoading,
+                    stringResource(Res.string.reset_password_screen_reset_button)
+                )
             }
         }
     }

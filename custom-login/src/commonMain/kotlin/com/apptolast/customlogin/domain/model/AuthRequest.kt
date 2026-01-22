@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 /**
  * Credentials used for authentication.
  */
-//FIXME: Check if we really need this class
 sealed interface Credentials {
     /**
      * Email and password authentication.
@@ -17,12 +16,9 @@ sealed interface Credentials {
 
     /**
      * OAuth token from external provider (Google, Apple, etc.)
+     * The token itself is obtained within the data layer, not passed from presentation.
      */
-    data class OAuthToken(
-        val providerId: String,
-        val idToken: String,
-        val accessToken: String? = null
-    ) : Credentials
+    data class OAuthToken(val provider: IdentityProvider) : Credentials
 
     /**
      * Refresh token for session renewal.

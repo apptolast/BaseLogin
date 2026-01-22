@@ -11,7 +11,7 @@ import com.apptolast.customlogin.presentation.screens.login.LoginScreen
 import com.apptolast.customlogin.presentation.screens.register.RegisterScreen
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordScreen
 import com.apptolast.customlogin.presentation.screens.welcome.WelcomeScreen
-import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
+import com.apptolast.customlogin.presentation.slots.AuthScreenSlots
 
 /**
  * Root navigation graph for the authentication flow.
@@ -19,13 +19,13 @@ import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
  * @param navController To handle navigation with the graph
  * @param startDestination The initial destination (default: WelcomeRoute)
  * @param slots Custom slots for all auth screens
- * @param onAuthSuccess Callback when login is successful
+ * @param onNavigateToHome Callback when login is successful
  */
 fun NavGraphBuilder.authRoutesFlow(
     navController: NavHostController,
     startDestination: Any = WelcomeRoute,
     slots: AuthScreenSlots = AuthScreenSlots(),
-    onAuthSuccess: (UserSession) -> Unit = {},
+    onNavigateToHome: () -> Unit = {},
 ) {
 
     navigation<AuthRoutesFlow>(startDestination = startDestination) {
@@ -50,7 +50,7 @@ fun NavGraphBuilder.authRoutesFlow(
         composable<LoginRoute> {
             LoginScreen(
                 loginSlots = slots.login,
-                onAuthSuccess = onAuthSuccess,
+                onNavigateToHome = onNavigateToHome,
                 onNavigateToRegister = {
                     navController.navigate(RegisterRoute) {
                         popUpTo(LoginRoute) {
@@ -72,7 +72,7 @@ fun NavGraphBuilder.authRoutesFlow(
         composable<RegisterRoute> {
             RegisterScreen(
                 registerSlots = slots.register,
-                onAuthSuccess = onAuthSuccess,
+                onNavigateToHome = onNavigateToHome,
                 onNavigateToLogin = {
                     navController.navigate(LoginRoute) {
                         popUpTo(RegisterRoute) {
@@ -103,7 +103,7 @@ fun NavGraphBuilder.authRoutesFlow(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onSuccess = {
+                onNavigateToLogin = {
                     navController.navigate(LoginRoute) {
                         popUpTo(AuthRoutesFlow) { // Pop up to the auth graph
                             inclusive = true

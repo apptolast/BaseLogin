@@ -2,15 +2,20 @@ package com.apptolast.customlogin.presentation.screens.register
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.apptolast.customlogin.domain.model.UserSession
+import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
-import com.apptolast.customlogin.presentation.theme.RegisterScreenSlots
+import com.apptolast.customlogin.presentation.slots.RegisterScreenSlots
+import kotlinx.coroutines.flow.collectLatest
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.register_screen_register_button
 import org.jetbrains.compose.resources.stringResource
@@ -18,46 +23,51 @@ import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * A composable function that represents the main entry point for the Register screen.
- * It connects the ViewModel to the UI content and handles authentication success navigation.
+ * It connects the ViewModel to the UI content and handles MVI effects.
  *
  * @param viewModel The [RegisterViewModel] instance for this screen.
  * @param registerSlots An instance of [RegisterScreenSlots] to customize the UI components.
- * @param onAuthSuccess A callback invoked upon successful authentication, providing the [UserSession].
+ * @param onNavigateToHome A callback invoked upon successful authentication.
  * @param onNavigateToLogin A callback to navigate back to the login screen.
  */
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel = koinViewModel(),
     registerSlots: RegisterScreenSlots = RegisterScreenSlots(),
-    onAuthSuccess: (UserSession) -> Unit,
+    onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    with(uiState) {
-        LaunchedEffect(user) {
-            user?.let { onAuthSuccess(it) }
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest { effect ->
+            when (effect) {
+                is RegisterEffect.NavigateToHome -> onNavigateToHome()
+                is RegisterEffect.ShowError -> {
+                    snackbarHostState.showSnackbar(
+                        message = effect.message,
+                        withDismissAction = true
+                    )
+                }
+            }
         }
+    }
 
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { snackBarData ->
+                CustomSnackBar(
+                    snackBarText = snackBarData.visuals.message,
+                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }
+                )
+            }
+        }
+    ) {
         RegisterContent(
             slots = registerSlots,
-            fullName = fullName,
-            email = email,
-            password = password,
-            confirmPassword = confirmPassword,
-            termsAccepted = termsAccepted,
-            fullNameError = fullNameError,
-            emailError = emailError,
-            passwordError = passwordError,
-            confirmPasswordError = confirmPasswordError,
-            errorMessage = errorMessage,
-            isLoading = isLoading,
-            onFullNameChange = viewModel::onFullNameChange,
-            onEmailChange = viewModel::onEmailChange,
-            onPasswordChange = viewModel::onPasswordChange,
-            onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
-            onTermsAcceptedChange = viewModel::onTermsAcceptedChange,
-            onRegisterClick = viewModel::createUserWithEmail,
+            state = uiState,
+            onAction = viewModel::onAction,
             onNavigateToLogin = onNavigateToLogin
         )
     }
@@ -68,48 +78,17 @@ fun RegisterScreen(
  * It is stateless regarding business logic and receives all data and callbacks as parameters.
  *
  * @param slots The [RegisterScreenSlots] instance defining the UI components.
- * @param fullName The current full name value.
- * @param email The current email value.
- * @param password The current password value.
- * @param confirmPassword The current confirm password value.
- * @param termsAccepted The current terms accepted value.
- * @param fullNameError An optional error for the full name field.
- * @param emailError An optional error for the email field.
- * @param passwordError An optional error for the password field.
- * @param confirmPasswordError An optional error for the confirm password field.
- * @param errorMessage A general error message to display.
- * @param isLoading A boolean indicating if a loading operation is in progress.
- * @param onFullNameChange A callback for full name input changes.
- * @param onEmailChange A callback for email input changes.
- * @param onPasswordChange A callback for password input changes.
- * @param onConfirmPasswordChange A callback for confirm password input changes.
- * @param onTermsAcceptedChange A callback for terms accepted input changes.
- * @param onRegisterClick A callback invoked when the register button is clicked.
+ * @param state The current [RegisterUiState] of the screen.
+ * @param onAction A callback to send actions to the ViewModel.
  * @param onNavigateToLogin A callback to navigate to the login screen.
  */
 @Composable
 private fun RegisterContent(
     slots: RegisterScreenSlots,
-    fullName: String,
-    email: String,
-    password: String,
-    confirmPassword: String,
-    termsAccepted: Boolean,
-    fullNameError: String?,
-    emailError: String?,
-    passwordError: String?,
-    confirmPasswordError: String?,
-    errorMessage: String?,
-    isLoading: Boolean,
-    onFullNameChange: (String) -> Unit,
-    onEmailChange: (String) -> Unit,
-    onPasswordChange: (String) -> Unit,
-    onConfirmPasswordChange: (String) -> Unit,
-    onTermsAcceptedChange: (Boolean) -> Unit,
-    onRegisterClick: () -> Unit,
+    state: RegisterUiState,
+    onAction: (RegisterAction) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-
     DefaultAuthContainer(
         verticalArrangement = slots.layoutVerticalArrangement,
     ) {
@@ -118,59 +97,58 @@ private fun RegisterContent(
         Spacer(modifier = Modifier.height(16.dp))
 
         slots.nameField(
-            fullName,
-            onFullNameChange,
-            fullNameError ?: errorMessage,
-            !isLoading
+            state.fullName,
+            { onAction(RegisterAction.FullNameChanged(it)) },
+            state.fullNameError,
+            !state.isLoading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         slots.emailField(
-            email,
-            onEmailChange,
-            emailError,
-            !isLoading
+            state.email,
+            { onAction(RegisterAction.EmailChanged(it)) },
+            state.emailError,
+            !state.isLoading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         slots.passwordField(
-            password,
-            onPasswordChange,
-            passwordError,
-            !isLoading
+            state.password,
+            { onAction(RegisterAction.PasswordChanged(it)) },
+            state.passwordError,
+            !state.isLoading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         slots.confirmPasswordField(
-            confirmPassword,
-            onConfirmPasswordChange,
-            confirmPasswordError,
-            !isLoading
+            state.confirmPassword,
+            { onAction(RegisterAction.ConfirmPasswordChanged(it)) },
+            state.confirmPasswordError,
+            !state.isLoading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         slots.termsCheckbox(
-            termsAccepted,
-            onTermsAcceptedChange
-        )
+            state.termsAccepted
+        ) { onAction(RegisterAction.TermsAcceptedChanged(it)) }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        val isFormValid = fullName.isNotBlank() &&
-                email.isNotBlank() &&
-                password.isNotBlank() &&
-                confirmPassword.isNotBlank() &&
-                password == confirmPassword &&
-                termsAccepted
+        val isFormValid = state.fullName.isNotBlank() &&
+                state.email.isNotBlank() &&
+                state.password.isNotBlank() &&
+                state.confirmPassword.isNotBlank() &&
+                state.password == state.confirmPassword &&
+                state.termsAccepted
 
         slots.submitButton(
-            onRegisterClick,
-            isLoading,
-            isFormValid && !isLoading,
+            { onAction(RegisterAction.SignUpClicked) },
+            state.isLoading,
+            isFormValid && !state.isLoading,
             stringResource(Res.string.register_screen_register_button)
         )
 
