@@ -7,16 +7,16 @@ import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.SignUpData
-import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.getSocialIdToken
 import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseAuthException
-import dev.gitlive.firebase.auth.FirebaseUser
 import dev.gitlive.firebase.auth.GithubAuthProvider
 import dev.gitlive.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /**
  * Firebase Authentication provider implementation.
@@ -79,7 +79,6 @@ class FirebaseAuthProvider(
                 data.password
             )
             result.user?.let { user ->
-                // Update display name if provided
                 if (!data.displayName.isNullOrBlank()) {
                     user.updateProfile(displayName = data.displayName)
                 }
@@ -126,22 +125,24 @@ class FirebaseAuthProvider(
     }
 
     override fun observeAuthState(): Flow<AuthState> {
-        return firebaseAuth.authStateChanged.map { user ->
-            if (user != null) {
-                user.toUserSession()?.let { session ->
-                    AuthState.Authenticated(session)
-                } ?: AuthState.Unauthenticated
-            } else {
-                AuthState.Unauthenticated
+        return firebaseAuth.authStateChanged
+            .map { user ->
+                user?.toUserSession()?.let { AuthState.Authenticated(it) }
+                    ?: AuthState.Unauthenticated
             }
-        }
+            .onStart { emit(AuthState.Loading) }
+            .catch { e ->
+                val error = (e as? FirebaseAuthException)?.toAuthError() ?: AuthError.Unknown(
+                    e.message ?: "An unknown error occurred", e
+                )
+                emit(AuthState.Error(error))
+            }
     }
 
     override suspend fun refreshSession(): AuthResult {
         return try {
             val user = firebaseAuth.currentUser
             if (user != null) {
-                // Force token refresh
                 val token = user.getIdToken(true)
                 user.toUserSession(accessToken = token)?.let { session ->
                     AuthResult.Success(session)
@@ -217,70 +218,9 @@ class FirebaseAuthProvider(
 
     private fun IdentityProvider.toCredential(idToken: String): AuthCredential? {
         return when (this) {
-            is IdentityProvider.Google -> GoogleAuthProvider.credential(idToken, null)
+            is IdentityProvider.Google -> GoogleAuthProvider.credential(idToken, accessToken = null)
             is IdentityProvider.GitHub -> GithubAuthProvider.credential(idToken)
             else -> null // Apple, Facebook, Phone have different flows
-        }
-    }
-
-    /**
-     * Convert FirebaseUser to UserSession.
-     */
-    private suspend fun FirebaseUser.toUserSession(accessToken: String? = null): UserSession? {
-        return try {
-            UserSession(
-                userId = uid,
-                email = email,
-                displayName = displayName,
-                photoUrl = photoURL,
-                isEmailVerified = isEmailVerified,
-                providerId = PROVIDER_ID,
-                accessToken = accessToken ?: getIdToken(false),
-                refreshToken = null, // Firebase manages refresh internally
-                expiresAt = null,
-            )
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    private fun FirebaseAuthException.toAuthError(): AuthError {
-        val errorMessage = message ?: "Authentication error"
-        return when {
-            errorMessage.contains("INVALID_LOGIN_CREDENTIALS", ignoreCase = true) ||
-                    errorMessage.contains("INVALID_PASSWORD", ignoreCase = true) ||
-                    errorMessage.contains("wrong-password", ignoreCase = true) ->
-                AuthError.InvalidCredentials()
-
-            errorMessage.contains("USER_NOT_FOUND", ignoreCase = true) ||
-                    errorMessage.contains("user-not-found", ignoreCase = true) ->
-                AuthError.UserNotFound()
-
-            errorMessage.contains("EMAIL_EXISTS", ignoreCase = true) ||
-                    errorMessage.contains("email-already-in-use", ignoreCase = true) ->
-                AuthError.EmailAlreadyInUse()
-
-            errorMessage.contains("WEAK_PASSWORD", ignoreCase = true) ||
-                    errorMessage.contains("weak-password", ignoreCase = true) ->
-                AuthError.WeakPassword()
-
-            errorMessage.contains("INVALID_EMAIL", ignoreCase = true) ||
-                    errorMessage.contains("invalid-email", ignoreCase = true) ->
-                AuthError.InvalidEmail()
-
-            errorMessage.contains("TOO_MANY_ATTEMPTS", ignoreCase = true) ||
-                    errorMessage.contains("too-many-requests", ignoreCase = true) ->
-                AuthError.TooManyRequests()
-
-            errorMessage.contains("USER_DISABLED", ignoreCase = true) ||
-                    errorMessage.contains("user-disabled", ignoreCase = true) ->
-                AuthError.UserDisabled()
-
-            errorMessage.contains("NETWORK", ignoreCase = true) ||
-                    errorMessage.contains("network-request-failed", ignoreCase = true) ->
-                AuthError.NetworkError(errorMessage, this)
-
-            else -> AuthError.Unknown(errorMessage, this)
         }
     }
 

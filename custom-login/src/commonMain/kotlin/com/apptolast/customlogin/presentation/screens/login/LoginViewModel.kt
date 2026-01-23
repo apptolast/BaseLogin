@@ -36,8 +36,6 @@ class LoginViewModel(
             is LoginAction.PasswordChanged -> onPasswordChange(action.password)
             is LoginAction.SocialSignInClicked -> onSocialSignIn(action.provider)
             is LoginAction.SignInClicked -> onSignInClicked()
-            is LoginAction.ErrorMessageDismissed -> { /* No-op, errors are now one-time effects */
-            }
         }
     }
 
@@ -62,7 +60,7 @@ class LoginViewModel(
 
                 is AuthResult.Failure -> {
                     _uiState.update { it.copy(isLoading = false) }
-                    _effect.emit(LoginEffect.ShowError(result.error.message))
+                    _effect.emit(LoginEffect.ShowError("$provider: ${result.error.message}"))
                 }
 
                 else -> {

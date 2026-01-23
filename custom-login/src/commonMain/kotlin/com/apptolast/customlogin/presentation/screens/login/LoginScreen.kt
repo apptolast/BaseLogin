@@ -140,8 +140,9 @@ private fun LoginContent(
             stringResource(Res.string.login_screen_sign_in_button),
             isFormValid && !state.isLoading,
             state.isLoading,
-            { onAction(LoginAction.SignInClicked) },
-        )
+        ) { onAction(LoginAction.SignInClicked) }
+
+        Spacer(Modifier.height(8.dp))
 
         slots.socialProviders?.let { socialProviders ->
             socialProviders { provider ->

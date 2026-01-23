@@ -14,5 +14,4 @@ sealed interface LoginAction {
     data class PasswordChanged(val password: String) : LoginAction
     data class SocialSignInClicked(val provider: IdentityProvider) : LoginAction
     data object SignInClicked : LoginAction
-    data object ErrorMessageDismissed : LoginAction
 }

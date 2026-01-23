@@ -37,7 +37,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -55,15 +54,9 @@ import org.koin.compose.viewmodel.koinViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: HomeViewModel = koinViewModel(),
-    onNavigateToAuth: () -> Unit,
+    viewModel: ProfileViewModel = koinViewModel(),
 ) {
-
     val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(uiState.isLoggedOut) {
-        if (uiState.isLoggedOut) onNavigateToAuth()
-    }
 
     Scaffold(
         topBar = {
@@ -92,7 +85,7 @@ fun ProfileScreen(
                 ProfileContent(
                     modifier = Modifier.padding(paddingValues),
                     userSession = uiState.userSession!!,
-                    onLogout = viewModel::signOut
+                    onAction = viewModel::onAction
                 )
             }
         }
@@ -102,7 +95,7 @@ fun ProfileScreen(
 @Composable
 private fun ProfileContent(
     userSession: UserSession,
-    onLogout: () -> Unit,
+    onAction: (ProfileAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -215,7 +208,7 @@ private fun ProfileContent(
         Spacer(modifier = Modifier.height(32.dp))
         // --- BOTÓN CERRAR SESIÓN ---
         Button(
-            onClick = onLogout,
+            onClick = { onAction(ProfileAction.SignOutClicked) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1A1A))

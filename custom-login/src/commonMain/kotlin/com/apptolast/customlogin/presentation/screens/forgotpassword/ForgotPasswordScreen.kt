@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -123,9 +124,8 @@ private fun ForgotPasswordContent(
                 )
             }
         },
-        modifier = Modifier.consumeWindowInsets(TopAppBarDefaults.windowInsets)
     ) { paddingValues ->
-        Box(modifier = Modifier.consumeWindowInsets(paddingValues)) {
+        Box(modifier = Modifier.padding(paddingValues)) {
             AnimatedContent(
                 targetState = isSuccess,
             ) { success ->

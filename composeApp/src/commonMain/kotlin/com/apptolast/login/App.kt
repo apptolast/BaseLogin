@@ -1,32 +1,23 @@
 package com.apptolast.login
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.IdentityProvider
-import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.presentation.navigation.AuthRoutesFlow
 import com.apptolast.customlogin.presentation.navigation.LoginRoute
 import com.apptolast.customlogin.presentation.navigation.NavTransitions
@@ -38,81 +29,74 @@ import com.apptolast.customlogin.presentation.slots.defaultslots.PhoneSocialButt
 import com.apptolast.login.home.navigation.HomeRoute
 import com.apptolast.login.home.navigation.HomeRoutesFlow
 import com.apptolast.login.home.presentation.home.ProfileScreen
-import com.apptolast.login.splash.SplashState
 import com.apptolast.login.splash.SplashViewModel
 import com.apptolast.login.theme.SampleAppTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Main App composable demonstrating the CustomLogin library usage.
- * @param splashViewModel Optional ViewModel for splash screen integration (Android only).
+ * Main App composable that orchestrates the entire navigation based on authentication state.
  */
 @Composable
-fun App(splashViewModel: SplashViewModel? = koinViewModel()) {
+fun App(splashViewModel: SplashViewModel = koinViewModel()) {
 
     SampleAppTheme {
 
-        val splashState by splashViewModel?.splashState?.collectAsStateWithLifecycle()
-            ?: remember { mutableStateOf(SplashState.Unauthenticated) }
-
-        // Don't render anything until we know the actual auth state
-        // This prevents the "flash" of login screen when user is authenticated
-        if (splashState is SplashState.Loading) return@SampleAppTheme
-
-        // Initialize auth state from splash screen check (now we have definitive state)
-        var isAuthenticated by remember(splashState) {
-            mutableStateOf(splashState is SplashState.Authenticated)
-        }
-        var currentSession by remember(splashState) {
-            mutableStateOf((splashState as? SplashState.Authenticated)?.session)
-        }
-
-        val startDestination = if (isAuthenticated) HomeRoutesFlow else AuthRoutesFlow
-
+        val authState by splashViewModel.authState.collectAsStateWithLifecycle()
         val navController = rememberNavController()
 
-        Surface {
-            NavHost(
-                navController = navController,
-                startDestination = startDestination,
-                enterTransition = { NavTransitions.enter },
-                exitTransition = { NavTransitions.exit },
-                popEnterTransition = { NavTransitions.popEnter },
-                popExitTransition = { NavTransitions.popExit },
-            ) {
+        // This is the single source of truth for navigation between the two main flows.
+        // It reacts to any change in the authentication state while the app is running.
+        LaunchedEffect(authState) {
+            val currentGraph = navController.currentDestination?.parent?.route
 
-                authRoutesFlow(
-                    navController = navController,
-                    startDestination = LoginRoute,
-//                    slots = createCustomSlots(),
-                    onNavigateToHome = {
-                        navController.navigate(HomeRoutesFlow) {
-                            popUpTo(AuthRoutesFlow) { inclusive = true }
-                        }
-                    },
-                )
-
-                homeRoutesFlow(
-                    userSession = currentSession,
-                    onNavigateToAuth = {
-                        navController.navigate(AuthRoutesFlow) {
-                            popUpTo(HomeRoutesFlow) { inclusive = true }
-                        }
-                    }
-                )
+            if (authState is AuthState.Authenticated && currentGraph != HomeRoutesFlow.serializer().descriptor.serialName) {
+                navController.navigate(HomeRoutesFlow) {
+                    popUpTo(AuthRoutesFlow) { inclusive = true }
+                }
+            } else if (authState is AuthState.Unauthenticated && currentGraph != AuthRoutesFlow.serializer().descriptor.serialName) {
+                navController.navigate(AuthRoutesFlow) {
+                    popUpTo(HomeRoutesFlow) { inclusive = true }
+                }
             }
         }
+
+        // The NavHost is now simpler. Its job is just to host the graphs.
+        // The `startDestination` is determined once based on the initial auth state.
+        if (authState !is AuthState.Loading) {
+            Surface {
+                NavHost(
+                    navController = navController,
+                    startDestination = if (authState is AuthState.Authenticated) HomeRoutesFlow else AuthRoutesFlow,
+                    enterTransition = { NavTransitions.enter },
+                    exitTransition = { NavTransitions.exit },
+                    popEnterTransition = { NavTransitions.popEnter },
+                    popExitTransition = { NavTransitions.popExit },
+                ) {
+                    // The auth flow graph. `onNavigateToHome` is no longer needed
+                    // as the global LaunchedEffect handles it.
+                    authRoutesFlow(
+                        navController = navController,
+                        startDestination = LoginRoute,
+//                        slots = createCustomSlots(),
+                        onNavigateToHome = { /* Handled globally by authState */ },
+                    )
+
+                    // The main app (home) flow graph.
+                    homeRoutesFlow(navController)
+                }
+            }
+        }
+        // While loading, we implicitly show the splash screen because nothing is composed here.
     }
 }
 
-private fun NavGraphBuilder.homeRoutesFlow(userSession: UserSession?, onNavigateToAuth: () -> Unit) {
+private fun NavGraphBuilder.homeRoutesFlow(navController: NavHostController) {
     navigation<HomeRoutesFlow>(
         startDestination = HomeRoute
     ) {
         composable<HomeRoute> {
-            ProfileScreen(
-                onNavigateToAuth = onNavigateToAuth,
-            )
+            // ProfileScreen is now self-contained and doesn't need navigation callbacks.
+            ProfileScreen()
         }
     }
 }
@@ -131,46 +115,3 @@ private fun createCustomSlots() = AuthScreenSlots(
         }
     )
 )
-
-/**
- * A custom submit button with a different style.
- * It MUST have the same signature as the slot it replaces.
- */
-@Composable
-fun MyCustomSubmitButton(
-    text: String,
-    enabled: Boolean,
-    isLoading: Boolean,
-    onClick: () -> Unit,
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth(0.7f)
-            .clickable(
-                enabled = !isLoading,
-                onClick = onClick,
-            )
-            .padding(vertical = 16.dp),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface,
-    ) {
-        Button(
-            onClick = onClick,
-            modifier = Modifier.fillMaxWidth(0.7f),
-            enabled = enabled && !isLoading,
-            shape = MaterialTheme.shapes.small,
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onSecondary
-                )
-            } else {
-                Text(
-                    text = text.uppercase(), // Uppercase text
-                    style = MaterialTheme.typography.titleMedium // Larger text
-                )
-            }
-        }
-    }
-}

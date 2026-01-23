@@ -1,3 +1,4 @@
+/*
 package com.apptolast.customlogin.presentation.slots.defaultslots
 
 import androidx.compose.foundation.BorderStroke
@@ -29,23 +30,27 @@ import login.custom_login.generated.resources.login_loading_text
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+*/
 /**
  * Represents a social login button configuration.
  *
  * @param provider The social provider associated with this button.
  * @param content The composable content of the button.
- */
+ *//*
+
 data class SocialLoginButton(
     val provider: IdentityProvider,
     val content: @Composable (onClick: () -> Unit) -> Unit
 )
 
+*/
 /**
  * A default section that displays social login buttons in a lazy list.
  * This is an optional composable that you can use in your `socialProviders` slot.
  *
  * @param onProviderClick A callback invoked when a social provider button is clicked.
- */
+ *//*
+
 @Composable
 fun SocialLoginButtonsSection(onProviderClick: (IdentityProvider) -> Unit) {
     val socialButtons = defaultSocialLoginButtons()
@@ -63,9 +68,11 @@ fun SocialLoginButtonsSection(onProviderClick: (IdentityProvider) -> Unit) {
     }
 }
 
+*/
 /**
  * Provides a default list of social login buttons (Google and Phone).
- */
+ *//*
+
 @Composable
 fun defaultSocialLoginButtons(): List<SocialLoginButton> = listOf(
     SocialLoginButton(
@@ -78,9 +85,11 @@ fun defaultSocialLoginButtons(): List<SocialLoginButton> = listOf(
     )
 )
 
+*/
 /**
  * Google Sign-In button following Google's branding guidelines.
- */
+ *//*
+
 @Composable
 fun GoogleSocialButton(
     text: String = stringResource(Res.string.login_google_button),
@@ -124,12 +133,15 @@ fun GoogleSocialButton(
     }
 }
 
+*/
 /**
  * A default implementation of a phone social login button.
- */
+ *//*
+
 @Composable
 fun PhoneSocialButton(onClick: () -> Unit) {
     Button(onClick = onClick) {
         Text("Sign in with Phone")
     }
 }
+*/
