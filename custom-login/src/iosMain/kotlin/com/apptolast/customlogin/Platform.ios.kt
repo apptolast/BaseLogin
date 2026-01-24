@@ -1,6 +1,10 @@
 package com.apptolast.customlogin
 
+import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.provider.GoogleSignInProviderIOS
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import platform.UIKit.UIDevice
 
 /**
@@ -9,22 +13,36 @@ import platform.UIKit.UIDevice
 actual fun platform(): String = UIDevice.currentDevice.systemName() + " " + UIDevice.currentDevice.systemVersion
 
 /**
+ * Helper object for Koin dependency injection in platform code.
+ */
+private object PlatformKoinHelper : KoinComponent {
+    val googleSignInConfig: GoogleSignInConfig? by lazy {
+        try {
+            val config: GoogleSignInConfig by inject()
+            config
+        } catch (e: Exception) {
+            null
+        }
+    }
+}
+
+/**
  * Actual implementation for getting a social ID token on iOS.
  */
 actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
     return when (provider) {
         is IdentityProvider.Google -> {
-            // TODO: Implement the native Google Sign-In flow for iOS.
-            // 1. Add `pod 'GoogleSignIn', '~> 7.0'` to your `iosApp/Podfile`.
-            // 2. You will need to obtain the top UIViewController to present the sign-in flow.
-            //    This is a common challenge in KMP and often requires a helper class or passing the controller down from SwiftUI.
-            // 3. Call `GIDSignIn.sharedInstance.signIn(...)` and await the result.
-            println("Google Sign-In for iOS is not implemented yet.")
-            null
+            val config = PlatformKoinHelper.googleSignInConfig
+            if (config == null) {
+                println("Google Sign-In is not configured. Provide GoogleSignInConfig in LoginLibraryConfig.")
+                return null
+            }
+
+            val googleProvider = GoogleSignInProviderIOS(config = config)
+            googleProvider.signIn()
         }
         is IdentityProvider.GitHub -> {
             // TODO: Implement GitHub OAuth flow for iOS.
-            // This usually involves using ASWebAuthenticationSession to open a browser to the GitHub auth URL.
             println("GitHub Sign-In for iOS is not implemented yet.")
             null
         }

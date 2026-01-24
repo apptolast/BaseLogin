@@ -4,4 +4,5 @@ target 'iosApp' do
 
   pod 'ComposeApp', :path => '../composeApp'
   pod 'FirebaseAppCheck'
+  pod 'GoogleSignIn', '~> 9.0'
 end
