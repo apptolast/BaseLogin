@@ -1,7 +1,5 @@
 package com.apptolast.customlogin.presentation.screens.register
 
-import com.apptolast.customlogin.domain.model.UserSession
-
 /**
  * Represents the state of the Register screen.
  *
@@ -15,8 +13,6 @@ import com.apptolast.customlogin.domain.model.UserSession
  * @property passwordError An optional error message for the password field.
  * @property confirmPasswordError An optional error message for the confirm password field.
  * @property isLoading Indicates if a registration operation is in progress.
- * @property user The authenticated user session, available upon success.
- * @property errorMessage A general error message to display.
  */
 data class RegisterUiState(
     val fullName: String = "",
@@ -29,6 +25,4 @@ data class RegisterUiState(
     val passwordError: String? = null,
     val confirmPasswordError: String? = null,
     val isLoading: Boolean = false,
-    val user: UserSession? = null,
-    val errorMessage: String? = null
 )

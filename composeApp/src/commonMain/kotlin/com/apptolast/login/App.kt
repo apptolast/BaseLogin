@@ -1,181 +1,85 @@
 package com.apptolast.login
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.apptolast.customlogin.domain.model.SocialProvider
-import com.apptolast.customlogin.domain.model.UserSession
+import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.presentation.navigation.AuthRoutesFlow
 import com.apptolast.customlogin.presentation.navigation.LoginRoute
 import com.apptolast.customlogin.presentation.navigation.NavTransitions
 import com.apptolast.customlogin.presentation.navigation.authRoutesFlow
-import com.apptolast.customlogin.presentation.theme.AuthScreenSlots
-import com.apptolast.customlogin.presentation.theme.LoginScreenSlots
-import com.apptolast.customlogin.presentation.theme.defaultslots.PhoneSocialButton
-import com.apptolast.login.home.navigation.HomeRoute
-import com.apptolast.login.home.navigation.HomeRoutesFlow
-import com.apptolast.login.home.presentation.home.ProfileScreen
-import com.apptolast.login.splash.SplashState
-import com.apptolast.login.splash.SplashViewModel
+import com.apptolast.login.presentation.navigation.MainRoutesFlow
+import com.apptolast.login.presentation.navigation.mainRoutesFlow
 import com.apptolast.login.theme.SampleAppTheme
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Main App composable demonstrating the CustomLogin library usage.
- * @param splashViewModel Optional ViewModel for splash screen integration (Android only).
+ * Main App composable that orchestrates the entire navigation based on authentication state.
  */
 @Composable
-fun App(splashViewModel: SplashViewModel? = koinViewModel()) {
+fun App(splashViewModel: SplashViewModel = koinViewModel()) {
 
     SampleAppTheme {
 
-        val splashState by splashViewModel?.splashState?.collectAsStateWithLifecycle()
-            ?: remember { mutableStateOf(SplashState.Unauthenticated) }
+        Surface(modifier = Modifier.fillMaxSize()) {
 
-        // Don't render anything until we know the actual auth state
-        // This prevents the "flash" of login screen when user is authenticated
-        if (splashState is SplashState.Loading) return@SampleAppTheme
+            val authState by splashViewModel.authState.collectAsStateWithLifecycle()
 
-        // Initialize auth state from splash screen check (now we have definitive state)
-        var isAuthenticated by remember(splashState) {
-            mutableStateOf(splashState is SplashState.Authenticated)
-        }
-        var currentSession by remember(splashState) {
-            mutableStateOf((splashState as? SplashState.Authenticated)?.session)
-        }
-
-        val startDestination = if (isAuthenticated) HomeRoutesFlow else AuthRoutesFlow
-
-        val navController = rememberNavController()
-
-        Surface {
-            NavHost(
-                navController = navController,
-                startDestination = startDestination,
-                enterTransition = { NavTransitions.enter },
-                exitTransition = { NavTransitions.exit },
-                popEnterTransition = { NavTransitions.popEnter },
-                popExitTransition = { NavTransitions.popExit },
-            ) {
-
-                authRoutesFlow(
-                    navController = navController,
-                    startDestination = LoginRoute,
-//                    slots = createCustomSlots(),
-                    onAuthSuccess = { userSession ->
-                        currentSession = userSession
-                        navController.navigate(HomeRoutesFlow) {
-                            popUpTo(AuthRoutesFlow) { inclusive = true }
-                        }
-                    },
-                )
-
-                homeRoutesFlow(
-                    userSession = currentSession,
-                    onLogoutSuccess = {
-                        navController.navigate(AuthRoutesFlow) {
-                            popUpTo(HomeRoutesFlow) { inclusive = true }
-                        }
-                    }
-                )
+            // AnimatedContent provides smooth transitions when the authentication state changes.
+            AnimatedContent(
+                targetState = authState is AuthState.Authenticated,
+                transitionSpec = {
+                    // Use the shared slide transitions for a consistent feel.
+                    NavTransitions.enter togetherWith NavTransitions.exit
+                },
+                label = "RootNavigationAnimation"
+            ) { isAuthenticated ->
+                if (isAuthenticated) {
+                    MainAppNavigation()
+                } else {
+                    // This will be shown for Loading, Unauthenticated, and Error states.
+                    // The splash screen condition in MainActivity will handle hiding the app content
+                    // while loading for the first time.
+                    AuthNavigation()
+                }
             }
         }
     }
 }
 
-private fun NavGraphBuilder.homeRoutesFlow(userSession: UserSession?, onLogoutSuccess: () -> Unit) {
-    navigation<HomeRoutesFlow>(
-        startDestination = HomeRoute
-    ) {
-        composable<HomeRoute> {
-            ProfileScreen(
-                onNavigateToAuth = onLogoutSuccess,
-            )
-        }
-    }
-}
-
-/**
- * Creates a custom slot configuration for the authentication screens.
- */
-private fun createCustomSlots() = AuthScreenSlots(
-    login = LoginScreenSlots(
-        socialProviders = { onProviderClick ->
-            Column {
-                MyCustomSubmitButton(
-                    text = "Custom Button",
-                    enabled = false,
-                    isLoading = false,
-                    onClick = onProviderClick,
-                )
-                Spacer(Modifier.height(8.dp))
-                PhoneSocialButton { onProviderClick(SocialProvider.Phone) }
-            }
-        }
-    )
-)
-
-/**
- * A custom submit button with a different style.
- * It MUST have the same signature as the slot it replaces.
- */
 @Composable
-fun MyCustomSubmitButton(
-    text: String,
-    enabled: Boolean,
-    isLoading: Boolean,
-    onClick: (SocialProvider) -> Unit,
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth(0.7f)
-            .clickable(
-                enabled = !isLoading,
-                onClick = { onClick(SocialProvider.Google) },
-            )
-            .padding(vertical = 16.dp),
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surface,
+private fun AuthNavigation() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = AuthRoutesFlow,
+        enterTransition = { NavTransitions.enter },
+        exitTransition = { NavTransitions.exit },
+        popEnterTransition = { NavTransitions.popEnter },
+        popExitTransition = { NavTransitions.popExit },
     ) {
-        Button(
-            onClick = { onClick(SocialProvider.Google) },
-            modifier = Modifier.fillMaxWidth(0.7f),
-            enabled = enabled && !isLoading,
-            shape = MaterialTheme.shapes.small,
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onSecondary
-                )
-            } else {
-                Text(
-                    text = text.uppercase(), // Uppercase text
-                    style = MaterialTheme.typography.titleMedium // Larger text
-                )
-            }
-        }
+        authRoutesFlow(
+            navController = navController,
+            startDestination = LoginRoute,
+            onNavigateToHome = { /* Handled by AuthState change */ },
+        )
+    }
+}
+
+@Composable
+private fun MainAppNavigation() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = MainRoutesFlow,
+    ) {
+        mainRoutesFlow()
     }
 }

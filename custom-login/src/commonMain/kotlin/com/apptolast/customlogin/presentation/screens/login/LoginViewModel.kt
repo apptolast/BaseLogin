@@ -2,17 +2,20 @@ package com.apptolast.customlogin.presentation.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
-import com.apptolast.customlogin.domain.model.SocialProvider
-import com.apptolast.customlogin.domain.repository.AuthRepository
+import com.apptolast.customlogin.domain.model.Credentials
+import com.apptolast.customlogin.domain.model.IdentityProvider
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel for the Login screen.
- * Handles business logic and exposes state to the UI.
+ * ViewModel for the Login screen using MVI pattern.
+ * Handles business logic and exposes state and effects to the UI.
  */
 class LoginViewModel(
     private val authRepository: AuthRepository
@@ -21,87 +24,56 @@ class LoginViewModel(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
-    /**
-     * Updates the email value in the UI state.
-     */
-    fun onEmailChange(email: String) {
-        _uiState.update { it.copy(email = email, emailError = null, errorMessage = null) }
-    }
+    private val _effect = MutableSharedFlow<LoginEffect>()
+    val effect = _effect.asSharedFlow()
 
     /**
-     * Updates the password value in the UI state.
+     * The single entry point for all user actions from the UI.
      */
-    fun onPasswordChange(password: String) {
-        _uiState.update { it.copy(password = password, passwordError = null, errorMessage = null) }
-    }
-
-    /**
-     * Clears the general error message from the UI state.
-     */
-    fun onErrorMessageDismiss() {
-        _uiState.update { it.copy(errorMessage = null) }
-    }
-
-    /**
-     * Handles social sign-in for different providers.
-     * @param provider The social provider to sign in with.
-     */
-    fun onSocialSignIn(provider: SocialProvider) {
-        when (provider) {
-            is SocialProvider.Google -> signInWithGoogle()
-            is SocialProvider.Phone -> signInWithPhone()
-            is SocialProvider.Custom -> signInWithCustom(provider.id)
+    fun onAction(action: LoginAction) {
+        when (action) {
+            is LoginAction.EmailChanged -> onEmailChange(action.email)
+            is LoginAction.PasswordChanged -> onPasswordChange(action.password)
+            is LoginAction.SocialSignInClicked -> onSocialSignIn(action.provider)
+            is LoginAction.SignInClicked -> onSignInClicked()
         }
     }
 
-    private fun signInWithGoogle() {
-        // TODO: Implement Google sign-in logic
+    private fun onEmailChange(email: String) {
+        _uiState.update { it.copy(email = email, emailError = null) }
     }
 
-    private fun signInWithPhone() {
-        // TODO: Implement Phone sign-in logic
+    private fun onPasswordChange(password: String) {
+        _uiState.update { it.copy(password = password, passwordError = null) }
     }
 
-    private fun signInWithCustom(id: String) {
-        // TODO: Implement custom sign-in logic for $id
-    }
-
-    /**
-     * Executes the sign-in flow.
-     * It validates the input and calls the repository to sign in.
-     */
-    fun signInWithEmail() = with(_uiState) {
-
-        if (!validate(value)) return@with
-
+    private fun onSocialSignIn(provider: IdentityProvider) {
         viewModelScope.launch {
-            update { it.copy(isLoading = true, errorMessage = null) }
+            _uiState.update { it.copy(isLoading = true) }
 
-            when (val result = authRepository.signInWithEmail(value.email, value.password)) {
+            val credentials = Credentials.OAuthToken(provider = provider)
+            when (val result = authRepository.signIn(credentials)) {
                 is AuthResult.Success -> {
-                    update { it.copy(isLoading = false, user = result.session) }
+                    _uiState.update { it.copy(isLoading = false) }
+                    _effect.emit(LoginEffect.NavigateToHome)
                 }
+
                 is AuthResult.Failure -> {
-                    update { it.copy(isLoading = false, errorMessage = result.error.message) }
+                    _uiState.update { it.copy(isLoading = false) }
+                    _effect.emit(LoginEffect.ShowError("$provider: ${result.error.message}"))
                 }
+
                 else -> {
-                    update { it.copy(isLoading = false, errorMessage = "An unexpected error occurred") }
+                    _uiState.update { it.copy(isLoading = false) }
+                    _effect.emit(LoginEffect.ShowError("An unexpected error occurred"))
                 }
             }
         }
     }
 
-    private fun validate(state: LoginUiState): Boolean {
-        val emailError = when {
-            state.email.isBlank() -> "Email cannot be empty"
-            !"^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex().matches(state.email) -> "Invalid email format"
-            else -> null
-        }
-
-        val passwordError = when {
-            state.password.isBlank() -> "Password cannot be empty"
-            else -> null
-        }
+    private fun onSignInClicked() {
+        val state = _uiState.value
+        val (emailError, passwordError) = validate(state)
 
         _uiState.update {
             it.copy(
@@ -110,6 +82,44 @@ class LoginViewModel(
             )
         }
 
-        return emailError == null && passwordError == null
+        if (emailError == null && passwordError == null) {
+            viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = true) }
+
+                when (val result = authRepository.signIn(state.toEmailPasswordCredentials())) {
+                    is AuthResult.Success -> {
+                        _uiState.update { it.copy(isLoading = false) }
+                        _effect.emit(LoginEffect.NavigateToHome)
+                    }
+
+                    is AuthResult.Failure -> {
+                        _uiState.update { it.copy(isLoading = false) }
+                        _effect.emit(LoginEffect.ShowError(result.error.message))
+                    }
+
+                    else -> {
+                        _uiState.update { it.copy(isLoading = false) }
+                        _effect.emit(LoginEffect.ShowError("An unexpected error occurred"))
+                    }
+                }
+            }
+        }
+    }
+
+    private fun validate(state: LoginUiState): Pair<String?, String?> {
+        val emailError = when {
+            state.email.isBlank() -> "Email cannot be empty"
+            !"^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
+                .matches(state.email) -> "Invalid email format"
+
+            else -> null
+        }
+
+        val passwordError = when {
+            state.password.isBlank() -> "Password cannot be empty"
+            else -> null
+        }
+
+        return emailError to passwordError
     }
 }
