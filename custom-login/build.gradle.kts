@@ -57,6 +57,15 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
             }
         }
+
+        val androidMain by getting {
+            dependencies {
+                // Google Sign-In via Credential Manager
+                implementation(libs.androidx.credentials)
+                implementation(libs.androidx.credentials.play.services.auth)
+                implementation(libs.googleid)
+            }
+        }
     }
 }
 

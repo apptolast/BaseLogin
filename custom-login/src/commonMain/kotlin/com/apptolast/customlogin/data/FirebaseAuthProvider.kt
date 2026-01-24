@@ -216,10 +216,18 @@ class FirebaseAuthProvider(
         return AuthResult.Failure(AuthError.OperationNotAllowed("Reauthentication not implemented in this provider"))
     }
 
-    private fun IdentityProvider.toCredential(idToken: String): AuthCredential? {
+    private fun IdentityProvider.toCredential(tokenData: String): AuthCredential? {
         return when (this) {
-            is IdentityProvider.Google -> GoogleAuthProvider.credential(idToken, accessToken = null)
-            is IdentityProvider.GitHub -> GithubAuthProvider.credential(idToken)
+            is IdentityProvider.Google -> {
+                // Parse combined tokens: "idToken|||accessToken|||accessTokenValue"
+                // or just idToken for Android (which doesn't need accessToken)
+                val parts = tokenData.split("|||accessToken|||")
+                val idToken = parts[0]
+                val accessToken = parts.getOrNull(1)
+                GoogleAuthProvider.credential(idToken, accessToken)
+            }
+
+            is IdentityProvider.GitHub -> GithubAuthProvider.credential(tokenData)
             else -> null // Apple, Facebook, Phone have different flows
         }
     }

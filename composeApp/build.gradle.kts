@@ -52,11 +52,15 @@ kotlin {
                 implementation(libs.koin.compose.viewmodel.navigation)
             }
         }
+
         val androidMain by getting {
             dependencies {
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.androidx.splashscreen)
                 implementation(libs.koin.android)
+//                implementation(libs.compose.ui.tooling)
+//                debugImplementation(libs.compose.ui.test.manifest)
+
 
                 // GitLive Firebase (common)
                 implementation(libs.firebase.auth)
@@ -85,7 +89,12 @@ kotlin {
             extraOpts += listOf("-compiler-option", "-fmodules")
         }
 
-        pod("FirebaseAuth") {            
+        pod("FirebaseAuth") {
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
+
+        pod("GoogleSignIn") {
+            version = "~> 9.0"
             extraOpts += listOf("-compiler-option", "-fmodules")
         }
     }
