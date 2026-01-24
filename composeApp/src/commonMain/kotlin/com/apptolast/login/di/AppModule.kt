@@ -1,7 +1,7 @@
 package com.apptolast.login.di
 
-import com.apptolast.login.home.presentation.home.ProfileViewModel
-import com.apptolast.login.splash.SplashViewModel
+import com.apptolast.login.presentation.profile.ProfileViewModel
+import com.apptolast.login.SplashViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 

@@ -2,6 +2,7 @@ package com.apptolast.customlogin.presentation.screens.register
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -63,10 +64,11 @@ fun RegisterScreen(
                 )
             }
         }
-    ) {
+    ) { paddingValues ->
         RegisterContent(
             slots = registerSlots,
             state = uiState,
+            modifier = Modifier.padding(paddingValues),
             onAction = viewModel::onAction,
             onNavigateToLogin = onNavigateToLogin
         )
@@ -75,10 +77,11 @@ fun RegisterScreen(
 
 /**
  * A private composable that defines the layout and UI of the Register screen.
- * It is stateless regarding business logic and receives all data and callbacks as parameters.
+ * It is stateless and receives all data and callbacks as parameters.
  *
  * @param slots The [RegisterScreenSlots] instance defining the UI components.
  * @param state The current [RegisterUiState] of the screen.
+ * @param modifier The modifier to be applied to the root container, including padding from the Scaffold.
  * @param onAction A callback to send actions to the ViewModel.
  * @param onNavigateToLogin A callback to navigate to the login screen.
  */
@@ -86,10 +89,12 @@ fun RegisterScreen(
 private fun RegisterContent(
     slots: RegisterScreenSlots,
     state: RegisterUiState,
+    modifier: Modifier = Modifier,
     onAction: (RegisterAction) -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
     DefaultAuthContainer(
+        modifier = modifier,
         verticalArrangement = slots.layoutVerticalArrangement,
     ) {
         slots.header()

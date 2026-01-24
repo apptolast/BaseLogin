@@ -1,9 +1,9 @@
-package com.apptolast.login.splash
+package com.apptolast.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.AuthRepository
+import com.apptolast.customlogin.domain.model.AuthState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -24,7 +24,7 @@ class SplashViewModel(
     val authState: StateFlow<AuthState> = authRepository.observeAuthState()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Eagerly,
+            started = SharingStarted.Companion.Eagerly,
             initialValue = AuthState.Loading
         )
 
@@ -36,7 +36,7 @@ class SplashViewModel(
         .map { it !is AuthState.Loading }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Eagerly,
+            started = SharingStarted.Companion.Eagerly,
             initialValue = false
         )
 }

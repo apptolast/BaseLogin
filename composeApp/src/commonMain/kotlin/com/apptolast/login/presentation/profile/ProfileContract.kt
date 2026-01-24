@@ -1,4 +1,4 @@
-package com.apptolast.login.home.presentation.home
+package com.apptolast.login.presentation.profile
 
 import com.apptolast.customlogin.domain.model.UserSession
 

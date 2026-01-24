@@ -5,7 +5,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
-import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.presentation.screens.forgotpassword.ForgotPasswordScreen
 import com.apptolast.customlogin.presentation.screens.login.LoginScreen
 import com.apptolast.customlogin.presentation.screens.register.RegisterScreen

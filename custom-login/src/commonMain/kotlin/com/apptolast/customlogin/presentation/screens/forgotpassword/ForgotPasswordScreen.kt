@@ -45,6 +45,7 @@ import org.koin.compose.viewmodel.koinViewModel
  * @param slots An instance of [ForgotPasswordScreenSlots] to customize the UI components.
  * @param onNavigateBack A callback to navigate to the previous screen.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordScreen(
     viewModel: ForgotPasswordViewModel = koinViewModel(),
@@ -53,6 +54,7 @@ fun ForgotPasswordScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+//    FIXME: la logica de isSuccess deberia estar en el viewModel
     var isSuccess by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -69,37 +71,6 @@ fun ForgotPasswordScreen(
         }
     }
 
-    ForgotPasswordContent(
-        slots = slots,
-        state = uiState,
-        isSuccess = isSuccess,
-        snackbarHostState = snackbarHostState,
-        onAction = viewModel::onAction,
-        onNavigateBack = onNavigateBack
-    )
-}
-
-/**
- * A private composable that defines the layout and UI for the Forgot Password screen.
- * It is stateless regarding business logic and field states, receiving all data and callbacks.
- *
- * @param slots The [ForgotPasswordScreenSlots] defining the UI components.
- * @param state The current [ForgotPasswordUiState] of the screen.
- * @param isSuccess A flag indicating if a password reset email was sent successfully.
- * @param snackbarHostState The state for the snackbar host.
- * @param onAction A callback to send actions to the ViewModel.
- * @param onNavigateBack A callback to navigate to the previous screen.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ForgotPasswordContent(
-    slots: ForgotPasswordScreenSlots,
-    state: ForgotPasswordUiState,
-    isSuccess: Boolean,
-    snackbarHostState: SnackbarHostState,
-    onAction: (ForgotPasswordAction) -> Unit,
-    onNavigateBack: () -> Unit
-) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -124,42 +95,69 @@ private fun ForgotPasswordContent(
                 )
             }
         },
+        modifier = Modifier.consumeWindowInsets(TopAppBarDefaults.windowInsets)
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            AnimatedContent(
-                targetState = isSuccess,
-            ) { success ->
-                if (success) {
-                    slots.successContent()
-                } else {
-                    DefaultAuthContainer(
-                        verticalArrangement = slots.layoutVerticalArrangement,
-                    ) {
+        ForgotPasswordContent(
+            slots = slots,
+            state = uiState,
+            modifier = Modifier.padding(paddingValues),
+            isSuccess = isSuccess,
+            onAction = viewModel::onAction
+        )
+    }
+}
 
-                        slots.header()
+/**
+ * A private composable that defines the layout and UI for the Forgot Password screen.
+ * It is stateless and receives all data and callbacks as parameters.
+ *
+ * @param slots The [ForgotPasswordScreenSlots] defining the UI components.
+ * @param state The current [ForgotPasswordUiState] of the screen.
+ * @param isSuccess A flag indicating if a password reset email was sent successfully.
+ * @param modifier The modifier to be applied to the root container, including padding from the Scaffold.
+ * @param onAction A callback to send actions to the ViewModel.
+ */
+@Composable
+private fun ForgotPasswordContent(
+    slots: ForgotPasswordScreenSlots,
+    state: ForgotPasswordUiState,
+    isSuccess: Boolean,
+    modifier: Modifier = Modifier,
+    onAction: (ForgotPasswordAction) -> Unit,
+) {
+    Box(modifier = modifier) {
+        AnimatedContent(
+            targetState = isSuccess,
+        ) { success ->
+            if (success) {
+                slots.successContent()
+            } else {
+                DefaultAuthContainer(
+                    verticalArrangement = slots.layoutVerticalArrangement,
+                ) {
+                    slots.header()
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                        slots.description()
+                    slots.description()
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                        slots.emailField(
-                            state.email,
-                            { onAction(ForgotPasswordAction.EmailChanged(it)) },
-                            state.emailError,
-                            !state.isLoading
-                        )
+                    slots.emailField(
+                        state.email,
+                        { onAction(ForgotPasswordAction.EmailChanged(it)) },
+                        state.emailError,
+                        !state.isLoading
+                    )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                        slots.submitButton(
-                            { onAction(ForgotPasswordAction.SendResetEmailClicked) },
-                            state.isLoading,
-                            state.email.isNotBlank() && !state.isLoading,
-                            stringResource(Res.string.forgot_password_screen_send_button)
-                        )
-                    }
+                    slots.submitButton(
+                        { onAction(ForgotPasswordAction.SendResetEmailClicked) },
+                        state.isLoading,
+                        state.email.isNotBlank() && !state.isLoading,
+                        stringResource(Res.string.forgot_password_screen_send_button)
+                    )
                 }
             }
         }

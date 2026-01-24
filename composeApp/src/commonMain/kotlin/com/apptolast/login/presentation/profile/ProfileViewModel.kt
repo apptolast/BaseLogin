@@ -1,4 +1,4 @@
-package com.apptolast.login.home.presentation.home
+package com.apptolast.login.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

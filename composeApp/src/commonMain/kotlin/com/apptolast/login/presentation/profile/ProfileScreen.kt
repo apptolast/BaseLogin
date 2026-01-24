@@ -1,4 +1,4 @@
-package com.apptolast.login.home.presentation.home
+package com.apptolast.login.presentation.profile
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box

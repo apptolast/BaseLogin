@@ -111,10 +111,10 @@ fun ResetPasswordScreen(
         ResetPasswordContent(
             slots = resetPasswordSlots,
             state = uiState,
+            modifier = Modifier.padding(paddingValues),
             isSuccess = isSuccess,
             onAction = viewModel::onAction,
             onNavigateBack = onNavigateBack,
-            modifier = Modifier.padding(paddingValues)
         )
     }
 }
@@ -134,9 +134,9 @@ private fun ResetPasswordContent(
     slots: ResetPasswordScreenSlots,
     state: ResetPasswordUiState,
     isSuccess: Boolean,
+    modifier: Modifier = Modifier,
     onAction: (ResetPasswordAction) -> Unit,
     onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
     AnimatedContent(
         targetState = isSuccess,

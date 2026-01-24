@@ -1,28 +1,17 @@
 package com.apptolast.customlogin.presentation.screens.login
 
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
@@ -80,10 +69,11 @@ fun LoginScreen(
                 )
             }
         }
-    ) {
+    ) { paddingValues ->
         LoginContent(
             slots = loginSlots,
             state = uiState,
+            modifier = Modifier.padding(paddingValues),
             onAction = viewModel::onAction,
             onNavigateToRegister = onNavigateToRegister,
             onNavigateToForgotPassword = onNavigateToResetPassword,
@@ -103,13 +93,14 @@ fun LoginScreen(
  */
 @Composable
 private fun LoginContent(
-    slots: LoginScreenSlots = LoginScreenSlots(),
+    slots: LoginScreenSlots,
     state: LoginUiState,
+    modifier: Modifier = Modifier,
     onAction: (LoginAction) -> Unit = {},
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},
 ) {
-    DefaultAuthContainer {
+    DefaultAuthContainer(modifier = modifier) {
         slots.header()
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -158,6 +149,7 @@ private fun LoginContent(
 @Composable
 private fun LoginScreenPreview() {
     LoginContent(
+        slots = LoginScreenSlots(),
         state = LoginUiState(
             email = "test@apptolast.com",
             password = "Password123",
@@ -171,6 +163,7 @@ private fun LoginScreenPreview() {
 @Composable
 private fun LoginScreenLoadingPreview() {
     LoginContent(
+        slots = LoginScreenSlots(),
         state = LoginUiState(
             email = "test@apptolast.com",
             password = "Password123",
