@@ -8,4 +8,21 @@
     <string name="home_screen_email_not_verified">Not Verified</string>
     <string name="home_screen_sign_out_button">Sign Out</string>
 
+    <!-- Profile Screen -->
+    <string name="profile_screen_title">Profile</string>
+    <string name="profile_screen_default_username">User</string>
+    <string name="profile_screen_email_verified">Account verified</string>
+    <string name="profile_screen_email_not_verified">Email not verified</string>
+    <string name="profile_screen_option_account_details_title">Account Details</string>
+    <string name="profile_screen_option_account_details_subtitle">Manage your data</string>
+    <string name="profile_screen_option_settings_title">Settings</string>
+    <string name="profile_screen_option_settings_subtitle">Privacy and notifications</string>
+    <string name="profile_screen_option_security_title">Security</string>
+    <string name="profile_screen_option_security_subtitle">Change password</string>
+    <string name="profile_screen_sign_out_button">Sign Out</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_profile_picture">Profile Picture</string>
+    <string name="cd_profile_icon_default">Default profile icon</string>
+
 </resources>

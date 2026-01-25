@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.HeaderContent
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.atl_isotipo_basic
+import login.custom_login.generated.resources.common_app_subtitle
 import login.custom_login.generated.resources.common_continue_button
 import login.custom_login.generated.resources.forgot_password_screen_description
 import login.custom_login.generated.resources.forgot_password_screen_success_description
@@ -53,8 +54,8 @@ import org.jetbrains.compose.resources.stringResource
 fun DefaultHeader() {
     HeaderContent(
         drawableResource = Res.drawable.atl_isotipo_basic,
-        appName = "AppToLast", // App name might not need to be in strings.xml if it's a brand name
-        appSubtitle = "App to Last example auth",
+        appName = "AppToLast", // Brand name - not localized
+        appSubtitle = stringResource(Res.string.common_app_subtitle),
     )
 }
 

@@ -25,7 +25,10 @@ import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.google_icon
+import login.custom_login.generated.resources.login_google_button
+import login.custom_login.generated.resources.login_phone_button
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * A generic, styled button for social login providers.
@@ -76,7 +79,7 @@ fun GoogleSocialButton(
     enabled: Boolean
 ) {
     DefaultSocialButton(
-        text = "Sign in with Google",
+        text = stringResource(Res.string.login_google_button),
         icon = painterResource(Res.drawable.google_icon),
         onClick = onClick,
         isLoading = isLoading,
@@ -94,7 +97,7 @@ fun PhoneSocialButton(
     enabled: Boolean
 ) {
     DefaultSocialButton(
-        text = "Sign in with Phone",
+        text = stringResource(Res.string.login_phone_button),
         icon = rememberVectorPainter(image = Icons.Default.Phone),
         onClick = onClick,
         isLoading = isLoading,

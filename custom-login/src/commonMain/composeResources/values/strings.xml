@@ -5,19 +5,29 @@
     <string name="common_password_label">Password</string>
     <string name="common_full_name_label">Full Name</string>
     <string name="common_continue_button">Continue</string>
+    <string name="common_divider_or">OR</string>
+    <string name="common_app_subtitle">App to Last example auth</string>
 
     <!-- Content Descriptions -->
     <string name="cd_show_password">Show password</string>
     <string name="cd_hide_password">Hide password</string>
     <string name="cd_navigate_back">Back</string>
 
+    <!-- Welcome Screen -->
+    <string name="welcome_screen_title">Welcome back!</string>
+    <string name="welcome_screen_subtitle">Your secure access starts here. Create an account or sign in to continue.</string>
+    <string name="welcome_screen_create_account_button">Create Account</string>
+    <string name="welcome_screen_sign_in_button">Sign In</string>
+
     <!-- Login Screen -->
     <string name="login_screen_sign_in_button">Sign In</string>
     <string name="login_screen_forgot_password_link">Forgot Password?</string>
-    <string name="login_screen_no_account_text">Don't have an account?</string>
+    <string name="login_screen_no_account_text">Don\'t have an account?</string>
     <string name="login_screen_sign_up_link">Sign Up</string>
     <string name="login_google_button">Sign in with Google</string>
-    <string name="login_loading_text"> "Signing in..."</string>
+    <string name="login_phone_button">Sign in with Phone</string>
+    <string name="login_loading_text">Signing in...</string>
+    <string name="login_register_link">Register</string>
 
     <!-- Register Screen -->
     <string name="register_screen_register_button">Register</string>
