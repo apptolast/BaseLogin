@@ -2,6 +2,8 @@ package com.apptolast.customlogin.di
 
 import com.apptolast.customlogin.data.AuthRepositoryImpl
 import com.apptolast.customlogin.data.FirebaseAuthProvider
+import com.apptolast.customlogin.data.FirebaseAuthService
+import com.apptolast.customlogin.data.FirebaseAuthServiceImpl
 import com.apptolast.customlogin.domain.AuthProvider
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.GoogleSignInConfig
@@ -16,6 +18,9 @@ import org.koin.dsl.module
 internal fun dataModule(googleSignInConfig: GoogleSignInConfig) = module {
     // Firebase Auth instance from GitLive
     single { Firebase.auth }
+
+    // Firebase Auth Service (abstraction layer for testing)
+    single<FirebaseAuthService> { FirebaseAuthServiceImpl(get()) }
 
     // Google instance from GitLive
     single { googleSignInConfig }

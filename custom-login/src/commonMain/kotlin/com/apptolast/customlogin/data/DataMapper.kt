@@ -5,15 +5,13 @@ import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.UserSession
 import dev.gitlive.firebase.auth.AuthCredential
-import dev.gitlive.firebase.auth.FirebaseAuthException
-import dev.gitlive.firebase.auth.FirebaseUser
 import dev.gitlive.firebase.auth.GithubAuthProvider
 import dev.gitlive.firebase.auth.GoogleAuthProvider
 
 /**
- * Maps a [FirebaseUser] to a domain [UserSession] object.
+ * Maps a [UserWrapper] to a domain [UserSession] object.
  */
-internal suspend fun FirebaseUser.toUserSession(accessToken: String? = null): UserSession? {
+internal suspend fun UserWrapper.toUserSession(accessToken: String? = null): UserSession? {
     return try {
         UserSession(
             userId = uid,
@@ -32,9 +30,10 @@ internal suspend fun FirebaseUser.toUserSession(accessToken: String? = null): Us
 }
 
 /**
- * Maps a [FirebaseAuthException] to a domain [AuthError] object.
+ * Maps a [Throwable] to a domain [AuthError] object based on message patterns.
+ * This works with Firebase exceptions and any other exception types for testability.
  */
-internal fun FirebaseAuthException.toAuthError(): AuthError {
+internal fun Throwable.toAuthError(): AuthError {
     val errorMessage = message ?: "Authentication error"
     return when {
         errorMessage.contains("INVALID_LOGIN_CREDENTIALS", ignoreCase = true) ||

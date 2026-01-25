@@ -8,8 +8,6 @@ import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.getSocialIdToken
-import dev.gitlive.firebase.auth.FirebaseAuth
-import dev.gitlive.firebase.auth.FirebaseAuthException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -20,7 +18,7 @@ import kotlinx.coroutines.flow.onStart
  * Uses GitLive Firebase SDK for multiplatform support.
  */
 class FirebaseAuthProvider(
-    private val firebaseAuth: FirebaseAuth
+    private val authService: FirebaseAuthService
 ) : AuthProvider {
 
     override val id: String = PROVIDER_ID
@@ -36,17 +34,15 @@ class FirebaseAuthProvider(
 
     private suspend fun signInWithEmail(credentials: Credentials.EmailPassword): AuthResult {
         return try {
-            val result = firebaseAuth.signInWithEmailAndPassword(
+            val result = authService.signInWithEmailAndPassword(
                 credentials.email,
                 credentials.password
             )
             result.user?.toUserSession()?.let { session ->
                 AuthResult.Success(session)
             } ?: AuthResult.Failure(AuthError.Unknown("No user returned after sign in"))
-        } catch (e: FirebaseAuthException) {
-            AuthResult.Failure(e.toAuthError())
         } catch (e: Exception) {
-            AuthResult.Failure(AuthError.Unknown(e.message ?: "Sign in failed", e))
+            AuthResult.Failure(e.toAuthError())
         }
     }
 
@@ -58,20 +54,18 @@ class FirebaseAuthProvider(
             val credential = provider.toCredential(idToken)
                 ?: return AuthResult.Failure(AuthError.OperationNotAllowed("Provider not supported: ${provider.id}"))
 
-            val result = firebaseAuth.signInWithCredential(credential)
+            val result = authService.signInWithCredential(credential)
             result.user?.toUserSession()?.let { session ->
                 AuthResult.Success(session)
             } ?: AuthResult.Failure(AuthError.Unknown("No user returned after social sign in"))
-        } catch (e: FirebaseAuthException) {
-            AuthResult.Failure(e.toAuthError())
         } catch (e: Exception) {
-            AuthResult.Failure(AuthError.Unknown(e.message ?: "OAuth sign in failed", e))
+            AuthResult.Failure(e.toAuthError())
         }
     }
 
     override suspend fun signUp(data: SignUpData): AuthResult {
         return try {
-            val result = firebaseAuth.createUserWithEmailAndPassword(
+            val result = authService.createUserWithEmailAndPassword(
                 data.email,
                 data.password
             )
@@ -83,16 +77,14 @@ class FirebaseAuthProvider(
                     AuthResult.Success(session)
                 } ?: AuthResult.Failure(AuthError.Unknown("No user returned after registration"))
             } ?: AuthResult.Failure(AuthError.Unknown("No user returned after registration"))
-        } catch (e: FirebaseAuthException) {
-            AuthResult.Failure(e.toAuthError())
         } catch (e: Exception) {
-            AuthResult.Failure(AuthError.Unknown(e.message ?: "Registration failed", e))
+            AuthResult.Failure(e.toAuthError())
         }
     }
 
     override suspend fun signOut(): Result<Unit> {
         return try {
-            firebaseAuth.signOut()
+            authService.signOut()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -101,44 +93,37 @@ class FirebaseAuthProvider(
 
     override suspend fun sendPasswordResetEmail(email: String): AuthResult {
         return try {
-            firebaseAuth.sendPasswordResetEmail(email)
+            authService.sendPasswordResetEmail(email)
             AuthResult.PasswordResetSent
-        } catch (e: FirebaseAuthException) {
-            AuthResult.Failure(e.toAuthError())
         } catch (e: Exception) {
-            AuthResult.Failure(AuthError.Unknown(e.message ?: "Failed to send reset email", e))
+            AuthResult.Failure(e.toAuthError())
         }
     }
 
     override suspend fun confirmPasswordReset(code: String, newPassword: String): AuthResult {
         return try {
-            firebaseAuth.confirmPasswordReset(code, newPassword)
+            authService.confirmPasswordReset(code, newPassword)
             AuthResult.PasswordResetSuccess
-        } catch (e: FirebaseAuthException) {
-            AuthResult.Failure(e.toAuthError())
         } catch (e: Exception) {
-            AuthResult.Failure(AuthError.Unknown(e.message ?: "Failed to reset password", e))
+            AuthResult.Failure(e.toAuthError())
         }
     }
 
     override fun observeAuthState(): Flow<AuthState> {
-        return firebaseAuth.authStateChanged
+        return authService.authStateChanged
             .map { user ->
                 user?.toUserSession()?.let { AuthState.Authenticated(it) }
                     ?: AuthState.Unauthenticated
             }
             .onStart { emit(AuthState.Loading) }
             .catch { e ->
-                val error = (e as? FirebaseAuthException)?.toAuthError() ?: AuthError.Unknown(
-                    e.message ?: "An unknown error occurred", e
-                )
-                emit(AuthState.Error(error))
+                emit(AuthState.Error(e.toAuthError()))
             }
     }
 
     override suspend fun refreshSession(): AuthResult {
         return try {
-            val user = firebaseAuth.currentUser
+            val user = authService.currentUser
             if (user != null) {
                 val token = user.getIdToken(true)
                 user.toUserSession(accessToken = token)?.let { session ->
@@ -153,12 +138,12 @@ class FirebaseAuthProvider(
     }
 
     override suspend fun isSignedIn(): Boolean {
-        return firebaseAuth.currentUser != null
+        return authService.currentUser != null
     }
 
     override suspend fun getIdToken(forceRefresh: Boolean): String? {
         return try {
-            firebaseAuth.currentUser?.getIdToken(forceRefresh)
+            authService.currentUser?.getIdToken(forceRefresh)
         } catch (e: Exception) {
             null
         }
@@ -166,7 +151,7 @@ class FirebaseAuthProvider(
 
     override suspend fun deleteAccount(): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.delete()
+            authService.currentUser?.delete()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -175,7 +160,7 @@ class FirebaseAuthProvider(
 
     override suspend fun updateDisplayName(displayName: String): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.updateProfile(displayName = displayName)
+            authService.currentUser?.updateProfile(displayName = displayName)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -184,7 +169,7 @@ class FirebaseAuthProvider(
 
     override suspend fun updateEmail(newEmail: String): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.verifyBeforeUpdateEmail(newEmail)
+            authService.currentUser?.verifyBeforeUpdateEmail(newEmail)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -193,7 +178,7 @@ class FirebaseAuthProvider(
 
     override suspend fun updatePassword(newPassword: String): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.updatePassword(newPassword)
+            authService.currentUser?.updatePassword(newPassword)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -202,7 +187,7 @@ class FirebaseAuthProvider(
 
     override suspend fun sendEmailVerification(): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.sendEmailVerification()
+            authService.currentUser?.sendEmailVerification()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
