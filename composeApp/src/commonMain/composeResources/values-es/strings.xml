@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Login</string>
+
+    <!-- Home Screen -->
+    <string name="home_screen_title">Inicio</string>
+    <string name="home_screen_welcome">Bienvenido</string>
+    <string name="home_screen_email_verified">Verificado</string>
+    <string name="home_screen_email_not_verified">No verificado</string>
+    <string name="home_screen_sign_out_button">Cerrar sesión</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_screen_title">Perfil</string>
+    <string name="profile_screen_default_username">Usuario</string>
+    <string name="profile_screen_email_verified">Cuenta verificada</string>
+    <string name="profile_screen_email_not_verified">Correo no verificado</string>
+    <string name="profile_screen_option_account_details_title">Detalles de cuenta</string>
+    <string name="profile_screen_option_account_details_subtitle">Gestiona tus datos</string>
+    <string name="profile_screen_option_settings_title">Ajustes</string>
+    <string name="profile_screen_option_settings_subtitle">Privacidad y notificaciones</string>
+    <string name="profile_screen_option_security_title">Seguridad</string>
+    <string name="profile_screen_option_security_subtitle">Cambiar contraseña</string>
+    <string name="profile_screen_sign_out_button">Cerrar sesión</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_profile_picture">Foto de perfil</string>
+    <string name="cd_profile_icon_default">Icono de perfil predeterminado</string>
+
+</resources>

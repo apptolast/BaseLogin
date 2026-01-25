@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.presentation.navigation.AuthRoutesFlow
 import com.apptolast.customlogin.presentation.navigation.LoginRoute
@@ -25,6 +27,14 @@ import org.koin.compose.viewmodel.koinViewModel
  */
 @Composable
 fun App(splashViewModel: SplashViewModel = koinViewModel()) {
+    // Configure Coil singleton ImageLoader with Ktor network support
+    setSingletonImageLoaderFactory { context ->
+        coil3.ImageLoader.Builder(context)
+            .components {
+                add(KtorNetworkFetcherFactory())
+            }
+            .build()
+    }
 
     SampleAppTheme {
 

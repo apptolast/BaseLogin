@@ -54,7 +54,7 @@ fun ForgotPasswordScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-//    FIXME: la logica de isSuccess deberia estar en el viewModel
+    // FIXME: The isSuccess logic should be in the ViewModel
     var isSuccess by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {

@@ -6,15 +6,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.login_register_link
+import login.custom_login.generated.resources.login_screen_no_account_text
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun RegisterLinkButtonContent(onNavigateToRegister: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
-            text = "Don't have an account?",
+            text = stringResource(Res.string.login_screen_no_account_text),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        TextButton(onClick = onNavigateToRegister) { Text("Register") }
+        TextButton(onClick = onNavigateToRegister) {
+            Text(stringResource(Res.string.login_register_link))
+        }
     }
 }

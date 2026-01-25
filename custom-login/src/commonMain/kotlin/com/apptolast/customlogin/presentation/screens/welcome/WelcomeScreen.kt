@@ -33,6 +33,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.welcome_screen_create_account_button
+import login.custom_login.generated.resources.welcome_screen_sign_in_button
+import login.custom_login.generated.resources.welcome_screen_subtitle
+import login.custom_login.generated.resources.welcome_screen_title
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -44,9 +50,9 @@ fun WelcomeScreen(
     var buttonsVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        delay(150) // Más rápido
+        delay(150) // Faster animation
         headerVisible = true
-        delay(150) // Más rápido
+        delay(150) // Faster animation
         buttonsVisible = true
     }
 
@@ -57,22 +63,21 @@ fun WelcomeScreen(
             .verticalScroll(rememberScrollState()),
         contentAlignment = Alignment.Center,
     ) {
-        // ---------- TÍTULO ----------
+        // ---------- TITLE ----------
         AnimatedVisibility(
             visible = headerVisible,
             enter = fadeIn(
-                animationSpec = tween(durationMillis = 500) // Más rápido
+                animationSpec = tween(durationMillis = 500) // Faster animation
             ) + slideInHorizontally(
-                initialOffsetX = { it / 4 }, // Menos offset
-                animationSpec = tween(durationMillis = 500) // Más rápido
+                initialOffsetX = { it / 4 }, // Less offset
+                animationSpec = tween(durationMillis = 500) // Faster animation
             )
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Welcome back! \uD83D\uDE04",
+                    text = stringResource(Res.string.welcome_screen_title) + " \uD83D\uDE04",
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontWeight = FontWeight.Bold,
-//                        lineHeight = MaterialTheme.typography.displaySmall.lineHeight * 1.1
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start,
@@ -80,7 +85,7 @@ fun WelcomeScreen(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Your secure access starts here. Create an account or sign in to continue.",
+                    text = stringResource(Res.string.welcome_screen_subtitle),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Start,
@@ -95,9 +100,9 @@ fun WelcomeScreen(
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
             enter = fadeIn(
-                animationSpec = tween(durationMillis = 400) // Más rápido
+                animationSpec = tween(durationMillis = 400) // Faster animation
             ) + slideInHorizontally(
-                initialOffsetX = { it / 5 }, // Menos offset
+                initialOffsetX = { it / 5 }, // Less offset
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
                     stiffness = Spring.StiffnessMedium
@@ -105,7 +110,7 @@ fun WelcomeScreen(
             )
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                // Botón principal - Create Account
+                // Primary button - Create Account
                 Button(
                     onClick = onNavigateToRegister,
                     modifier = Modifier
@@ -118,7 +123,7 @@ fun WelcomeScreen(
                     )
                 ) {
                     Text(
-                        text = "Create Account",
+                        text = stringResource(Res.string.welcome_screen_create_account_button),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -126,7 +131,7 @@ fun WelcomeScreen(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Botón secundario - Sign In
+                // Secondary button - Sign In
                 OutlinedButton(
                     onClick = onNavigateToLogin,
                     modifier = Modifier
@@ -138,7 +143,7 @@ fun WelcomeScreen(
                     )
                 ) {
                     Text(
-                        text = "Sign In",
+                        text = stringResource(Res.string.welcome_screen_sign_in_button),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium
                     )

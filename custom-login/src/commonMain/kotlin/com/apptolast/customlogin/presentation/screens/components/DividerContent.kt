@@ -10,13 +10,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.common_divider_or
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DividerContent() {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         HorizontalDivider(modifier = Modifier.weight(1f))
         Text(
-            " OR ",
+            " ${stringResource(Res.string.common_divider_or)} ",
             modifier = Modifier.padding(horizontal = 8.dp),
             style = MaterialTheme.typography.bodySmall
         )

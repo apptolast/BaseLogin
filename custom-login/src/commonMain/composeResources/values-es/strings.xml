@@ -1,0 +1,58 @@
+<resources>
+    <!-- Common -->
+    <string name="common_error">Error</string>
+    <string name="common_email_label">Correo electrónico</string>
+    <string name="common_password_label">Contraseña</string>
+    <string name="common_full_name_label">Nombre completo</string>
+    <string name="common_continue_button">Continuar</string>
+    <string name="common_divider_or">O</string>
+    <string name="common_app_subtitle">Ejemplo de autenticación App to Last</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_show_password">Mostrar contraseña</string>
+    <string name="cd_hide_password">Ocultar contraseña</string>
+    <string name="cd_navigate_back">Volver</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_screen_title">¡Bienvenido de nuevo!</string>
+    <string name="welcome_screen_subtitle">Tu acceso seguro comienza aquí. Crea una cuenta o inicia sesión para continuar.</string>
+    <string name="welcome_screen_create_account_button">Crear cuenta</string>
+    <string name="welcome_screen_sign_in_button">Iniciar sesión</string>
+
+    <!-- Login Screen -->
+    <string name="login_screen_sign_in_button">Iniciar sesión</string>
+    <string name="login_screen_forgot_password_link">¿Olvidaste tu contraseña?</string>
+    <string name="login_screen_no_account_text">¿No tienes una cuenta?</string>
+    <string name="login_screen_sign_up_link">Regístrate</string>
+    <string name="login_google_button">Iniciar sesión con Google</string>
+    <string name="login_phone_button">Iniciar sesión con teléfono</string>
+    <string name="login_loading_text">Iniciando sesión...</string>
+    <string name="login_register_link">Registrarse</string>
+
+    <!-- Register Screen -->
+    <string name="register_screen_register_button">Registrarse</string>
+    <string name="register_screen_confirm_password_label">Confirmar contraseña</string>
+    <string name="register_screen_terms_prefix">Acepto los</string>
+    <string name="register_screen_terms_and_conditions">Términos y Condiciones</string>
+    <string name="register_screen_terms_conjunction">y la</string>
+    <string name="register_screen_privacy_policy">Política de Privacidad</string>
+    <string name="register_screen_already_have_account_text">¿Ya tienes una cuenta?</string>
+    <string name="register_screen_sign_in_link">Inicia sesión</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_screen_title">Olvidé mi contraseña</string>
+    <string name="forgot_password_screen_description">Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</string>
+    <string name="forgot_password_screen_send_button">Enviar enlace</string>
+    <string name="forgot_password_screen_success_title">Revisa tu bandeja de entrada</string>
+    <string name="forgot_password_screen_success_description">Hemos enviado un enlace para restablecer tu contraseña a tu correo electrónico.</string>
+
+    <!-- Reset Password Screen -->
+    <string name="reset_password_screen_title">Crear nueva contraseña</string>
+    <string name="reset_password_screen_new_password_label">Nueva contraseña</string>
+    <string name="reset_password_screen_confirm_new_password_label">Confirmar nueva contraseña</string>
+    <string name="reset_password_screen_description">Tu nueva contraseña debe ser diferente a las contraseñas utilizadas anteriormente.</string>
+    <string name="reset_password_screen_reset_button">Restablecer contraseña</string>
+    <string name="reset_password_screen_success_title">¡Contraseña restablecida!</string>
+    <string name="reset_password_screen_success_description">Ahora puedes usar tu nueva contraseña para iniciar sesión en tu cuenta.</string>
+
+</resources>

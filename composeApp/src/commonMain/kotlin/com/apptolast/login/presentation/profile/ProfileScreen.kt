@@ -1,5 +1,6 @@
 package com.apptolast.login.presentation.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,8 +48,26 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.compose.SubcomposeAsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.apptolast.customlogin.domain.model.UserSession
+import login.composeapp.generated.resources.Res
+import login.composeapp.generated.resources.cd_profile_icon_default
+import login.composeapp.generated.resources.cd_profile_picture
+import login.composeapp.generated.resources.profile_screen_default_username
+import login.composeapp.generated.resources.profile_screen_email_not_verified
+import login.composeapp.generated.resources.profile_screen_email_verified
+import login.composeapp.generated.resources.profile_screen_option_account_details_subtitle
+import login.composeapp.generated.resources.profile_screen_option_account_details_title
+import login.composeapp.generated.resources.profile_screen_option_security_subtitle
+import login.composeapp.generated.resources.profile_screen_option_security_title
+import login.composeapp.generated.resources.profile_screen_option_settings_subtitle
+import login.composeapp.generated.resources.profile_screen_option_settings_title
+import login.composeapp.generated.resources.profile_screen_sign_out_button
+import login.composeapp.generated.resources.profile_screen_title
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +82,7 @@ fun ProfileScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Profile",
+                        text = stringResource(Res.string.profile_screen_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -98,27 +117,32 @@ private fun ProfileContent(
     onAction: (ProfileAction) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val defaultUsername = stringResource(Res.string.profile_screen_default_username)
+    val verifiedText = stringResource(Res.string.profile_screen_email_verified)
+    val notVerifiedText = stringResource(Res.string.profile_screen_email_not_verified)
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // --- HEADER: FOTO Y NOMBRE ---
+        // --- HEADER: PHOTO AND NAME ---
         Box(contentAlignment = Alignment.BottomEnd) {
-            AsyncImage(
-                model = userSession.photoUrl ?: "https://via.placeholder.com/150",
-                contentDescription = "Profile Picture",
-                modifier = Modifier.size(120.dp).clip(CircleShape).border(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    shape = CircleShape
-                ),
-                contentScale = ContentScale.Crop,
+            ProfileImage(
+                photoUrl = userSession.photoUrl,
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = CircleShape
+                    )
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
-        // Badge de edición
+        // Edit badge
         Surface(
             modifier = Modifier.size(32.dp),
             shape = CircleShape,
@@ -133,7 +157,7 @@ private fun ProfileContent(
         }
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = userSession.displayName ?: "Usuario",
+            text = userSession.displayName ?: defaultUsername,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.ExtraBold
         )
@@ -143,7 +167,7 @@ private fun ProfileContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(modifier = Modifier.height(32.dp))
-        // --- CARD: ESTADO DE VERIFICACIÓN ---
+        // --- CARD: VERIFICATION STATUS ---
         val statusColor = if (userSession.isEmailVerified) Color(0xFF2E7D32) else Color(0xFFC62828)
         val bgColor =
             if (userSession.isEmailVerified) Color(0xFFE8F5E9) else Color(0xFFFFEBEE)
@@ -163,8 +187,7 @@ private fun ProfileContent(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text =
-                        if (userSession.isEmailVerified) "Cuenta verificada" else "Correo no verificado",
+                    text = if (userSession.isEmailVerified) verifiedText else notVerifiedText,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = statusColor
@@ -172,7 +195,7 @@ private fun ProfileContent(
             }
         }
         Spacer(modifier = Modifier.height(24.dp))
-        // --- SECCIÓN DE OPCIONES ---
+        // --- OPTIONS SECTION ---
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
@@ -183,30 +206,29 @@ private fun ProfileContent(
             Column(modifier = Modifier.padding(16.dp)) {
                 ProfileOptionItem(
                     icon = Icons.Default.Person,
-                    title = "Detalles de cuenta",
-                    subtitle = "Gestiona tus datos"
+                    title = stringResource(Res.string.profile_screen_option_account_details_title),
+                    subtitle = stringResource(Res.string.profile_screen_option_account_details_subtitle)
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
                 ProfileOptionItem(
-                    icon =
-                        Icons.Default.Settings,
-                    title = "Ajustes",
-                    subtitle = "Privacidad y notificaciones"
+                    icon = Icons.Default.Settings,
+                    title = stringResource(Res.string.profile_screen_option_settings_title),
+                    subtitle = stringResource(Res.string.profile_screen_option_settings_subtitle)
                 )
                 HorizontalDivider(
-                    modifier =
-                        Modifier.padding(vertical = 8.dp), thickness = 0.5.dp
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    thickness = 0.5.dp
                 )
                 ProfileOptionItem(
                     icon = Icons.Default.Security,
-                    title = "Seguridad",
-                    subtitle = "Cambiar contraseña"
+                    title = stringResource(Res.string.profile_screen_option_security_title),
+                    subtitle = stringResource(Res.string.profile_screen_option_security_subtitle)
                 )
             }
         }
-        // Espaciador flexible para empujar el botón hacia abajo
+        // Flexible spacer to push the button down
         Spacer(modifier = Modifier.height(32.dp))
-        // --- BOTÓN CERRAR SESIÓN ---
+        // --- SIGN OUT BUTTON ---
         Button(
             onClick = { onAction(ProfileAction.SignOutClicked) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
@@ -214,7 +236,7 @@ private fun ProfileContent(
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1A1A))
         ) {
             Text(
-                text = "Cerrar Sesión",
+                text = stringResource(Res.string.profile_screen_sign_out_button),
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -260,6 +282,70 @@ private fun ProfileOptionItem(icon: ImageVector, title: String, subtitle: String
                 Icons.Default.ChevronRight,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+    }
+}
+
+/**
+ * Profile image component with proper loading and error states using Coil.
+ */
+@Composable
+private fun ProfileImage(
+    photoUrl: String?,
+    modifier: Modifier = Modifier,
+) {
+    val hasValidUrl = !photoUrl.isNullOrBlank()
+    val profilePictureDescription = stringResource(Res.string.cd_profile_picture)
+
+    if (hasValidUrl) {
+        SubcomposeAsyncImage(
+            model = ImageRequest.Builder(LocalPlatformContext.current)
+                .data(photoUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = profilePictureDescription,
+            modifier = modifier,
+            contentScale = ContentScale.Crop,
+            loading = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            error = {
+                ProfilePlaceholder()
+            }
+        )
+    } else {
+        ProfilePlaceholder(modifier = modifier)
+    }
+}
+
+/**
+ * Default placeholder shown when no profile image is available or on error.
+ */
+@Composable
+private fun ProfilePlaceholder(modifier: Modifier = Modifier) {
+    val defaultIconDescription = stringResource(Res.string.cd_profile_icon_default)
+
+    Box(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Person,
+            contentDescription = defaultIconDescription,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

@@ -44,6 +44,9 @@ kotlin {
                 implementation(libs.coil.compose)
                 implementation(libs.coil.network)
 
+                // Ktor core (required for Coil network)
+                implementation(libs.ktor.client.core)
+
                 // Koin
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
@@ -58,9 +61,9 @@ kotlin {
                 implementation(libs.androidx.activity.compose)
                 implementation(libs.androidx.splashscreen)
                 implementation(libs.koin.android)
-//                implementation(libs.compose.ui.tooling)
-//                debugImplementation(libs.compose.ui.test.manifest)
 
+                // Ktor engine for Android (required for Coil network)
+                implementation(libs.ktor.client.okhttp)
 
                 // GitLive Firebase (common)
                 implementation(libs.firebase.auth)
@@ -68,6 +71,13 @@ kotlin {
                 // Firebase App Check (Android native)
                 implementation(libs.firebase.appcheck.playintegrity)
                 implementation(libs.firebase.appcheck.debug)
+            }
+        }
+
+        val iosMain by creating {
+            dependencies {
+                // Ktor engine for iOS (required for Coil network)
+                implementation(libs.ktor.client.darwin)
             }
         }
     }
