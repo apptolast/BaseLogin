@@ -2,8 +2,8 @@ package com.apptolast.login
 
 import android.app.Application
 import com.apptolast.customlogin.appContext
-import com.apptolast.customlogin.domain.model.GoogleSignInConfig
 import com.apptolast.customlogin.di.initLoginKoin
+import com.apptolast.customlogin.domain.model.GoogleSignInConfig
 import com.apptolast.login.di.appModule
 import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
@@ -28,7 +28,7 @@ class LoginApplication : Application() {
 
         // Configure Google Sign-In with the Web Client ID from Firebase Console
         val loginConfig = GoogleSignInConfig(
-            webClientId = "218717255604-h57da28qm4s2ed0f8js5a9q54gnbett5.apps.googleusercontent.com"
+            webClientId = "495458702268-al98mksrlh27v607972b0oaa0g98pfru.apps.googleusercontent.com"
         )
 
         initLoginKoin(googleSignInConfig = loginConfig) {

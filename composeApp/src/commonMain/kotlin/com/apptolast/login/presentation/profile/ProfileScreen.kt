@@ -1,5 +1,6 @@
 package com.apptolast.login.presentation.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,7 +48,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.compose.SubcomposeAsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.apptolast.customlogin.domain.model.UserSession
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -106,15 +110,16 @@ private fun ProfileContent(
     ) {
         // --- HEADER: FOTO Y NOMBRE ---
         Box(contentAlignment = Alignment.BottomEnd) {
-            AsyncImage(
-                model = userSession.photoUrl ?: "https://via.placeholder.com/150",
-                contentDescription = "Profile Picture",
-                modifier = Modifier.size(120.dp).clip(CircleShape).border(
-                    width = 2.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    shape = CircleShape
-                ),
-                contentScale = ContentScale.Crop,
+            ProfileImage(
+                photoUrl = userSession.photoUrl,
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = CircleShape
+                    )
             )
         }
         Spacer(modifier = Modifier.height(10.dp))
@@ -260,6 +265,67 @@ private fun ProfileOptionItem(icon: ImageVector, title: String, subtitle: String
                 Icons.Default.ChevronRight,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+    }
+}
+
+/**
+ * Profile image component with proper loading and error states using Coil.
+ */
+@Composable
+private fun ProfileImage(
+    photoUrl: String?,
+    modifier: Modifier = Modifier,
+) {
+    val hasValidUrl = !photoUrl.isNullOrBlank()
+
+    if (hasValidUrl) {
+        SubcomposeAsyncImage(
+            model = ImageRequest.Builder(LocalPlatformContext.current)
+                .data(photoUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = "Profile Picture",
+            modifier = modifier,
+            contentScale = ContentScale.Crop,
+            loading = {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(32.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            error = {
+                ProfilePlaceholder()
+            }
+        )
+    } else {
+        ProfilePlaceholder(modifier = modifier)
+    }
+}
+
+/**
+ * Default placeholder shown when no profile image is available or on error.
+ */
+@Composable
+private fun ProfilePlaceholder(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.Person,
+            contentDescription = "Default profile icon",
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
