@@ -7,7 +7,7 @@ import com.apptolast.customlogin.domain.model.UserSession
  */
 data class ProfileUiState(
     val isLoading: Boolean = false,
-    val userSession: UserSession? = null
+    val userSession: UserSession? = null,
 )
 
 /**

@@ -49,22 +49,22 @@ class LoginViewModel(
 
     private fun onSocialSignIn(provider: IdentityProvider) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(loadingProvider = provider.id) }
 
             val credentials = Credentials.OAuthToken(provider = provider)
             when (val result = authRepository.signIn(credentials)) {
                 is AuthResult.Success -> {
-                    _uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { it.copy(loadingProvider = null) }
                     _effect.emit(LoginEffect.NavigateToHome)
                 }
 
                 is AuthResult.Failure -> {
-                    _uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { it.copy(loadingProvider = null) }
                     _effect.emit(LoginEffect.ShowError("$provider: ${result.error.message}"))
                 }
 
                 else -> {
-                    _uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { it.copy(loadingProvider = null) }
                     _effect.emit(LoginEffect.ShowError("An unexpected error occurred"))
                 }
             }
@@ -84,21 +84,21 @@ class LoginViewModel(
 
         if (emailError == null && passwordError == null) {
             viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = true) }
+                _uiState.update { it.copy(loadingProvider = "email") }
 
                 when (val result = authRepository.signIn(state.toEmailPasswordCredentials())) {
                     is AuthResult.Success -> {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update { it.copy(loadingProvider = null) }
                         _effect.emit(LoginEffect.NavigateToHome)
                     }
 
                     is AuthResult.Failure -> {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update { it.copy(loadingProvider = null) }
                         _effect.emit(LoginEffect.ShowError(result.error.message))
                     }
 
                     else -> {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update { it.copy(loadingProvider = null) }
                         _effect.emit(LoginEffect.ShowError("An unexpected error occurred"))
                     }
                 }

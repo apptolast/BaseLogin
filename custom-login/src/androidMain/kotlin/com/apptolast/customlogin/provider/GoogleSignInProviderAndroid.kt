@@ -8,7 +8,7 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
-import com.apptolast.customlogin.config.GoogleSignInConfig
+import com.apptolast.customlogin.domain.model.GoogleSignInConfig
 import com.apptolast.customlogin.platform.ActivityHolder
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -21,7 +21,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
  */
 class GoogleSignInProviderAndroid(
     private val config: GoogleSignInConfig,
-    private val context: Context
+    private val context: Context,
 ) {
     private val credentialManager: CredentialManager by lazy {
         CredentialManager.create(context)

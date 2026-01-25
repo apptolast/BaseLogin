@@ -1,6 +1,6 @@
 package com.apptolast.customlogin.provider
 
-import com.apptolast.customlogin.config.GoogleSignInConfig
+import com.apptolast.customlogin.domain.model.GoogleSignInConfig
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.UIKit.UIApplication
@@ -94,9 +94,4 @@ class GoogleSignInProviderIOS(
         }
         return topController
     }
-
-    /**
-     * Returns the iOS client ID for configuration.
-     */
-    fun getClientId(): String? = config.iosClientId ?: config.webClientId
 }

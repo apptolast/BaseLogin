@@ -1,4 +1,4 @@
-package com.apptolast.customlogin.config
+package com.apptolast.customlogin.domain.model
 
 /**
  * Configuration for Google Sign-In.

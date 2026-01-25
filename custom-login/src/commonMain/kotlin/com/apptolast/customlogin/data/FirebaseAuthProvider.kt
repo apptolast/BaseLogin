@@ -8,11 +8,8 @@ import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.getSocialIdToken
-import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseAuthException
-import dev.gitlive.firebase.auth.GithubAuthProvider
-import dev.gitlive.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -187,7 +184,7 @@ class FirebaseAuthProvider(
 
     override suspend fun updateEmail(newEmail: String): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.updateEmail(newEmail)
+            firebaseAuth.currentUser?.verifyBeforeUpdateEmail(newEmail)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -214,22 +211,6 @@ class FirebaseAuthProvider(
 
     override suspend fun reauthenticate(credentials: Credentials): AuthResult {
         return AuthResult.Failure(AuthError.OperationNotAllowed("Reauthentication not implemented in this provider"))
-    }
-
-    private fun IdentityProvider.toCredential(tokenData: String): AuthCredential? {
-        return when (this) {
-            is IdentityProvider.Google -> {
-                // Parse combined tokens: "idToken|||accessToken|||accessTokenValue"
-                // or just idToken for Android (which doesn't need accessToken)
-                val parts = tokenData.split("|||accessToken|||")
-                val idToken = parts[0]
-                val accessToken = parts.getOrNull(1)
-                GoogleAuthProvider.credential(idToken, accessToken)
-            }
-
-            is IdentityProvider.GitHub -> GithubAuthProvider.credential(tokenData)
-            else -> null // Apple, Facebook, Phone have different flows
-        }
     }
 
     companion object {
