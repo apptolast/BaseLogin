@@ -25,13 +25,6 @@ class AuthRepositoryImpl(
         return authProvider.observeAuthState()
     }
 
-    override suspend fun getCurrentSession(): UserSession? {
-        return when (val result = authProvider.refreshSession()) {
-            is AuthResult.Success -> result.session
-            else -> null
-        }
-    }
-
     override suspend fun signIn(credentials: Credentials): AuthResult {
         return authProvider.signIn(credentials)
     }

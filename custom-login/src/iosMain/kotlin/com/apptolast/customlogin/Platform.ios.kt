@@ -1,6 +1,6 @@
 package com.apptolast.customlogin
 
-import com.apptolast.customlogin.config.GoogleSignInConfig
+import com.apptolast.customlogin.domain.model.GoogleSignInConfig
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.provider.GoogleSignInProviderIOS
 import org.koin.core.component.KoinComponent

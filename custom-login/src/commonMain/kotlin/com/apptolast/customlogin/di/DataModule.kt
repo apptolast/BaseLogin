@@ -1,9 +1,10 @@
 package com.apptolast.customlogin.di
 
-import com.apptolast.customlogin.data.FirebaseAuthProvider
 import com.apptolast.customlogin.data.AuthRepositoryImpl
+import com.apptolast.customlogin.data.FirebaseAuthProvider
 import com.apptolast.customlogin.domain.AuthProvider
 import com.apptolast.customlogin.domain.AuthRepository
+import com.apptolast.customlogin.domain.model.GoogleSignInConfig
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.auth
 import org.koin.dsl.module
@@ -12,9 +13,12 @@ import org.koin.dsl.module
  * Koin module for data layer dependencies.
  * Provides repository implementations and their dependencies.
  */
-internal val dataModule = module {
+internal fun dataModule(googleSignInConfig: GoogleSignInConfig) = module {
     // Firebase Auth instance from GitLive
     single { Firebase.auth }
+
+    // Google instance from GitLive
+    single { googleSignInConfig }
 
     // Firebase Auth Provider
     single<AuthProvider> { FirebaseAuthProvider(get()) }

@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -28,7 +29,7 @@ import org.jetbrains.compose.resources.painterResource
 
 /**
  * A generic, styled button for social login providers.
- * Takes an optional tint parameter. Defaults to Unspecified to support multi-color icons.
+ * It now supports a loading state.
  */
 @Composable
 internal fun DefaultSocialButton(
@@ -36,6 +37,8 @@ internal fun DefaultSocialButton(
     icon: Painter,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isLoading: Boolean = false,
+    enabled: Boolean = true,
     tint: Color = Color.Unspecified,
 ) {
     OutlinedButton(
@@ -45,56 +48,84 @@ internal fun DefaultSocialButton(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
         colors = ButtonDefaults.outlinedButtonColors(
             contentColor = MaterialTheme.colorScheme.onSurface
-        )
+        ),
+        enabled = enabled && !isLoading
     ) {
-        Icon(
-            painter = icon,
-            contentDescription = text,
-            modifier = Modifier.size(24.dp),
-            tint = tint // Use the tint parameter
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(text = text)
+        if (isLoading) {
+            CircularProgressIndicator(modifier = Modifier.size(24.dp))
+        } else {
+            Icon(
+                painter = icon,
+                contentDescription = text,
+                modifier = Modifier.size(24.dp),
+                tint = tint
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(text = text)
+        }
     }
 }
 
 /**
- * A specific social login button for Google. Uses a painter resource for the multi-color icon.
+ * A specific social login button for Google, with loading state support.
  */
 @Composable
-fun GoogleSocialButton(onClick: () -> Unit) {
+fun GoogleSocialButton(
+    onClick: () -> Unit,
+    isLoading: Boolean,
+    enabled: Boolean
+) {
     DefaultSocialButton(
         text = "Sign in with Google",
         icon = painterResource(Res.drawable.google_icon),
         onClick = onClick,
-        // Tint is defaulted to Unspecified, which is correct for this multi-color icon
+        isLoading = isLoading,
+        enabled = enabled
     )
 }
 
 /**
- * A specific social login button for Phone. Uses a Material Vector Icon.
+ * A specific social login button for Phone, with loading state support.
  */
 @Composable
-fun PhoneSocialButton(onClick: () -> Unit) {
+fun PhoneSocialButton(
+    onClick: () -> Unit,
+    isLoading: Boolean,
+    enabled: Boolean
+) {
     DefaultSocialButton(
         text = "Sign in with Phone",
         icon = rememberVectorPainter(image = Icons.Default.Phone),
         onClick = onClick,
-        // We provide a tint color, so the vector icon is colored correctly.
+        isLoading = isLoading,
+        enabled = enabled,
         tint = MaterialTheme.colorScheme.onSurface
     )
 }
 
 /**
- * A composable that arranges multiple social login buttons.
+ * A composable that arranges multiple social login buttons, handling loading states.
  * This is the default implementation for the `socialProviders` slot.
  */
 @Composable
-fun SocialLoginButtonsSection(onProviderClick: (IdentityProvider) -> Unit) {
+fun SocialLoginButtonsSection(
+    loadingProvider: String?,
+    onProviderClick: (IdentityProvider) -> Unit
+) {
+    val isAnyLoading = loadingProvider != null
+
     Column(modifier = Modifier.fillMaxWidth()) {
-        GoogleSocialButton { onProviderClick(IdentityProvider.Google) }
+        GoogleSocialButton(
+            onClick = { onProviderClick(IdentityProvider.Google) },
+            isLoading = loadingProvider == IdentityProvider.Google.id,
+            enabled = !isAnyLoading
+        )
         Spacer(Modifier.height(8.dp))
-        PhoneSocialButton { onProviderClick(IdentityProvider.Phone) }
-        // TODO: Add other buttons like GitHub, Apple, etc. here
+        PhoneSocialButton(
+            onClick = { onProviderClick(IdentityProvider.Phone) },
+            isLoading = loadingProvider == IdentityProvider.Phone.id,
+            enabled = !isAnyLoading
+        )
+        // TODO: Add other buttons like GitHub, Apple, etc. here following the same pattern
     }
 }

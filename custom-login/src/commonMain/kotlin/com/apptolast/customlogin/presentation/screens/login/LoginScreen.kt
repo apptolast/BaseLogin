@@ -100,6 +100,8 @@ private fun LoginContent(
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},
 ) {
+    val isLoading = state.loadingProvider != null
+
     DefaultAuthContainer(modifier = modifier) {
         slots.header()
 
@@ -109,7 +111,7 @@ private fun LoginContent(
             state.email,
             { onAction(LoginAction.EmailChanged(it)) },
             state.emailError,
-            !state.isLoading
+            !isLoading
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -118,7 +120,7 @@ private fun LoginContent(
             state.password,
             { onAction(LoginAction.PasswordChanged(it)) },
             state.passwordError,
-            !state.isLoading
+            !isLoading
         )
 
         slots.forgotPasswordLink(onNavigateToForgotPassword)
@@ -129,14 +131,14 @@ private fun LoginContent(
 
         slots.submitButton(
             stringResource(Res.string.login_screen_sign_in_button),
-            isFormValid && !state.isLoading,
-            state.isLoading,
+            isFormValid && !isLoading,
+            state.loadingProvider == "email",
         ) { onAction(LoginAction.SignInClicked) }
 
         Spacer(Modifier.height(8.dp))
 
         slots.socialProviders?.let { socialProviders ->
-            socialProviders { provider ->
+            socialProviders(state.loadingProvider) { provider ->
                 onAction(LoginAction.SocialSignInClicked(provider))
             }
         }
@@ -153,7 +155,7 @@ private fun LoginScreenPreview() {
         state = LoginUiState(
             email = "test@apptolast.com",
             password = "Password123",
-            isLoading = false
+            loadingProvider = null
         )
     )
 }
@@ -167,7 +169,7 @@ private fun LoginScreenLoadingPreview() {
         state = LoginUiState(
             email = "test@apptolast.com",
             password = "Password123",
-            isLoading = true
+            loadingProvider = "email"
         )
     )
 }

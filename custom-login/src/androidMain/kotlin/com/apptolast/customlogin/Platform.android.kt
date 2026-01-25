@@ -1,7 +1,7 @@
 package com.apptolast.customlogin
 
 import android.content.Context
-import com.apptolast.customlogin.config.GoogleSignInConfig
+import com.apptolast.customlogin.domain.model.GoogleSignInConfig
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.provider.GoogleSignInProviderAndroid
 import org.koin.core.component.KoinComponent

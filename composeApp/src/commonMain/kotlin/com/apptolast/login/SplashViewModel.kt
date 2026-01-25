@@ -24,7 +24,7 @@ class SplashViewModel(
     val authState: StateFlow<AuthState> = authRepository.observeAuthState()
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.Eagerly,
+            started = SharingStarted.Eagerly,
             initialValue = AuthState.Loading
         )
 

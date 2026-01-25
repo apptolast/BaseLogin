@@ -24,11 +24,6 @@ interface AuthRepository {
     fun observeAuthState(): Flow<AuthState>
 
     /**
-     * Get the current user session, if authenticated.
-     */
-    suspend fun getCurrentSession(): UserSession?
-
-    /**
      * Sign in with any supported credentials.
      */
     suspend fun signIn(credentials: Credentials): AuthResult
