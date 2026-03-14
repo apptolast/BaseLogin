@@ -73,8 +73,21 @@ android {
     namespace = "com.apptolast.customlogin"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
+
+        val googleWebClientId: String =
+            project.findProperty("GOOGLE_WEB_CLIENT_ID") as String? ?: ""
+
+        buildConfigField(
+            "String",
+            "GOOGLE_WEB_CLIENT_ID",
+            "\"$googleWebClientId\""
+        )
     }
 
     compileOptions {

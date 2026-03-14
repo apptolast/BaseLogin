@@ -95,7 +95,6 @@ fun ForgotPasswordScreen(
                 )
             }
         },
-        modifier = Modifier.consumeWindowInsets(TopAppBarDefaults.windowInsets)
     ) { paddingValues ->
         ForgotPasswordContent(
             slots = slots,

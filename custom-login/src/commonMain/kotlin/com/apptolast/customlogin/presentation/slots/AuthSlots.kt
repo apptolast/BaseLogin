@@ -3,6 +3,7 @@ package com.apptolast.customlogin.presentation.slots
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.runtime.Composable
 import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.presentation.screens.login.LoginLoadingState
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultEmailField
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordDescription
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordHeader
@@ -70,8 +71,8 @@ data class LoginScreenSlots(
             onClick = onClick,
         )
     },
-    val socialProviders: (@Composable (onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { onProviderClick ->
-        SocialLoginButtonsSection(onProviderClick = onProviderClick)
+    val socialProviders: (@Composable (loadingState: LoginLoadingState, onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { loadingState, onProviderClick ->
+        SocialLoginButtonsSection(loadingState = loadingState, onProviderClick = onProviderClick)
     },
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
         DefaultForgotPasswordLink(onForgotPasswordClick = onClick)

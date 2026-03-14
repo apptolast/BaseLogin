@@ -2,9 +2,13 @@ package com.apptolast.customlogin.data
 
 import com.apptolast.customlogin.data.FirebaseAuthProvider.Companion.PROVIDER_ID
 import com.apptolast.customlogin.domain.model.AuthError
+import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.UserSession
+import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.FirebaseAuthException
 import dev.gitlive.firebase.auth.FirebaseUser
+import dev.gitlive.firebase.auth.GithubAuthProvider
+import dev.gitlive.firebase.auth.GoogleAuthProvider
 
 /**
  * Maps a [FirebaseUser] to a domain [UserSession] object.
@@ -67,5 +71,24 @@ internal fun FirebaseAuthException.toAuthError(): AuthError {
             AuthError.NetworkError(errorMessage, this)
 
         else -> AuthError.Unknown(errorMessage, this)
+    }
+}
+
+/**
+ * Maps an [IdentityProvider] and its corresponding token data to a Firebase [AuthCredential].
+ */
+internal fun IdentityProvider.toCredential(tokenData: String): AuthCredential? {
+    return when (this) {
+        is IdentityProvider.Google -> {
+            // For iOS, the tokenData might be "idToken|||accessToken|||accessTokenValue"
+            // For Android, it's just the idToken.
+            val parts = tokenData.split("|||accessToken|||")
+            val idToken = parts[0]
+            val accessToken = parts.getOrNull(1)
+            GoogleAuthProvider.credential(idToken, accessToken)
+        }
+
+        is IdentityProvider.GitHub -> GithubAuthProvider.credential(tokenData)
+        else -> null // Other providers like Apple or Phone have different credential flows.
     }
 }

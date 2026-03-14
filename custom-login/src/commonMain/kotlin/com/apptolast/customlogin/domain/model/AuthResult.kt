@@ -12,6 +12,11 @@ sealed interface AuthResult {
     data class Success(val session: UserSession) : AuthResult
 
     /**
+     * Represents a successful sign-out.
+     */
+    data object SignOutSuccess : AuthResult
+
+    /**
      * Represents a failed authentication.
      * @property error The typed authentication error.
      */
