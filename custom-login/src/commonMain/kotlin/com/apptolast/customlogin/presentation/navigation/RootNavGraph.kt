@@ -7,6 +7,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.apptolast.customlogin.presentation.screens.forgotpassword.ForgotPasswordScreen
 import com.apptolast.customlogin.presentation.screens.login.LoginScreen
+import com.apptolast.customlogin.presentation.screens.phone.PhoneAuthScreen
 import com.apptolast.customlogin.presentation.screens.register.RegisterScreen
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordScreen
 import com.apptolast.customlogin.presentation.screens.welcome.WelcomeScreen
@@ -59,11 +60,23 @@ fun NavGraphBuilder.authRoutesFlow(
                     }
                 },
                 onNavigateToResetPassword = {
-                    // Navigate to the new Forgot Password screen
                     navController.navigate(ForgotPasswordRoute) {
                         launchSingleTop = true
                     }
                 },
+                onNavigateToPhoneAuth = {
+                    navController.navigate(PhoneAuthRoute) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+
+        // ---------- PHONE AUTH SCREEN ----------
+        composable<PhoneAuthRoute> {
+            PhoneAuthScreen(
+                onBack = { navController.popBackStack() },
+                onNavigateToHome = onNavigateToHome
             )
         }
 

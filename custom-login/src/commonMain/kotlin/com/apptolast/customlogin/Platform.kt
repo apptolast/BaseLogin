@@ -2,8 +2,6 @@ package com.apptolast.customlogin
 
 import com.apptolast.customlogin.domain.model.IdentityProvider
 
-expect fun platform(): String
-
 /**
  * Initiates a platform-specific social sign-in flow to get an ID token.
  * This common `expect` function is implemented in each platform's `actual` function.

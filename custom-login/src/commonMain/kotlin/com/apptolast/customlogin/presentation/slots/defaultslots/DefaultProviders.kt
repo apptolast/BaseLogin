@@ -1,6 +1,7 @@
 package com.apptolast.customlogin.presentation.slots.defaultslots
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,9 +24,61 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.presentation.screens.login.LoginLoadingState
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.google_icon
 import org.jetbrains.compose.resources.painterResource
+
+/**
+ * A composable that arranges multiple social login buttons, handling loading states.
+ * This is the default implementation for the `socialProviders` slot.
+ */
+@Composable
+fun SocialLoginButtonsSection(
+    loadingState: LoginLoadingState,
+    onProviderClick: (IdentityProvider) -> Unit,
+    providers: List<IdentityProvider> = listOf(IdentityProvider.Google, IdentityProvider.Apple, IdentityProvider.Phone)
+) {
+    val isAnyLoading = loadingState !is LoginLoadingState.Idle
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        providers.forEach { provider ->
+            val isLoading = loadingState is LoginLoadingState.SocialSignIn && loadingState.provider == provider
+
+            when (provider) {
+                is IdentityProvider.Google -> DefaultSocialButton(
+                    text = "Sign in with Google",
+                    icon = painterResource(Res.drawable.google_icon),
+                    onClick = { onProviderClick(provider) },
+                    isLoading = isLoading,
+                    enabled = !isAnyLoading
+                )
+                is IdentityProvider.Apple -> DefaultSocialButton(
+                    text = "Sign in with Apple",
+                    // TODO: Replace with a proper Apple icon resource
+                    icon = rememberVectorPainter(image = Icons.Default.Phone),
+                    onClick = { onProviderClick(provider) },
+                    isLoading = isLoading,
+                    enabled = !isAnyLoading,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                is IdentityProvider.Phone -> DefaultSocialButton(
+                    text = "Sign in with Phone",
+                    icon = rememberVectorPainter(image = Icons.Default.Phone),
+                    onClick = { onProviderClick(provider) },
+                    isLoading = isLoading,
+                    enabled = !isAnyLoading,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                // TODO: Add other buttons like GitHub, etc. here following the same pattern
+                else -> {}
+            }
+        }
+    }
+}
 
 /**
  * A generic, styled button for social login providers.
@@ -63,69 +116,5 @@ internal fun DefaultSocialButton(
             Spacer(modifier = Modifier.width(16.dp))
             Text(text = text)
         }
-    }
-}
-
-/**
- * A specific social login button for Google, with loading state support.
- */
-@Composable
-fun GoogleSocialButton(
-    onClick: () -> Unit,
-    isLoading: Boolean,
-    enabled: Boolean
-) {
-    DefaultSocialButton(
-        text = "Sign in with Google",
-        icon = painterResource(Res.drawable.google_icon),
-        onClick = onClick,
-        isLoading = isLoading,
-        enabled = enabled
-    )
-}
-
-/**
- * A specific social login button for Phone, with loading state support.
- */
-@Composable
-fun PhoneSocialButton(
-    onClick: () -> Unit,
-    isLoading: Boolean,
-    enabled: Boolean
-) {
-    DefaultSocialButton(
-        text = "Sign in with Phone",
-        icon = rememberVectorPainter(image = Icons.Default.Phone),
-        onClick = onClick,
-        isLoading = isLoading,
-        enabled = enabled,
-        tint = MaterialTheme.colorScheme.onSurface
-    )
-}
-
-/**
- * A composable that arranges multiple social login buttons, handling loading states.
- * This is the default implementation for the `socialProviders` slot.
- */
-@Composable
-fun SocialLoginButtonsSection(
-    loadingProvider: String?,
-    onProviderClick: (IdentityProvider) -> Unit
-) {
-    val isAnyLoading = loadingProvider != null
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        GoogleSocialButton(
-            onClick = { onProviderClick(IdentityProvider.Google) },
-            isLoading = loadingProvider == IdentityProvider.Google.id,
-            enabled = !isAnyLoading
-        )
-        Spacer(Modifier.height(8.dp))
-        PhoneSocialButton(
-            onClick = { onProviderClick(IdentityProvider.Phone) },
-            isLoading = loadingProvider == IdentityProvider.Phone.id,
-            enabled = !isAnyLoading
-        )
-        // TODO: Add other buttons like GitHub, Apple, etc. here following the same pattern
     }
 }

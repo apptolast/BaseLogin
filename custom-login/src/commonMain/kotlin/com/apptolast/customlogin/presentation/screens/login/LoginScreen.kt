@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.LoginScreenSlots
@@ -41,6 +42,7 @@ fun LoginScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToResetPassword: () -> Unit = {},
+    onNavigateToPhoneAuth: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
@@ -49,6 +51,7 @@ fun LoginScreen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is LoginEffect.NavigateToHome -> onNavigateToHome()
+                is LoginEffect.NavigateToPhoneAuth -> onNavigateToPhoneAuth()
                 is LoginEffect.ShowError -> {
                     snackBarHostState.showSnackbar(
                         message = effect.message,
@@ -100,7 +103,7 @@ private fun LoginContent(
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},
 ) {
-    val isLoading = state.loadingProvider != null
+    val isLoading = state.loadingState !is LoginLoadingState.Idle
 
     DefaultAuthContainer(modifier = modifier) {
         slots.header()
@@ -132,14 +135,14 @@ private fun LoginContent(
         slots.submitButton(
             stringResource(Res.string.login_screen_sign_in_button),
             isFormValid && !isLoading,
-            state.loadingProvider == "email",
-        ) { onAction(LoginAction.SignInClicked) }
+            state.loadingState is LoginLoadingState.EmailSignIn,
+        ) { onAction(LoginAction.SignIn(IdentityProvider.Email)) }
 
         Spacer(Modifier.height(8.dp))
 
         slots.socialProviders?.let { socialProviders ->
-            socialProviders(state.loadingProvider) { provider ->
-                onAction(LoginAction.SocialSignInClicked(provider))
+            socialProviders(state.loadingState) { provider ->
+                onAction(LoginAction.SignIn(provider))
             }
         }
 
@@ -155,7 +158,7 @@ private fun LoginScreenPreview() {
         state = LoginUiState(
             email = "test@apptolast.com",
             password = "Password123",
-            loadingProvider = null
+            loadingState = LoginLoadingState.Idle
         )
     )
 }
@@ -169,7 +172,7 @@ private fun LoginScreenLoadingPreview() {
         state = LoginUiState(
             email = "test@apptolast.com",
             password = "Password123",
-            loadingProvider = "email"
+            loadingState = LoginLoadingState.EmailSignIn
         )
     )
 }

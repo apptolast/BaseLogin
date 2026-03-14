@@ -1,7 +1,6 @@
 package com.apptolast.login
 
 import androidx.compose.ui.window.ComposeUIViewController
-import com.apptolast.customlogin.domain.model.GoogleSignInConfig
 import com.apptolast.customlogin.di.initLoginKoin
 import com.apptolast.login.di.appModule
 
@@ -22,16 +21,11 @@ private var koinInitialized = false
 
 private fun initKoinIfNeeded() {
     if (!koinInitialized) {
-        // Configure Google Sign-In with both Web and iOS Client IDs
-        val loginConfig = GoogleSignInConfig(
-            webClientId = "218717255604-h57da28qm4s2ed0f8js5a9q54gnbett5.apps.googleusercontent.com",
-            iosClientId = "495458702268-1ekoub6nmp7hmkhinuasdlup1rke9kg4.apps.googleusercontent.com"
-        )
 
-
-        initLoginKoin(googleSignInConfig = loginConfig) {
+        initLoginKoin {
             modules(appModule)
         }
+
         koinInitialized = true
     }
 }

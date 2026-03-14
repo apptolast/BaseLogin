@@ -5,3 +5,7 @@ PRODUCT_BUNDLE_IDENTIFIER=com.apptolast.login.Login$(TEAM_ID)
 
 CURRENT_PROJECT_VERSION=1
 MARKETING_VERSION=1.0
+
+GOOGLE_WEB_CLIENT_ID=218717255604-h57da28qm4s2ed0f8js5a9q54gnbett5.apps.googleusercontent.com
+GOOGLE_IOS_CLIENT_ID=495458702268-1ekoub6nmp7hmkhinuasdlup1rke9kg4.apps.googleusercontent.com
+GOOGLE_IOS_REVERSED_CLIENT_ID=com.googleusercontent.apps.495458702268-1ekoub6nmp7hmkhinuasdlup1rke9kg4
