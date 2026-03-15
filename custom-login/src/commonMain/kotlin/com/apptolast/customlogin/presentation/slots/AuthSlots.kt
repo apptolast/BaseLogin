@@ -277,13 +277,17 @@ data class PhoneAuthScreenSlots(
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
-    ) -> Unit = { value, onValueChange, error, enabled ->
+        enabled: Boolean,
+        countryCode: String,
+        onCountryCodeChange: (String) -> Unit,
+    ) -> Unit = { value, onValueChange, error, enabled, countryCode, onCountryCodeChange ->
         DefaultPhoneField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
+            countryCode = countryCode,
+            onCountryCodeChange = onCountryCodeChange,
         )
     },
     val sendCodeButton: @Composable (

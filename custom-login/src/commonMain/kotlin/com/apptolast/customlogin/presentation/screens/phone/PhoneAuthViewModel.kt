@@ -28,6 +28,8 @@ class PhoneAuthViewModel(
 
     fun onAction(action: PhoneAuthAction) {
         when (action) {
+            is PhoneAuthAction.CountryCodeChanged ->
+                _uiState.update { it.copy(countryCode = action.dialCode, phoneError = null) }
             is PhoneAuthAction.PhoneNumberChanged ->
                 _uiState.update { it.copy(phoneNumber = action.phoneNumber, phoneError = null) }
             is PhoneAuthAction.OtpCodeChanged ->
@@ -38,11 +40,13 @@ class PhoneAuthViewModel(
     }
 
     private fun onSendCode() {
-        val phone = _uiState.value.phoneNumber.trim()
-        if (phone.isBlank()) {
+        val state = _uiState.value
+        val digits = state.phoneNumber.filter { it.isDigit() }.trimStart('0')
+        if (digits.isBlank()) {
             _uiState.update { it.copy(phoneError = "Phone number cannot be empty") }
             return
         }
+        val phone = "${state.countryCode}$digits"
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             when (val result = authRepository.sendPhoneOtp(phone)) {

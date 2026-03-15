@@ -5,6 +5,7 @@ import com.apptolast.customlogin.data.PhoneAuthProviderIOS
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
+import com.apptolast.customlogin.provider.AppleSignInProviderIOS
 import com.apptolast.customlogin.provider.GoogleSignInProviderIOS
 import com.apptolast.customlogin.util.Logger
 import org.koin.core.component.KoinComponent
@@ -45,6 +46,7 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
             val googleProvider = GoogleSignInProviderIOS(config = config)
             googleProvider.signIn()
         }
+        is IdentityProvider.Apple -> AppleSignInProviderIOS.signIn()
         is IdentityProvider.GitHub -> {
             // TODO: Implement GitHub OAuth flow for iOS.
             Logger.w("Platform", "GitHub Sign-In for iOS is not implemented yet.")

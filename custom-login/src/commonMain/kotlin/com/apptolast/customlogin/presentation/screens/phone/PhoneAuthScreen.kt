@@ -154,7 +154,9 @@ private fun PhoneAuthContent(
                         state.phoneNumber,
                         { onAction(PhoneAuthAction.PhoneNumberChanged(it)) },
                         state.phoneError,
-                        !state.isLoading
+                        !state.isLoading,
+                        state.countryCode,
+                        { onAction(PhoneAuthAction.CountryCodeChanged(it)) },
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))

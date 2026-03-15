@@ -64,6 +64,10 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
             )
             googleProvider.signIn()
         }
+        is IdentityProvider.Apple -> {
+            Logger.w("Platform", "Apple Sign-In is not available on Android (iOS only).")
+            null
+        }
         is IdentityProvider.GitHub -> {
             // TODO: Implement GitHub OAuth flow for Android.
             Logger.w("Platform", "GitHub Sign-In for Android is not implemented yet.")

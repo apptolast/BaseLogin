@@ -17,6 +17,7 @@ import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseAuthException
 import dev.gitlive.firebase.auth.GithubAuthProvider
 import dev.gitlive.firebase.auth.GoogleAuthProvider
+import dev.gitlive.firebase.auth.OAuthProvider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -268,8 +269,20 @@ class FirebaseAuthProvider(
                 GoogleAuthProvider.credential(idToken, accessToken)
             }
 
+            is IdentityProvider.Apple -> {
+                // Token format: "idToken|||rawNonce|||rawNonceValue" or just "idToken"
+                val parts = tokenData.split("|||rawNonce|||")
+                val idToken = parts[0]
+                val rawNonce = parts.getOrNull(1)
+                OAuthProvider.credential(
+                    providerId = "apple.com",
+                    accessToken = null,
+                    idToken = idToken,
+                    rawNonce = rawNonce
+                )
+            }
             is IdentityProvider.GitHub -> GithubAuthProvider.credential(tokenData)
-            else -> null // Apple, Facebook, Phone have different flows
+            else -> null // Facebook, Phone have different flows
         }
     }
 

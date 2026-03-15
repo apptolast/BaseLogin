@@ -95,6 +95,7 @@ class AuthRepositoryImpl(
     override fun getAvailableProviders(): List<IdentityProvider> {
         return buildList {
             if (config.googleSignInConfig != null) add(IdentityProvider.Google)
+            if (config.appleSignInConfig != null) add(IdentityProvider.Apple)
             add(IdentityProvider.Phone)
         }
     }

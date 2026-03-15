@@ -8,6 +8,7 @@ package com.apptolast.customlogin.presentation.screens.phone
  * - Step 2: [verificationId] is not null → user enters the OTP code.
  */
 data class PhoneAuthUiState(
+    val countryCode: String = "+1",
     val phoneNumber: String = "",
     val phoneError: String? = null,
     val otpCode: String = "",
