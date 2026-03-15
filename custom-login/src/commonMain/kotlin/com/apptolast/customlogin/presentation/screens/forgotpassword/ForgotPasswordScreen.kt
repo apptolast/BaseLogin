@@ -62,6 +62,7 @@ fun ForgotPasswordScreen(
                         withDismissAction = true
                     )
                 }
+                is ForgotPasswordEffect.NavigateBack -> onNavigateBack()
             }
         }
     }

@@ -10,6 +10,7 @@ import com.apptolast.customlogin.provider.GitHubSignInProviderIOS
 import com.apptolast.customlogin.provider.GoogleSignInProviderIOS
 import com.apptolast.customlogin.provider.MicrosoftSignInProviderIOS
 import com.apptolast.customlogin.util.Logger
+import com.apptolast.customlogin.SocialTokenResult
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import platform.UIKit.UIDevice
@@ -35,8 +36,12 @@ private object PlatformKoinHelper : KoinComponent {
 
 /**
  * Actual implementation for getting a social ID token on iOS.
+ *
+ * GitHub and Microsoft providers complete the entire Firebase sign-in from Swift and signal
+ * completion via [PLATFORM_AUTH_HANDLED]. This implementation converts that sentinel to the
+ * type-safe [SocialTokenResult.PlatformHandled].
  */
-actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
+actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResult? {
     return when (provider) {
         is IdentityProvider.Google -> {
             val config = PlatformKoinHelper.googleSignInConfig
@@ -46,17 +51,22 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
             }
 
             val googleProvider = GoogleSignInProviderIOS(config = config)
-            googleProvider.signIn()
+            googleProvider.signIn()?.let { SocialTokenResult.Token(it) }
         }
-        is IdentityProvider.Apple -> AppleSignInProviderIOS.signIn()
-        is IdentityProvider.GitHub -> GitHubSignInProviderIOS.signIn()
-        is IdentityProvider.Microsoft -> MicrosoftSignInProviderIOS.signIn()
+        is IdentityProvider.Apple -> AppleSignInProviderIOS.signIn()?.let { SocialTokenResult.Token(it) }
+        is IdentityProvider.GitHub -> GitHubSignInProviderIOS.signIn()?.toSocialTokenResult()
+        is IdentityProvider.Microsoft -> MicrosoftSignInProviderIOS.signIn()?.toSocialTokenResult()
         else -> {
             Logger.w("Platform", "Social sign-in for ${provider.id} is not implemented on iOS yet.")
             null
         }
     }
 }
+
+/** Converts a raw String callback result from Swift to a type-safe [SocialTokenResult]. */
+private fun String.toSocialTokenResult(): SocialTokenResult =
+    if (this == PLATFORM_AUTH_HANDLED) SocialTokenResult.PlatformHandled
+    else SocialTokenResult.Token(this)
 
 /**
  * iOS actual implementation: delegates to [PhoneAuthProviderIOS] which uses a Swift callback

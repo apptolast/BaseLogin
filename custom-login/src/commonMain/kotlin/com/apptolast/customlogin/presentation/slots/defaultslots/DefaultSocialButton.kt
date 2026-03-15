@@ -24,12 +24,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.google_icon
 import login.custom_login.generated.resources.login_apple_button
 import login.custom_login.generated.resources.login_github_button
+import login.custom_login.generated.resources.login_google_button
 import login.custom_login.generated.resources.login_magic_link_button
 import login.custom_login.generated.resources.login_microsoft_button
 import login.custom_login.generated.resources.login_phone_button
@@ -38,7 +40,7 @@ import org.jetbrains.compose.resources.stringResource
 
 /**
  * A generic, styled button for social login providers.
- * Takes an optional tint parameter. Defaults to Unspecified to support multi-color icons.
+ * Takes an optional tint parameter. Defaults to Unspecified to support multi-color icons (e.g. Google).
  */
 @Composable
 internal fun DefaultSocialButton(
@@ -50,28 +52,35 @@ internal fun DefaultSocialButton(
 ) {
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth().height(56.dp),
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
         )
     ) {
         Icon(
             painter = icon,
-            contentDescription = text,
-            modifier = Modifier.size(24.dp),
+            contentDescription = null, // text is the label; icon is decorative
+            modifier = Modifier.size(20.dp),
             tint = tint
         )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(text = text)
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 
 @Composable
 fun GoogleSocialButton(onClick: () -> Unit) {
     DefaultSocialButton(
-        text = "Sign in with Google",
+        text = stringResource(Res.string.login_google_button),
         icon = painterResource(Res.drawable.google_icon),
         onClick = onClick,
     )
@@ -129,8 +138,7 @@ fun PhoneSocialButton(onClick: () -> Unit) {
 
 /**
  * Renders social login buttons for the given [providers] list.
- * The order of buttons matches the order of [providers]:
- * Google → Apple → GitHub → Microsoft → MagicLink → Phone.
+ * The order of buttons matches the order of [providers].
  */
 @Composable
 fun SocialLoginButtonsSection(
@@ -139,7 +147,7 @@ fun SocialLoginButtonsSection(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         providers.forEachIndexed { index, provider ->
-            if (index > 0) Spacer(Modifier.height(8.dp))
+            if (index > 0) Spacer(Modifier.height(10.dp))
             when (provider) {
                 is IdentityProvider.Google -> GoogleSocialButton { onProviderClick(provider) }
                 is IdentityProvider.Apple -> AppleSocialButton { onProviderClick(provider) }

@@ -7,21 +7,37 @@ import com.apptolast.customlogin.domain.model.PhoneAuthResult
 expect fun platform(): String
 
 /**
- * Sentinel token returned by platform implementations when the platform
- * itself (e.g. Android via [startActivityForSignInWithProvider]) has already
- * completed the Firebase sign-in. [FirebaseAuthProvider] detects this value
- * and calls [refreshSession] instead of creating a new credential.
+ * Typed result of a platform-specific social token acquisition.
+ */
+sealed interface SocialTokenResult {
+    /** The platform obtained a token that Kotlin should use to create a Firebase credential. */
+    data class Token(val value: String) : SocialTokenResult
+
+    /**
+     * The platform itself completed the entire Firebase sign-in (e.g. Android web OAuth via
+     * [startActivityForSignInWithProvider]). [FirebaseAuthProvider] calls [refreshSession] instead
+     * of creating a new credential.
+     */
+    data object PlatformHandled : SocialTokenResult
+}
+
+/**
+ * Sentinel string used by iOS Swift callbacks (GitHub, Microsoft) to signal that the platform
+ * already completed the Firebase sign-in. Swift code passes this string to the Kotlin callback,
+ * and the iOS [Platform.ios.kt] implementation converts it to [SocialTokenResult.PlatformHandled].
+ *
+ * Exposed here so iOS provider companion objects can re-export it for Swift callers.
  */
 const val PLATFORM_AUTH_HANDLED = "___PLATFORM_AUTH_COMPLETE___"
 
 /**
- * Initiates a platform-specific social sign-in flow to get an ID token.
- * This common `expect` function is implemented in each platform's `actual` function.
+ * Initiates a platform-specific social sign-in flow.
  *
- * @param provider The social provider (e.g., Google, GitHub).
- * @return The ID token from the provider upon successful sign-in, or null if the flow is cancelled or fails.
+ * @param provider The social identity provider (e.g., Google, GitHub).
+ * @return [SocialTokenResult.Token] with the ID token, [SocialTokenResult.PlatformHandled] if the
+ *         platform completed sign-in directly, or `null` if cancelled or failed.
  */
-expect suspend fun getSocialIdToken(provider: IdentityProvider): String?
+expect suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResult?
 
 /**
  * Sends a phone verification OTP using the platform's native Firebase SDK.

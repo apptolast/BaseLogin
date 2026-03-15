@@ -1,6 +1,7 @@
 package com.apptolast.customlogin.presentation.slots.defaultslots
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
@@ -20,6 +23,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
@@ -39,6 +44,10 @@ import login.custom_login.generated.resources.forgot_password_screen_description
 import login.custom_login.generated.resources.forgot_password_screen_success_description
 import login.custom_login.generated.resources.forgot_password_screen_success_title
 import login.custom_login.generated.resources.forgot_password_screen_title
+import login.custom_login.generated.resources.magic_link_screen_description
+import login.custom_login.generated.resources.magic_link_screen_success_description
+import login.custom_login.generated.resources.magic_link_screen_success_title
+import login.custom_login.generated.resources.magic_link_screen_title
 import login.custom_login.generated.resources.phone_auth_screen_otp_description
 import login.custom_login.generated.resources.phone_auth_screen_otp_header
 import login.custom_login.generated.resources.phone_auth_screen_phone_description
@@ -47,28 +56,57 @@ import login.custom_login.generated.resources.register_screen_privacy_policy
 import login.custom_login.generated.resources.register_screen_terms_and_conditions
 import login.custom_login.generated.resources.register_screen_terms_conjunction
 import login.custom_login.generated.resources.register_screen_terms_prefix
-import login.custom_login.generated.resources.magic_link_screen_description
-import login.custom_login.generated.resources.magic_link_screen_success_description
-import login.custom_login.generated.resources.magic_link_screen_success_title
-import login.custom_login.generated.resources.magic_link_screen_title
 import login.custom_login.generated.resources.reset_password_screen_description
 import login.custom_login.generated.resources.reset_password_screen_title
 import org.jetbrains.compose.resources.stringResource
 
+// ── Shared helpers ─────────────────────────────────────────────────────────────
+
 /**
- * Default implementation for a screen header.
+ * A circle Surface container holding an icon. Used for screen headers to give
+ * a polished, consistent visual anchor across all auth screens.
+ */
+@Composable
+private fun IconInCircle(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescription: String? = null,
+    size: Int = 64,
+    iconSize: Int = 28,
+) {
+    Surface(
+        shape = CircleShape,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        modifier = Modifier.size(size.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(iconSize.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+    }
+}
+
+// ── Header ─────────────────────────────────────────────────────────────────────
+
+/**
+ * Default implementation for the login/register screen header (logo + brand name).
  */
 @Composable
 fun DefaultHeader() {
     HeaderContent(
         drawableResource = Res.drawable.atl_isotipo_basic,
-        appName = "AppToLast", // App name might not need to be in strings.xml if it's a brand name
+        appName = "AppToLast",
         appSubtitle = "App to Last example auth",
     )
 }
 
+// ── Divider ────────────────────────────────────────────────────────────────────
+
 /**
- * Default implementation for a divider with text.
+ * An elegant horizontal divider with centred label text (e.g. "OR").
  */
 @Composable
 fun DefaultDivider(text: String) {
@@ -77,24 +115,28 @@ fun DefaultDivider(text: String) {
             .fillMaxWidth()
             .padding(vertical = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        HorizontalDivider()
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
         Text(
             text = text,
-            style = MaterialTheme.typography.labelMedium
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 12.dp)
         )
-        HorizontalDivider()
+        HorizontalDivider(
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.outlineVariant
+        )
     }
 }
 
+// ── Terms checkbox ─────────────────────────────────────────────────────────────
+
 /**
- * Default implementation for a terms and conditions checkbox.
- *
- * @param checked The current checked state.
- * @param onCheckedChange The callback to be invoked when the checkbox is clicked.
- * @param onTermsClick The callback to be invoked when the terms link is clicked.
- * @param onPrivacyClick The callback to be invoked when the privacy link is clicked.
+ * Default implementation for the terms and conditions checkbox on the Register screen.
  */
 @Composable
 fun DefaultTermsCheckbox(
@@ -105,7 +147,8 @@ fun DefaultTermsCheckbox(
 ) {
     val linkStyle = SpanStyle(
         color = MaterialTheme.colorScheme.primary,
-        textDecoration = TextDecoration.Underline
+        textDecoration = TextDecoration.Underline,
+        fontWeight = FontWeight.Medium
     )
 
     val annotatedString = buildAnnotatedString {
@@ -137,64 +180,52 @@ fun DefaultTermsCheckbox(
         Spacer(Modifier.width(8.dp))
         Text(
             text = annotatedString,
-            style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
-/**
- * Default implementation for the header of the Forgot Password screen.
- */
+// ── Forgot Password ────────────────────────────────────────────────────────────
+
 @Composable
 fun DefaultForgotPasswordHeader() {
-    Icon(
-        imageVector = Icons.Default.Email,
-        contentDescription = null,
-        modifier = Modifier.size(40.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
-    Spacer(modifier = Modifier.height(16.dp))
+    IconInCircle(icon = Icons.Default.Email, size = 64, iconSize = 28)
+    Spacer(modifier = Modifier.height(20.dp))
     Text(
         text = stringResource(Res.string.forgot_password_screen_title),
         style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onSurface
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center
     )
 }
 
-/**
- * Default implementation for the description text of the Forgot Password screen.
- */
 @Composable
 fun DefaultForgotPasswordDescription() {
     Text(
         text = stringResource(Res.string.forgot_password_screen_description),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
     )
 }
 
-/**
- * Default implementation for the header of the Reset Password screen.
- */
+// ── Reset Password ─────────────────────────────────────────────────────────────
+
 @Composable
 fun DefaultResetPasswordHeader() {
-    Icon(
-        imageVector = Icons.Default.Lock,
-        contentDescription = null,
-        modifier = Modifier.size(64.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
-    Spacer(modifier = Modifier.height(16.dp))
+    IconInCircle(icon = Icons.Default.Lock, size = 64, iconSize = 28)
+    Spacer(modifier = Modifier.height(20.dp))
     Text(
         text = stringResource(Res.string.reset_password_screen_title),
         style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onSurface
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center
     )
 }
 
-/**
- * Default implementation for the description text of the Reset Password screen.
- */
 @Composable
 fun DefaultResetPasswordDescription() {
     Text(
@@ -205,28 +236,21 @@ fun DefaultResetPasswordDescription() {
     )
 }
 
-/**
- * Default implementation for the header of the Magic Link screen.
- */
+// ── Magic Link ─────────────────────────────────────────────────────────────────
+
 @Composable
 fun DefaultMagicLinkHeader() {
-    Icon(
-        imageVector = Icons.Default.Email,
-        contentDescription = null,
-        modifier = Modifier.size(40.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
-    Spacer(modifier = Modifier.height(16.dp))
+    IconInCircle(icon = Icons.Default.Email, size = 64, iconSize = 28)
+    Spacer(modifier = Modifier.height(20.dp))
     Text(
         text = stringResource(Res.string.magic_link_screen_title),
         style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onSurface
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center
     )
 }
 
-/**
- * Default implementation for the description of the Magic Link screen.
- */
 @Composable
 fun DefaultMagicLinkDescription() {
     Text(
@@ -237,11 +261,6 @@ fun DefaultMagicLinkDescription() {
     )
 }
 
-/**
- * Default implementation for the success state of the Magic Link screen.
- *
- * @param email The email address the link was sent to.
- */
 @Composable
 fun DefaultMagicLinkSuccessContent(email: String) {
     DefaultSuccessContent(
@@ -250,28 +269,21 @@ fun DefaultMagicLinkSuccessContent(email: String) {
     )
 }
 
-/**
- * Default implementation for the header of the Phone Auth screen (phone number step).
- */
+// ── Phone Auth ─────────────────────────────────────────────────────────────────
+
 @Composable
 fun DefaultPhoneAuthHeader() {
-    Icon(
-        imageVector = Icons.Default.Phone,
-        contentDescription = null,
-        modifier = Modifier.size(40.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
-    Spacer(modifier = Modifier.height(16.dp))
+    IconInCircle(icon = Icons.Default.Phone, size = 64, iconSize = 28)
+    Spacer(modifier = Modifier.height(20.dp))
     Text(
         text = stringResource(Res.string.phone_auth_screen_phone_header),
         style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onSurface
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center
     )
 }
 
-/**
- * Default implementation for the description of the Phone Auth screen (phone number step).
- */
 @Composable
 fun DefaultPhoneAuthDescription() {
     Text(
@@ -282,30 +294,19 @@ fun DefaultPhoneAuthDescription() {
     )
 }
 
-/**
- * Default implementation for the header of the Phone Auth screen (OTP step).
- */
 @Composable
 fun DefaultOtpHeader() {
-    Icon(
-        imageVector = Icons.Default.Phone,
-        contentDescription = null,
-        modifier = Modifier.size(40.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
-    Spacer(modifier = Modifier.height(16.dp))
+    IconInCircle(icon = Icons.Default.Phone, size = 64, iconSize = 28)
+    Spacer(modifier = Modifier.height(20.dp))
     Text(
         text = stringResource(Res.string.phone_auth_screen_otp_header),
         style = MaterialTheme.typography.headlineMedium,
-        color = MaterialTheme.colorScheme.onSurface
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center
     )
 }
 
-/**
- * Default implementation for the description of the Phone Auth screen (OTP step).
- *
- * @param phoneNumber The phone number the code was sent to.
- */
 @Composable
 fun DefaultOtpDescription(phoneNumber: String) {
     Text(
@@ -316,12 +317,15 @@ fun DefaultOtpDescription(phoneNumber: String) {
     )
 }
 
+// ── Success content ────────────────────────────────────────────────────────────
+
 /**
- * Default implementation for the success state of a screen.
+ * Generic success state for any auth screen.
+ * The check icon is presented inside a tinted circle Surface for visual polish.
  *
- * @param title The title text to display.
- * @param description The description text to display.
- * @param onContinue The callback to be invoked when the continue button is clicked, if any.
+ * @param title       Title text.
+ * @param description Body text below the title.
+ * @param onContinue  Optional callback; when non-null a "Continue" button is shown.
  */
 @Composable
 fun DefaultSuccessContent(
@@ -336,31 +340,55 @@ fun DefaultSuccessContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.CheckCircle,
-            contentDescription = null, // Decorative icon
-            modifier = Modifier.size(80.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(24.dp))
+        // Icon in a circle container
+        Surface(
+            shape = CircleShape,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier = Modifier.size(96.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null, // decorative; title conveys the message
+                    modifier = Modifier.size(52.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(28.dp))
+
         Text(
             text = title,
             style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface
         )
-        Spacer(modifier = Modifier.height(16.dp))
+
+        Spacer(modifier = Modifier.height(12.dp))
+
         Text(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
         if (onContinue != null) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(36.dp))
             Button(
                 onClick = onContinue,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text(stringResource(Res.string.common_continue_button))
+                Text(
+                    text = stringResource(Res.string.common_continue_button),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }

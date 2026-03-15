@@ -8,7 +8,7 @@ import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.SignUpData
-import com.apptolast.customlogin.PLATFORM_AUTH_HANDLED
+import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.getSocialIdToken
 import com.apptolast.customlogin.sendPhoneVerificationCode
 import com.apptolast.customlogin.verifyPhoneCode
@@ -62,19 +62,21 @@ class FirebaseAuthProvider(
 
     private suspend fun signInWithOAuth(provider: IdentityProvider): AuthResult {
         return try {
-            val idToken = getSocialIdToken(provider)
-                ?: return AuthResult.Failure(AuthError.Unknown("Social sign-in cancelled or failed."))
-
-            // Platform (e.g. Android web OAuth) already completed the Firebase sign-in.
-            if (idToken == PLATFORM_AUTH_HANDLED) return refreshSession()
-
-            val credential = provider.toCredential(idToken)
-                ?: return AuthResult.Failure(AuthError.OperationNotAllowed("Provider not supported: ${provider.id}"))
-
-            val result = firebaseAuth.signInWithCredential(credential)
-            result.user?.toUserSession()?.let { session ->
-                AuthResult.Success(session)
-            } ?: AuthResult.Failure(AuthError.Unknown("No user returned after social sign in"))
+            when (val tokenResult = getSocialIdToken(provider)) {
+                null -> AuthResult.Failure(AuthError.Unknown("Social sign-in cancelled or failed."))
+                // Platform (e.g. Android web OAuth) already completed the Firebase sign-in.
+                is SocialTokenResult.PlatformHandled -> refreshSession()
+                is SocialTokenResult.Token -> {
+                    val credential = provider.toCredential(tokenResult.value)
+                        ?: return AuthResult.Failure(
+                            AuthError.OperationNotAllowed("Provider not supported: ${provider.id}")
+                        )
+                    val result = firebaseAuth.signInWithCredential(credential)
+                    result.user?.toUserSession()?.let { session ->
+                        AuthResult.Success(session)
+                    } ?: AuthResult.Failure(AuthError.Unknown("No user returned after social sign in"))
+                }
+            }
         } catch (e: FirebaseAuthException) {
             AuthResult.Failure(e.toAuthError())
         } catch (e: Exception) {
@@ -234,10 +236,16 @@ class FirebaseAuthProvider(
                 )
 
                 is Credentials.OAuthToken -> {
-                    val idToken = getSocialIdToken(credentials.provider)
+                    val tokenResult = getSocialIdToken(credentials.provider)
                         ?: return AuthResult.Failure(AuthError.Unknown("Social sign-in cancelled."))
-                    credentials.provider.toCredential(idToken)
-                        ?: return AuthResult.Failure(AuthError.OperationNotAllowed("Provider not supported for reauthentication: ${credentials.provider.id}"))
+                    if (tokenResult is SocialTokenResult.PlatformHandled) {
+                        // Platform completed sign-in — re-read the current session
+                        return refreshSession()
+                    }
+                    credentials.provider.toCredential((tokenResult as SocialTokenResult.Token).value)
+                        ?: return AuthResult.Failure(
+                            AuthError.OperationNotAllowed("Provider not supported for reauthentication: ${credentials.provider.id}")
+                        )
                 }
 
                 is Credentials.RefreshToken -> return AuthResult.Failure(

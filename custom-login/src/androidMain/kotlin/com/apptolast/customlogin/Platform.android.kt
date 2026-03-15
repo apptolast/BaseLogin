@@ -7,6 +7,7 @@ import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.UserSession
+import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.platform.ActivityHolder
 import com.apptolast.customlogin.provider.GoogleSignInProviderAndroid
 import com.apptolast.customlogin.provider.WebOAuthProviderAndroid
@@ -50,7 +51,7 @@ private object PlatformKoinHelper : KoinComponent {
 /**
  * Actual implementation for getting a social ID token on Android.
  */
-actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
+actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResult? {
     return when (provider) {
         is IdentityProvider.Google -> {
             val config = PlatformKoinHelper.googleSignInConfig
@@ -63,7 +64,7 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
                 config = config,
                 context = appContext
             )
-            googleProvider.signIn()
+            googleProvider.signIn()?.let { SocialTokenResult.Token(it) }
         }
         is IdentityProvider.Apple ->
             WebOAuthProviderAndroid.signIn(

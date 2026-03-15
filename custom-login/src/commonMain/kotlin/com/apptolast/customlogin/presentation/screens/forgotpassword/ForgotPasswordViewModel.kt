@@ -33,6 +33,9 @@ class ForgotPasswordViewModel(
         when (action) {
             is ForgotPasswordAction.EmailChanged -> onEmailChange(action.email)
             is ForgotPasswordAction.SendResetEmailClicked -> onSendResetEmailClicked()
+            is ForgotPasswordAction.SuccessDismissed -> viewModelScope.launch {
+                _effect.emit(ForgotPasswordEffect.NavigateBack)
+            }
         }
     }
 

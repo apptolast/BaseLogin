@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +29,7 @@ fun CustomSnackBar(
             IconButton(onClick = onDismiss) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = null,
+                    contentDescription = "Dismiss",
                     tint = MaterialTheme.colorScheme.onErrorContainer
                 )
             }
@@ -40,11 +40,15 @@ fun CustomSnackBar(
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = null,
+                imageVector = Icons.Outlined.Error,
+                contentDescription = null, // error conveyed by text
+                tint = MaterialTheme.colorScheme.error
             )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = snackBarText)
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = snackBarText,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

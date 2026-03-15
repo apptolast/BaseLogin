@@ -4,4 +4,5 @@ package com.apptolast.customlogin.presentation.screens.forgotpassword
  */
 sealed interface ForgotPasswordEffect {
     data class ShowError(val message: String) : ForgotPasswordEffect
+    data object NavigateBack : ForgotPasswordEffect
 }

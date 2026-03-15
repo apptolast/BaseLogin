@@ -10,4 +10,6 @@ package com.apptolast.customlogin.presentation.screens.forgotpassword
 sealed interface ForgotPasswordAction {
     data class EmailChanged(val email: String) : ForgotPasswordAction
     data object SendResetEmailClicked : ForgotPasswordAction
+    /** Fired when the user taps the back/done button on the success state. */
+    data object SuccessDismissed : ForgotPasswordAction
 }

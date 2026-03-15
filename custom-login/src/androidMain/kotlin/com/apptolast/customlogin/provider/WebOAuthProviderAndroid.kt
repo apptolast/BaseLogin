@@ -1,6 +1,6 @@
 package com.apptolast.customlogin.provider
 
-import com.apptolast.customlogin.PLATFORM_AUTH_HANDLED
+import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.platform.ActivityHolder
 import com.apptolast.customlogin.util.Logger
 import com.google.firebase.Firebase
@@ -16,7 +16,7 @@ import kotlin.coroutines.resume
  * Firebase opens the OAuth page in a Chrome Custom Tab and handles the redirect.
  *
  * On success, the user is already signed in via Firebase. The function returns
- * [PLATFORM_AUTH_HANDLED] so [FirebaseAuthProvider] knows to call refreshSession()
+ * [SocialTokenResult.PlatformHandled] so [FirebaseAuthProvider] knows to call refreshSession()
  * instead of creating a new credential.
  *
  * ## Required Firebase console setup
@@ -31,7 +31,7 @@ object WebOAuthProviderAndroid {
         providerId: String,
         scopes: List<String> = emptyList(),
         customParams: Map<String, String> = emptyMap()
-    ): String? {
+    ): SocialTokenResult? {
         val activity = try {
             ActivityHolder.requireActivity()
         } catch (e: IllegalStateException) {
@@ -48,7 +48,7 @@ object WebOAuthProviderAndroid {
             Firebase.auth
                 .startActivityForSignInWithProvider(activity, provider)
                 .addOnSuccessListener {
-                    if (cont.isActive) cont.resume(PLATFORM_AUTH_HANDLED)
+                    if (cont.isActive) cont.resume(SocialTokenResult.PlatformHandled)
                 }
                 .addOnFailureListener { e ->
                     Logger.e("WebOAuth", "$providerId sign-in failed: ${e.message}")

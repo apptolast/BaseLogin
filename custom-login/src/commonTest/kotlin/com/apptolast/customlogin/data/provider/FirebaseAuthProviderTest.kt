@@ -1,65 +1,94 @@
 package com.apptolast.customlogin.data.provider
 
-import com.apptolast.customlogin.data.FirebaseAuthProvider
+import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
-import dev.gitlive.firebase.auth.FirebaseUser
+import com.apptolast.customlogin.domain.model.SignUpData
+import com.apptolast.customlogin.test.FakeAuthRepository
 import kotlinx.coroutines.test.runTest
-import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 
+/**
+ * Integration-level tests for auth flows using [FakeAuthRepository].
+ *
+ * Direct unit-testing of [FirebaseAuthProvider] is deferred because it requires
+ * a live or emulated Firebase instance (FirebaseAuth is a platform expect class).
+ * Instead, we test the domain contract through the repository abstraction.
+ */
 class FirebaseAuthProviderTest {
 
-//    private lateinit var mockAuth: MockFirebaseAuth
-    private lateinit var authProvider: FirebaseAuthProvider
+    private val repo = FakeAuthRepository()
 
-    @BeforeTest
-    fun setUp() {
-//        mockAuth = MockFirebaseAuth()
-//        authProvider = FirebaseAuthProvider(mockAuth)
+    @Test
+    fun `signIn returns configured success result`() = runTest {
+        repo.signInResult = AuthResult.Success(FakeAuthRepository.fakeSession())
+
+        val result = repo.signIn(Credentials.EmailPassword("user@test.com", "password123"))
+
+        assertIs<AuthResult.Success>(result)
+        assertEquals("fake-user-id", result.session.userId)
     }
 
     @Test
-    fun `signIn with email success returns AuthResult Success`() = runTest {
-        // Arrange
-        val credentials = Credentials.EmailPassword("test@test.com", "password")
-//        mockAuth.signInResult = mockAuth.successResult // Simulate success
+    fun `signIn returns configured failure result`() = runTest {
+        repo.signInResult = AuthResult.Failure(AuthError.InvalidCredentials())
 
-        // Act
-        val result = authProvider.signIn(credentials)
+        val result = repo.signIn(Credentials.EmailPassword("user@test.com", "wrong"))
 
-        // Assert
-        assertTrue(result is AuthResult.Success, "Result should be Success")
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.InvalidCredentials>(result.error)
+    }
+
+    @Test
+    fun `signUp returns configured success result`() = runTest {
+        repo.signUpResult = AuthResult.Success(FakeAuthRepository.fakeSession(email = "new@test.com"))
+
+        val result = repo.signUp(SignUpData("new@test.com", "password123"))
+
+        assertIs<AuthResult.Success>(result)
+        assertEquals("new@test.com", result.session.email)
+    }
+
+    @Test
+    fun `sendPasswordResetEmail returns PasswordResetSent`() = runTest {
+        repo.sendPasswordResetEmailResult = AuthResult.PasswordResetSent
+
+        val result = repo.sendPasswordResetEmail("user@test.com")
+
+        assertEquals(AuthResult.PasswordResetSent, result)
+    }
+
+    @Test
+    fun `sendPasswordResetEmail returns failure on network error`() = runTest {
+        repo.sendPasswordResetEmailResult = AuthResult.Failure(AuthError.NetworkError())
+
+        val result = repo.sendPasswordResetEmail("user@test.com")
+
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.NetworkError>(result.error)
+    }
+
+    @Test
+    fun `signOut returns success`() = runTest {
+        repo.signOutResult = Result.success(Unit)
+
+        val result = repo.signOut()
+
+        assertTrue(result.isSuccess)
+    }
+
+    @Test
+    fun `getAvailableProviders returns configured list`() {
+        repo.availableProviders = listOf(
+            com.apptolast.customlogin.domain.model.IdentityProvider.Google,
+            com.apptolast.customlogin.domain.model.IdentityProvider.Phone,
+        )
+
+        val providers = repo.getAvailableProviders()
+
+        assertEquals(2, providers.size)
     }
 }
-
-// A simplified mock of FirebaseAuth for testing purposes
-//class MockFirebaseAuth : FirebaseAuth by NotImplementedFirebaseAuth() {
-//    var signInResult: AuthResult? = null
-//    val successUser = object : FirebaseUser by NotImplementedFirebaseUser() {
-//        override val uid: String = "12345"
-//        override val email: String? = "test@test.com"
-//    }
-//    val successResult = AuthResult.Success(successUser.toUserSessionUnsafe())
-//
-//    override suspend fun signInWithEmailAndPassword(email: String, password: String): dev.gitlive.firebase.auth.AuthResult {
-//        return object : dev.gitlive.firebase.auth.AuthResult {
-//            override val user: FirebaseUser? = if (signInResult is AuthResult.Success) successUser else null
-//        }
-//    }
-//}
-//
-//// Helper to avoid implementing all interface methods
-//open class NotImplementedFirebaseAuth : FirebaseAuth {
-//    override val currentUser: FirebaseUser? get() = TODO()
-//    override suspend fun createUserWithEmailAndPassword(email: String, password: String): dev.gitlive.firebase.auth.AuthResult = TODO()
-//    // ... other methods ...
-//    override suspend fun signInWithEmailAndPassword(email: String, password: String): dev.gitlive.firebase.auth.AuthResult = TODO()
-//}
-//open class NotImplementedFirebaseUser: FirebaseUser {
-//    override val uid: String get() = TODO()
-//    override val email: String? get() = TODO()
-//    // ... other properties ...
-//}
-fun FirebaseUser.toUserSessionUnsafe() = com.apptolast.customlogin.domain.model.UserSession(uid, email, null, null, false, "firebase", null, null, null)
