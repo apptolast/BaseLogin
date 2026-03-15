@@ -110,4 +110,20 @@ interface AuthProvider {
      * @param otpCode The 6-digit SMS code entered by the user.
      */
     suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult
+
+    /**
+     * Sends a magic link (passwordless email sign-in link) to [email].
+     * @param email The user's email address.
+     * @param continueUrl The deep link URL configured in [MagicLinkConfig].
+     * @param iosBundleId Optional iOS bundle ID for deep link handling.
+     * @return [AuthResult.MagicLinkSent] on success, [AuthResult.Failure] on error.
+     */
+    suspend fun sendMagicLink(email: String, continueUrl: String, iosBundleId: String?): AuthResult
+
+    /**
+     * Completes a magic link sign-in by verifying [email] and [link].
+     * Call this from the host app when it receives the deep link URL.
+     * @return [AuthResult.Success] on sign-in, [AuthResult.Failure] on error.
+     */
+    suspend fun signInWithMagicLink(email: String, link: String): AuthResult
 }

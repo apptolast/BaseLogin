@@ -22,3 +22,6 @@ data class ResetPasswordRoute(val resetCode: String)
 
 @Serializable
 data object PhoneAuthRoute
+
+@Serializable
+data object MagicLinkRoute

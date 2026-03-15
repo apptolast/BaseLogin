@@ -2,7 +2,9 @@ package com.apptolast.login
 
 import android.app.Application
 import com.apptolast.customlogin.appContext
+import com.apptolast.customlogin.config.AppleSignInConfig
 import com.apptolast.customlogin.config.GoogleSignInConfig
+import com.apptolast.customlogin.config.MagicLinkConfig
 import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.di.initLoginKoin
 import com.apptolast.login.di.appModule
@@ -31,6 +33,12 @@ class LoginApplication : Application() {
         val loginConfig = LoginLibraryConfig(
             googleSignInConfig = GoogleSignInConfig(
                 webClientId = "495458702268-al98mksrlh27v607972b0oaa0g98pfru.apps.googleusercontent.com"
+            ),
+            appleSignInConfig = AppleSignInConfig(),
+            githubEnabled = true,
+            microsoftEnabled = true,
+            magicLinkConfig = MagicLinkConfig(
+                continueUrl = "https://apptolast.com/login"
             )
         )
 

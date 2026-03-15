@@ -42,6 +42,7 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onNavigateToResetPassword: () -> Unit = {},
     onNavigateToPhoneAuth: () -> Unit = {},
+    onNavigateToMagicLink: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
@@ -51,6 +52,7 @@ fun LoginScreen(
             when (effect) {
                 is LoginEffect.NavigateToHome -> onNavigateToHome()
                 is LoginEffect.NavigateToPhoneAuth -> onNavigateToPhoneAuth()
+                is LoginEffect.NavigateToMagicLink -> onNavigateToMagicLink()
                 is LoginEffect.ShowError -> {
                     snackBarHostState.showSnackbar(
                         message = effect.message,
@@ -139,7 +141,7 @@ private fun LoginContent(
         Spacer(Modifier.height(8.dp))
 
         slots.socialProviders?.let { socialProviders ->
-            socialProviders { provider ->
+            socialProviders(state.availableProviders) { provider ->
                 onAction(LoginAction.SocialSignInClicked(provider))
             }
         }

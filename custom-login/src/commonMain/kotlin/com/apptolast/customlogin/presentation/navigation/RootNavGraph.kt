@@ -7,6 +7,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.apptolast.customlogin.presentation.screens.forgotpassword.ForgotPasswordScreen
 import com.apptolast.customlogin.presentation.screens.login.LoginScreen
+import com.apptolast.customlogin.presentation.screens.magiclink.MagicLinkScreen
 import com.apptolast.customlogin.presentation.screens.phone.PhoneAuthScreen
 import com.apptolast.customlogin.presentation.screens.register.RegisterScreen
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordScreen
@@ -69,6 +70,11 @@ fun NavGraphBuilder.authRoutesFlow(
                         launchSingleTop = true
                     }
                 },
+                onNavigateToMagicLink = {
+                    navController.navigate(MagicLinkRoute) {
+                        launchSingleTop = true
+                    }
+                },
             )
         }
 
@@ -103,6 +109,16 @@ fun NavGraphBuilder.authRoutesFlow(
             PhoneAuthScreen(
                 slots = slots.phoneAuth,
                 onNavigateToHome = onNavigateToHome,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // ---------- MAGIC LINK SCREEN ----------
+        composable<MagicLinkRoute> {
+            MagicLinkScreen(
+                slots = slots.magicLink,
                 onNavigateBack = {
                     navController.popBackStack()
                 }

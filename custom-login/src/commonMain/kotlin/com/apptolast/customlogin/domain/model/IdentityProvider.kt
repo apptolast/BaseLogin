@@ -9,6 +9,8 @@ sealed class IdentityProvider(val id: String) {
     data object Apple : IdentityProvider("apple.com")
     data object Facebook : IdentityProvider("facebook.com")
     data object GitHub : IdentityProvider("github.com")
+    data object Microsoft : IdentityProvider("microsoft.com")
+    data object MagicLink : IdentityProvider("magiclink")
     data object Phone : IdentityProvider("phone")
     data class Custom(val customId: String) : IdentityProvider(customId)
 }

@@ -7,6 +7,9 @@ import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultEmailFie
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordDescription
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordLink
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultMagicLinkDescription
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultMagicLinkHeader
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultMagicLinkSuccessContent
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultLoginLink
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultNameField
@@ -76,8 +79,8 @@ data class LoginScreenSlots(
             text = text,
         )
     },
-    val socialProviders: (@Composable (onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { onProviderClick ->
-        SocialLoginButtonsSection(onProviderClick = onProviderClick)
+    val socialProviders: (@Composable (providers: List<IdentityProvider>, onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { providers, onProviderClick ->
+        SocialLoginButtonsSection(providers = providers, onProviderClick = onProviderClick)
     },
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
         DefaultForgotPasswordLink(onForgotPasswordClick = onClick)
@@ -336,6 +339,38 @@ data class PhoneAuthScreenSlots(
 )
 
 /**
+ * Defines the customizable composable slots for the Magic Link (passwordless email) screen.
+ */
+data class MagicLinkScreenSlots(
+    val header: @Composable () -> Unit = { DefaultMagicLinkHeader() },
+    val description: @Composable () -> Unit = { DefaultMagicLinkDescription() },
+    val emailField: @Composable (
+        value: String,
+        onValueChange: (String) -> Unit,
+        error: String?,
+        enabled: Boolean
+    ) -> Unit = { value, onValueChange, error, enabled ->
+        DefaultEmailField(
+            value = value,
+            onValueChange = onValueChange,
+            error = error,
+            enabled = enabled
+        )
+    },
+    val submitButton: @Composable (
+        onClick: () -> Unit,
+        isLoading: Boolean,
+        enabled: Boolean,
+        text: String
+    ) -> Unit = { onClick, isLoading, enabled, text ->
+        DefaultSubmitButton(onClick = onClick, isLoading = isLoading, enabled = enabled, text = text)
+    },
+    val successContent: @Composable (email: String) -> Unit = { email ->
+        DefaultMagicLinkSuccessContent(email = email)
+    }
+)
+
+/**
  * A container for all authentication-related screen slots.
  * This allows passing all custom UI components in a single object.
  */
@@ -345,4 +380,5 @@ data class AuthScreenSlots(
     val forgotPassword: ForgotPasswordScreenSlots = ForgotPasswordScreenSlots(),
     val resetPassword: ResetPasswordScreenSlots = ResetPasswordScreenSlots(),
     val phoneAuth: PhoneAuthScreenSlots = PhoneAuthScreenSlots(),
+    val magicLink: MagicLinkScreenSlots = MagicLinkScreenSlots(),
 )

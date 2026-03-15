@@ -47,6 +47,10 @@ import login.custom_login.generated.resources.register_screen_privacy_policy
 import login.custom_login.generated.resources.register_screen_terms_and_conditions
 import login.custom_login.generated.resources.register_screen_terms_conjunction
 import login.custom_login.generated.resources.register_screen_terms_prefix
+import login.custom_login.generated.resources.magic_link_screen_description
+import login.custom_login.generated.resources.magic_link_screen_success_description
+import login.custom_login.generated.resources.magic_link_screen_success_title
+import login.custom_login.generated.resources.magic_link_screen_title
 import login.custom_login.generated.resources.reset_password_screen_description
 import login.custom_login.generated.resources.reset_password_screen_title
 import org.jetbrains.compose.resources.stringResource
@@ -198,6 +202,51 @@ fun DefaultResetPasswordDescription() {
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center
+    )
+}
+
+/**
+ * Default implementation for the header of the Magic Link screen.
+ */
+@Composable
+fun DefaultMagicLinkHeader() {
+    Icon(
+        imageVector = Icons.Default.Email,
+        contentDescription = null,
+        modifier = Modifier.size(40.dp),
+        tint = MaterialTheme.colorScheme.primary
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+    Text(
+        text = stringResource(Res.string.magic_link_screen_title),
+        style = MaterialTheme.typography.headlineMedium,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+/**
+ * Default implementation for the description of the Magic Link screen.
+ */
+@Composable
+fun DefaultMagicLinkDescription() {
+    Text(
+        text = stringResource(Res.string.magic_link_screen_description),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
+}
+
+/**
+ * Default implementation for the success state of the Magic Link screen.
+ *
+ * @param email The email address the link was sent to.
+ */
+@Composable
+fun DefaultMagicLinkSuccessContent(email: String) {
+    DefaultSuccessContent(
+        title = stringResource(Res.string.magic_link_screen_success_title),
+        description = stringResource(Res.string.magic_link_screen_success_description, email)
     )
 }
 

@@ -1,7 +1,9 @@
 package com.apptolast.login
 
 import androidx.compose.ui.window.ComposeUIViewController
+import com.apptolast.customlogin.config.AppleSignInConfig
 import com.apptolast.customlogin.config.GoogleSignInConfig
+import com.apptolast.customlogin.config.MagicLinkConfig
 import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.di.initLoginKoin
 import com.apptolast.login.di.appModule
@@ -28,6 +30,13 @@ private fun initKoinIfNeeded() {
             googleSignInConfig = GoogleSignInConfig(
                 webClientId = "495458702268-al98mksrlh27v607972b0oaa0g98pfru.apps.googleusercontent.com",
                 iosClientId = "495458702268-1ekoub6nmp7hmkhinuasdlup1rke9kg4.apps.googleusercontent.com"
+            ),
+            appleSignInConfig = AppleSignInConfig(),
+            githubEnabled = true,
+            microsoftEnabled = true,
+            magicLinkConfig = MagicLinkConfig(
+                continueUrl = "https://apptolast.com/login",
+                iosBundleId = "com.apptolast.login"
             )
         )
 

@@ -7,6 +7,14 @@ import com.apptolast.customlogin.domain.model.PhoneAuthResult
 expect fun platform(): String
 
 /**
+ * Sentinel token returned by platform implementations when the platform
+ * itself (e.g. Android via [startActivityForSignInWithProvider]) has already
+ * completed the Firebase sign-in. [FirebaseAuthProvider] detects this value
+ * and calls [refreshSession] instead of creating a new credential.
+ */
+const val PLATFORM_AUTH_HANDLED = "___PLATFORM_AUTH_COMPLETE___"
+
+/**
  * Initiates a platform-specific social sign-in flow to get an ID token.
  * This common `expect` function is implemented in each platform's `actual` function.
  *

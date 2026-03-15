@@ -5,5 +5,6 @@ package com.apptolast.customlogin.presentation.screens.login
 sealed interface LoginEffect {
     data object NavigateToHome : LoginEffect
     data object NavigateToPhoneAuth : LoginEffect
+    data object NavigateToMagicLink : LoginEffect
     data class ShowError(val message: String) : LoginEffect
 }

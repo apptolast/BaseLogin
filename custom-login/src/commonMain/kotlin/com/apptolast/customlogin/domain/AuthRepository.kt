@@ -118,4 +118,19 @@ interface AuthRepository {
      * @param otpCode The 6-digit SMS code entered by the user.
      */
     suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult
+
+    /**
+     * Sends a passwordless sign-in link to [email].
+     * Requires [MagicLinkConfig] to be set in [LoginLibraryConfig].
+     * @return [AuthResult.MagicLinkSent] on success.
+     */
+    suspend fun sendMagicLink(email: String): AuthResult
+
+    /**
+     * Completes a magic link sign-in. Call this from the host app when it intercepts
+     * the deep link URL that Firebase embeds in the magic link email.
+     * @param email The same email address used in [sendMagicLink].
+     * @param link The full URL received from the deep link intent/universal link.
+     */
+    suspend fun signInWithMagicLink(email: String, link: String): AuthResult
 }

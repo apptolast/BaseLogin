@@ -56,6 +56,20 @@
     <string name="phone_auth_screen_phone_label">Phone Number</string>
     <string name="phone_auth_screen_otp_label">Verification Code</string>
 
+    <!-- Social Sign-In Buttons -->
+    <string name="login_apple_button">Sign in with Apple</string>
+    <string name="login_github_button">Sign in with GitHub</string>
+    <string name="login_microsoft_button">Sign in with Microsoft</string>
+    <string name="login_magic_link_button">Sign in with Email Link</string>
+    <string name="login_phone_button">Sign in with Phone</string>
+
+    <!-- Magic Link Screen -->
+    <string name="magic_link_screen_title">Email Link Sign-In</string>
+    <string name="magic_link_screen_description">Enter your email and we'll send you a sign-in link. No password needed.</string>
+    <string name="magic_link_screen_send_button">Send Sign-In Link</string>
+    <string name="magic_link_screen_success_title">Check Your Inbox</string>
+    <string name="magic_link_screen_success_description">We've sent a sign-in link to %1$s. Click the link in the email to complete sign-in.</string>
+
     <!-- Reset Password Screen -->
     <string name="reset_password_screen_title">Create New Password</string>
     <string name="reset_password_screen_new_password_label">New Password</string>

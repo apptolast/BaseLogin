@@ -2,6 +2,7 @@ package com.apptolast.customlogin.di
 
 import com.apptolast.customlogin.presentation.screens.forgotpassword.ForgotPasswordViewModel
 import com.apptolast.customlogin.presentation.screens.login.LoginViewModel
+import com.apptolast.customlogin.presentation.screens.magiclink.MagicLinkViewModel
 import com.apptolast.customlogin.presentation.screens.phone.PhoneAuthViewModel
 import com.apptolast.customlogin.presentation.screens.register.RegisterViewModel
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordViewModel
@@ -17,4 +18,5 @@ internal val presentationModule = module {
     viewModelOf(::ForgotPasswordViewModel)
     viewModelOf(::ResetPasswordViewModel)
     viewModelOf(::PhoneAuthViewModel)
+    viewModelOf(::MagicLinkViewModel)
 }

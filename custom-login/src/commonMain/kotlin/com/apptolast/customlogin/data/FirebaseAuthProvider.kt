@@ -8,6 +8,7 @@ import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.SignUpData
+import com.apptolast.customlogin.PLATFORM_AUTH_HANDLED
 import com.apptolast.customlogin.getSocialIdToken
 import com.apptolast.customlogin.sendPhoneVerificationCode
 import com.apptolast.customlogin.verifyPhoneCode
@@ -15,6 +16,7 @@ import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.EmailAuthProvider
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseAuthException
+import dev.gitlive.firebase.auth.ActionCodeSettings
 import dev.gitlive.firebase.auth.GithubAuthProvider
 import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.auth.OAuthProvider
@@ -62,6 +64,9 @@ class FirebaseAuthProvider(
         return try {
             val idToken = getSocialIdToken(provider)
                 ?: return AuthResult.Failure(AuthError.Unknown("Social sign-in cancelled or failed."))
+
+            // Platform (e.g. Android web OAuth) already completed the Firebase sign-in.
+            if (idToken == PLATFORM_AUTH_HANDLED) return refreshSession()
 
             val credential = provider.toCredential(idToken)
                 ?: return AuthResult.Failure(AuthError.OperationNotAllowed("Provider not supported: ${provider.id}"))
@@ -258,6 +263,35 @@ class FirebaseAuthProvider(
         return verifyPhoneCode(verificationId, otpCode)
     }
 
+    override suspend fun sendMagicLink(email: String, continueUrl: String, iosBundleId: String?): AuthResult {
+        return try {
+            val settings = ActionCodeSettings(
+                url = continueUrl,
+                canHandleCodeInApp = true,
+                iOSBundleId = iosBundleId
+            )
+            firebaseAuth.sendSignInLinkToEmail(email, settings)
+            AuthResult.MagicLinkSent
+        } catch (e: FirebaseAuthException) {
+            AuthResult.Failure(e.toAuthError())
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message ?: "Failed to send magic link", e))
+        }
+    }
+
+    override suspend fun signInWithMagicLink(email: String, link: String): AuthResult {
+        return try {
+            val result = firebaseAuth.signInWithEmailLink(email, link)
+            result.user?.toUserSession()?.let { session ->
+                AuthResult.Success(session)
+            } ?: AuthResult.Failure(AuthError.Unknown("No user returned after magic link sign-in"))
+        } catch (e: FirebaseAuthException) {
+            AuthResult.Failure(e.toAuthError())
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message ?: "Magic link sign-in failed", e))
+        }
+    }
+
     private fun IdentityProvider.toCredential(tokenData: String): AuthCredential? {
         return when (this) {
             is IdentityProvider.Google -> {
@@ -282,7 +316,13 @@ class FirebaseAuthProvider(
                 )
             }
             is IdentityProvider.GitHub -> GithubAuthProvider.credential(tokenData)
-            else -> null // Facebook, Phone have different flows
+            is IdentityProvider.Microsoft -> OAuthProvider.credential(
+                providerId = "microsoft.com",
+                accessToken = null,
+                idToken = tokenData,
+                rawNonce = null
+            )
+            else -> null // Facebook, Phone, MagicLink have different flows
         }
     }
 

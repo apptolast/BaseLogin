@@ -3,6 +3,7 @@ package com.apptolast.customlogin.data
 import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.domain.AuthProvider
 import com.apptolast.customlogin.domain.AuthRepository
+import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
@@ -96,6 +97,9 @@ class AuthRepositoryImpl(
         return buildList {
             if (config.googleSignInConfig != null) add(IdentityProvider.Google)
             if (config.appleSignInConfig != null) add(IdentityProvider.Apple)
+            if (config.githubEnabled) add(IdentityProvider.GitHub)
+            if (config.microsoftEnabled) add(IdentityProvider.Microsoft)
+            if (config.magicLinkConfig != null) add(IdentityProvider.MagicLink)
             add(IdentityProvider.Phone)
         }
     }
@@ -106,5 +110,15 @@ class AuthRepositoryImpl(
 
     override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult {
         return authProvider.verifyPhoneOtp(verificationId, otpCode)
+    }
+
+    override suspend fun sendMagicLink(email: String): AuthResult {
+        val mlConfig = config.magicLinkConfig
+            ?: return AuthResult.Failure(AuthError.OperationNotAllowed("Magic Link is not configured. Provide MagicLinkConfig in LoginLibraryConfig."))
+        return authProvider.sendMagicLink(email, mlConfig.continueUrl, mlConfig.iosBundleId)
+    }
+
+    override suspend fun signInWithMagicLink(email: String, link: String): AuthResult {
+        return authProvider.signInWithMagicLink(email, link)
     }
 }

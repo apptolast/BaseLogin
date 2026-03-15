@@ -33,4 +33,10 @@ sealed interface AuthResult {
      * This is a terminal success state for the `confirmPasswordReset` operation.
      */
     data object PasswordResetSuccess : AuthResult
+
+    /**
+     * Represents that a magic link email was sent successfully.
+     * The user must click the link in their email to complete sign-in.
+     */
+    data object MagicLinkSent : AuthResult
 }

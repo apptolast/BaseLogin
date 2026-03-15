@@ -9,7 +9,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Business
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -24,7 +28,13 @@ import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.google_icon
+import login.custom_login.generated.resources.login_apple_button
+import login.custom_login.generated.resources.login_github_button
+import login.custom_login.generated.resources.login_magic_link_button
+import login.custom_login.generated.resources.login_microsoft_button
+import login.custom_login.generated.resources.login_phone_button
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * A generic, styled button for social login providers.
@@ -51,50 +61,94 @@ internal fun DefaultSocialButton(
             painter = icon,
             contentDescription = text,
             modifier = Modifier.size(24.dp),
-            tint = tint // Use the tint parameter
+            tint = tint
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(text = text)
     }
 }
 
-/**
- * A specific social login button for Google. Uses a painter resource for the multi-color icon.
- */
 @Composable
 fun GoogleSocialButton(onClick: () -> Unit) {
     DefaultSocialButton(
         text = "Sign in with Google",
         icon = painterResource(Res.drawable.google_icon),
         onClick = onClick,
-        // Tint is defaulted to Unspecified, which is correct for this multi-color icon
     )
 }
 
-/**
- * A specific social login button for Phone. Uses a Material Vector Icon.
- */
+@Composable
+fun AppleSocialButton(onClick: () -> Unit) {
+    DefaultSocialButton(
+        text = stringResource(Res.string.login_apple_button),
+        icon = rememberVectorPainter(Icons.Default.Smartphone),
+        onClick = onClick,
+        tint = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+fun GitHubSocialButton(onClick: () -> Unit) {
+    DefaultSocialButton(
+        text = stringResource(Res.string.login_github_button),
+        icon = rememberVectorPainter(Icons.Default.Code),
+        onClick = onClick,
+        tint = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+fun MicrosoftSocialButton(onClick: () -> Unit) {
+    DefaultSocialButton(
+        text = stringResource(Res.string.login_microsoft_button),
+        icon = rememberVectorPainter(Icons.Default.Business),
+        onClick = onClick,
+        tint = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+@Composable
+fun MagicLinkSocialButton(onClick: () -> Unit) {
+    DefaultSocialButton(
+        text = stringResource(Res.string.login_magic_link_button),
+        icon = rememberVectorPainter(Icons.Default.Email),
+        onClick = onClick,
+        tint = MaterialTheme.colorScheme.onSurface
+    )
+}
+
 @Composable
 fun PhoneSocialButton(onClick: () -> Unit) {
     DefaultSocialButton(
-        text = "Sign in with Phone",
+        text = stringResource(Res.string.login_phone_button),
         icon = rememberVectorPainter(image = Icons.Default.Phone),
         onClick = onClick,
-        // We provide a tint color, so the vector icon is colored correctly.
         tint = MaterialTheme.colorScheme.onSurface
     )
 }
 
 /**
- * A composable that arranges multiple social login buttons.
- * This is the default implementation for the `socialProviders` slot.
+ * Renders social login buttons for the given [providers] list.
+ * The order of buttons matches the order of [providers]:
+ * Google → Apple → GitHub → Microsoft → MagicLink → Phone.
  */
 @Composable
-fun SocialLoginButtonsSection(onProviderClick: (IdentityProvider) -> Unit) {
+fun SocialLoginButtonsSection(
+    providers: List<IdentityProvider>,
+    onProviderClick: (IdentityProvider) -> Unit,
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        GoogleSocialButton { onProviderClick(IdentityProvider.Google) }
-        Spacer(Modifier.height(8.dp))
-        PhoneSocialButton { onProviderClick(IdentityProvider.Phone) }
-        // TODO: Add other buttons like GitHub, Apple, etc. here
+        providers.forEachIndexed { index, provider ->
+            if (index > 0) Spacer(Modifier.height(8.dp))
+            when (provider) {
+                is IdentityProvider.Google -> GoogleSocialButton { onProviderClick(provider) }
+                is IdentityProvider.Apple -> AppleSocialButton { onProviderClick(provider) }
+                is IdentityProvider.GitHub -> GitHubSocialButton { onProviderClick(provider) }
+                is IdentityProvider.Microsoft -> MicrosoftSocialButton { onProviderClick(provider) }
+                is IdentityProvider.MagicLink -> MagicLinkSocialButton { onProviderClick(provider) }
+                is IdentityProvider.Phone -> PhoneSocialButton { onProviderClick(provider) }
+                else -> {} // Facebook, Custom: not shown in default UI
+            }
+        }
     }
 }

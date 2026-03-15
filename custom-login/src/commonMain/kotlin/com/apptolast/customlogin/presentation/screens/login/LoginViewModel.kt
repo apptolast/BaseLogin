@@ -25,6 +25,10 @@ class LoginViewModel(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
+    init {
+        _uiState.update { it.copy(availableProviders = authRepository.getAvailableProviders()) }
+    }
+
     private val _effect = MutableSharedFlow<LoginEffect>()
     val effect = _effect.asSharedFlow()
 
@@ -51,6 +55,10 @@ class LoginViewModel(
     private fun onSocialSignIn(provider: IdentityProvider) {
         if (provider == IdentityProvider.Phone) {
             viewModelScope.launch { _effect.emit(LoginEffect.NavigateToPhoneAuth) }
+            return
+        }
+        if (provider == IdentityProvider.MagicLink) {
+            viewModelScope.launch { _effect.emit(LoginEffect.NavigateToMagicLink) }
             return
         }
         viewModelScope.launch {

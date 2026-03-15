@@ -9,6 +9,7 @@ import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.platform.ActivityHolder
 import com.apptolast.customlogin.provider.GoogleSignInProviderAndroid
+import com.apptolast.customlogin.provider.WebOAuthProviderAndroid
 import com.apptolast.customlogin.util.Logger
 import com.google.firebase.Firebase
 import com.google.firebase.auth.PhoneAuthCredential
@@ -64,15 +65,21 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
             )
             googleProvider.signIn()
         }
-        is IdentityProvider.Apple -> {
-            Logger.w("Platform", "Apple Sign-In is not available on Android (iOS only).")
-            null
-        }
-        is IdentityProvider.GitHub -> {
-            // TODO: Implement GitHub OAuth flow for Android.
-            Logger.w("Platform", "GitHub Sign-In for Android is not implemented yet.")
-            null
-        }
+        is IdentityProvider.Apple ->
+            WebOAuthProviderAndroid.signIn(
+                providerId = "apple.com",
+                scopes = listOf("email", "name")
+            )
+        is IdentityProvider.GitHub ->
+            WebOAuthProviderAndroid.signIn(
+                providerId = "github.com",
+                scopes = listOf("user:email")
+            )
+        is IdentityProvider.Microsoft ->
+            WebOAuthProviderAndroid.signIn(
+                providerId = "microsoft.com",
+                scopes = listOf("email", "profile")
+            )
         else -> {
             Logger.w("Platform", "Social sign-in for ${provider.id} is not implemented on Android yet.")
             null
