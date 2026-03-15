@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -105,11 +106,11 @@ class RegisterViewModel(
         }
         val emailError = when {
             state.email.isBlank() -> "Email cannot be empty"
-            !"^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex().matches(state.email) -> "Invalid email format"
+            !Validators.isValidEmail(state.email) -> "Invalid email format"
             else -> null
         }
         val passwordError = when {
-            state.password.length < 6 -> "Password must be at least 6 characters"
+            !Validators.isValidPassword(state.password) -> "Password must be at least 6 characters"
             else -> null
         }
         val confirmPasswordError = when {

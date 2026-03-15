@@ -10,7 +10,13 @@ import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPa
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultLoginLink
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultNameField
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultOtpDescription
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultOtpField
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultOtpHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultPasswordField
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultPhoneAuthDescription
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultPhoneAuthHeader
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultPhoneField
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultRegisterLink
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultResetPasswordDescription
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultResetPasswordHeader
@@ -58,16 +64,16 @@ data class LoginScreenSlots(
         )
     },
     val submitButton: @Composable (
-        text: String,
-        enabled: Boolean,
-        isLoading: Boolean,
         onClick: () -> Unit,
-    ) -> Unit = { text, enabled, isLoading, onClick ->
+        isLoading: Boolean,
+        enabled: Boolean,
+        text: String,
+    ) -> Unit = { onClick, isLoading, enabled, text ->
         DefaultSubmitButton(
-            text = text,
-            enabled = enabled,
-            isLoading = isLoading,
             onClick = onClick,
+            isLoading = isLoading,
+            enabled = enabled,
+            text = text,
         )
     },
     val socialProviders: (@Composable (onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { onProviderClick ->
@@ -260,6 +266,72 @@ data class ResetPasswordScreenSlots(
 )
 
 /**
+ * Defines the customizable composable slots for the Phone Authentication screen.
+ * Covers both the phone number entry step and the OTP verification step.
+ */
+data class PhoneAuthScreenSlots(
+    val layoutVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
+    val phoneHeader: @Composable () -> Unit = { DefaultPhoneAuthHeader() },
+    val phoneDescription: @Composable () -> Unit = { DefaultPhoneAuthDescription() },
+    val phoneField: @Composable (
+        value: String,
+        onValueChange: (String) -> Unit,
+        error: String?,
+        enabled: Boolean
+    ) -> Unit = { value, onValueChange, error, enabled ->
+        DefaultPhoneField(
+            value = value,
+            onValueChange = onValueChange,
+            error = error,
+            enabled = enabled
+        )
+    },
+    val sendCodeButton: @Composable (
+        onClick: () -> Unit,
+        isLoading: Boolean,
+        enabled: Boolean,
+        text: String
+    ) -> Unit = { onClick, isLoading, enabled, text ->
+        DefaultSubmitButton(
+            onClick = onClick,
+            isLoading = isLoading,
+            enabled = enabled,
+            text = text
+        )
+    },
+    val otpHeader: @Composable () -> Unit = { DefaultOtpHeader() },
+    val otpDescription: @Composable (phoneNumber: String) -> Unit = { phoneNumber ->
+        DefaultOtpDescription(phoneNumber = phoneNumber)
+    },
+    val otpField: @Composable (
+        value: String,
+        onValueChange: (String) -> Unit,
+        error: String?,
+        enabled: Boolean
+    ) -> Unit = { value, onValueChange, error, enabled ->
+        DefaultOtpField(
+            value = value,
+            onValueChange = onValueChange,
+            error = error,
+            enabled = enabled
+        )
+    },
+    val verifyButton: @Composable (
+        onClick: () -> Unit,
+        isLoading: Boolean,
+        enabled: Boolean,
+        text: String
+    ) -> Unit = { onClick, isLoading, enabled, text ->
+        DefaultSubmitButton(
+            onClick = onClick,
+            isLoading = isLoading,
+            enabled = enabled,
+            text = text
+        )
+    },
+)
+
+/**
  * A container for all authentication-related screen slots.
  * This allows passing all custom UI components in a single object.
  */
@@ -268,4 +340,5 @@ data class AuthScreenSlots(
     val register: RegisterScreenSlots = RegisterScreenSlots(),
     val forgotPassword: ForgotPasswordScreenSlots = ForgotPasswordScreenSlots(),
     val resetPassword: ResetPasswordScreenSlots = ResetPasswordScreenSlots(),
+    val phoneAuth: PhoneAuthScreenSlots = PhoneAuthScreenSlots(),
 )

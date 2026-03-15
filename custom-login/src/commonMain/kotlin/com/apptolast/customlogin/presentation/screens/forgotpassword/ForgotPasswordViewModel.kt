@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -51,8 +52,7 @@ class ForgotPasswordViewModel(
 
                 when (val result = authRepository.sendPasswordResetEmail(state.email)) {
                     is AuthResult.PasswordResetSent -> {
-                        _uiState.update { it.copy(isLoading = false) }
-                        _effect.emit(ForgotPasswordEffect.ResetEmailSent)
+                        _uiState.update { it.copy(isLoading = false, isSuccess = true) }
                     }
                     is AuthResult.Failure -> {
                         _uiState.update { it.copy(isLoading = false) }
@@ -70,7 +70,7 @@ class ForgotPasswordViewModel(
     private fun validate(state: ForgotPasswordUiState): String? {
         return when {
             state.email.isBlank() -> "Email cannot be empty"
-            !"^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex().matches(state.email) -> "Invalid email format"
+            !Validators.isValidEmail(state.email) -> "Invalid email format"
             else -> null
         }
     }

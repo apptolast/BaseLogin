@@ -20,9 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
@@ -58,7 +56,6 @@ fun ResetPasswordScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    var isSuccess by remember { mutableStateOf(false) }
 
     LaunchedEffect(resetCode) {
         if (resetCode.isNotBlank()) {
@@ -70,7 +67,6 @@ fun ResetPasswordScreen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is ResetPasswordEffect.NavigateToLogin -> {
-                    isSuccess = true
                     delay(2000) // Keep success message on screen for a moment
                     onNavigateToLogin()
                 }
@@ -112,7 +108,6 @@ fun ResetPasswordScreen(
             slots = resetPasswordSlots,
             state = uiState,
             modifier = Modifier.padding(paddingValues),
-            isSuccess = isSuccess,
             onAction = viewModel::onAction,
             onNavigateBack = onNavigateBack,
         )
@@ -133,13 +128,12 @@ fun ResetPasswordScreen(
 private fun ResetPasswordContent(
     slots: ResetPasswordScreenSlots,
     state: ResetPasswordUiState,
-    isSuccess: Boolean,
     modifier: Modifier = Modifier,
     onAction: (ResetPasswordAction) -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     AnimatedContent(
-        targetState = isSuccess,
+        targetState = state.isSuccess,
         modifier = modifier
     ) { passwordReset ->
         if (passwordReset) {

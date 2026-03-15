@@ -6,9 +6,13 @@ import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.getSocialIdToken
+import com.apptolast.customlogin.sendPhoneVerificationCode
+import com.apptolast.customlogin.verifyPhoneCode
 import dev.gitlive.firebase.auth.AuthCredential
+import dev.gitlive.firebase.auth.EmailAuthProvider
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseAuthException
 import dev.gitlive.firebase.auth.GithubAuthProvider
@@ -213,7 +217,44 @@ class FirebaseAuthProvider(
     }
 
     override suspend fun reauthenticate(credentials: Credentials): AuthResult {
-        return AuthResult.Failure(AuthError.OperationNotAllowed("Reauthentication not implemented in this provider"))
+        return try {
+            val user = firebaseAuth.currentUser
+                ?: return AuthResult.Failure(AuthError.UserNotFound())
+
+            val firebaseCredential = when (credentials) {
+                is Credentials.EmailPassword -> EmailAuthProvider.credential(
+                    credentials.email,
+                    credentials.password
+                )
+
+                is Credentials.OAuthToken -> {
+                    val idToken = getSocialIdToken(credentials.provider)
+                        ?: return AuthResult.Failure(AuthError.Unknown("Social sign-in cancelled."))
+                    credentials.provider.toCredential(idToken)
+                        ?: return AuthResult.Failure(AuthError.OperationNotAllowed("Provider not supported for reauthentication: ${credentials.provider.id}"))
+                }
+
+                is Credentials.RefreshToken -> return AuthResult.Failure(
+                    AuthError.OperationNotAllowed("RefreshToken credentials cannot be used for reauthentication")
+                )
+            }
+
+            user.reauthenticate(firebaseCredential)
+            user.toUserSession()?.let { AuthResult.Success(it) }
+                ?: AuthResult.Failure(AuthError.Unknown("No user session after reauthentication"))
+        } catch (e: FirebaseAuthException) {
+            AuthResult.Failure(e.toAuthError())
+        } catch (e: Exception) {
+            AuthResult.Failure(AuthError.Unknown(e.message ?: "Reauthentication failed", e))
+        }
+    }
+
+    override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult {
+        return sendPhoneVerificationCode(phoneNumber)
+    }
+
+    override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult {
+        return verifyPhoneCode(verificationId, otpCode)
     }
 
     private fun IdentityProvider.toCredential(tokenData: String): AuthCredential? {

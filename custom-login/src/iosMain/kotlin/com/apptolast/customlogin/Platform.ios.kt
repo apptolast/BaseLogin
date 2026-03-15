@@ -1,8 +1,12 @@
 package com.apptolast.customlogin
 
 import com.apptolast.customlogin.config.GoogleSignInConfig
+import com.apptolast.customlogin.data.PhoneAuthProviderIOS
+import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.provider.GoogleSignInProviderIOS
+import com.apptolast.customlogin.util.Logger
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import platform.UIKit.UIDevice
@@ -34,7 +38,7 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
         is IdentityProvider.Google -> {
             val config = PlatformKoinHelper.googleSignInConfig
             if (config == null) {
-                println("Google Sign-In is not configured. Provide GoogleSignInConfig in LoginLibraryConfig.")
+                Logger.w("Platform", "Google Sign-In is not configured. Provide GoogleSignInConfig in LoginLibraryConfig.")
                 return null
             }
 
@@ -43,12 +47,28 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): String? {
         }
         is IdentityProvider.GitHub -> {
             // TODO: Implement GitHub OAuth flow for iOS.
-            println("GitHub Sign-In for iOS is not implemented yet.")
+            Logger.w("Platform", "GitHub Sign-In for iOS is not implemented yet.")
             null
         }
         else -> {
-            println("Social sign-in for ${provider.id} is not implemented on iOS yet.")
+            Logger.w("Platform", "Social sign-in for ${provider.id} is not implemented on iOS yet.")
             null
         }
     }
+}
+
+/**
+ * iOS actual implementation: delegates to [PhoneAuthProviderIOS] which uses a Swift callback
+ * to call Firebase's [PhoneAuthProvider.provider().verifyPhoneNumber()].
+ */
+actual suspend fun sendPhoneVerificationCode(phoneNumber: String): PhoneAuthResult {
+    return PhoneAuthProviderIOS.sendCode(phoneNumber)
+}
+
+/**
+ * iOS actual implementation: delegates to [PhoneAuthProviderIOS] which uses a Swift callback
+ * to create the credential and sign in via the native Firebase iOS SDK.
+ */
+actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): AuthResult {
+    return PhoneAuthProviderIOS.verifyCode(verificationId, otpCode)
 }

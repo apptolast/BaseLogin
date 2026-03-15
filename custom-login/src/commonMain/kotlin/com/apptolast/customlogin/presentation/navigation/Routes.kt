@@ -19,3 +19,6 @@ data object ForgotPasswordRoute
 
 @Serializable
 data class ResetPasswordRoute(val resetCode: String)
+
+@Serializable
+data object PhoneAuthRoute

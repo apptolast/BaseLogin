@@ -1,4 +1,4 @@
-package com.apptolast.customlogin.presentation.screens.forgotpassword
+package com.apptolast.customlogin.presentation.screens.phone
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
@@ -26,29 +26,32 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
-import com.apptolast.customlogin.presentation.slots.ForgotPasswordScreenSlots
+import com.apptolast.customlogin.presentation.slots.PhoneAuthScreenSlots
 import kotlinx.coroutines.flow.collectLatest
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
-import login.custom_login.generated.resources.forgot_password_screen_send_button
-import login.custom_login.generated.resources.forgot_password_screen_title
+import login.custom_login.generated.resources.phone_auth_screen_send_button
+import login.custom_login.generated.resources.phone_auth_screen_title
+import login.custom_login.generated.resources.phone_auth_screen_verify_button
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * A composable function that represents the main entry point for the Forgot Password screen.
- * It connects the ViewModel to the UI content and handles MVI effects.
+ * Entry-point composable for the Phone Authentication screen.
+ * Connects the [PhoneAuthViewModel] to the UI and handles one-time effects.
  *
- * @param viewModel The [ForgotPasswordViewModel] instance for this screen.
- * @param slots An instance of [ForgotPasswordScreenSlots] to customize the UI components.
- * @param onNavigateBack A callback to navigate to the previous screen.
+ * @param viewModel The [PhoneAuthViewModel] instance.
+ * @param slots Customisable UI components for this screen.
+ * @param onNavigateToHome Callback invoked when the user is successfully signed in.
+ * @param onNavigateBack Callback to go back to the previous screen.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgotPasswordScreen(
-    viewModel: ForgotPasswordViewModel = koinViewModel(),
-    slots: ForgotPasswordScreenSlots = ForgotPasswordScreenSlots(),
-    onNavigateBack: () -> Unit
+fun PhoneAuthScreen(
+    viewModel: PhoneAuthViewModel = koinViewModel(),
+    slots: PhoneAuthScreenSlots = PhoneAuthScreenSlots(),
+    onNavigateToHome: () -> Unit,
+    onNavigateBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -56,7 +59,8 @@ fun ForgotPasswordScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
-                is ForgotPasswordEffect.ShowError -> {
+                is PhoneAuthEffect.NavigateToHome -> onNavigateToHome()
+                is PhoneAuthEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
                         message = effect.message,
                         withDismissAction = true
@@ -69,9 +73,7 @@ fun ForgotPasswordScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(stringResource(Res.string.forgot_password_screen_title))
-                },
+                title = { Text(stringResource(Res.string.phone_auth_screen_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -83,73 +85,85 @@ fun ForgotPasswordScreen(
             )
         },
         snackbarHost = {
-            SnackbarHost(snackbarHostState) { snackBarData ->
+            SnackbarHost(snackbarHostState) { data ->
                 CustomSnackBar(
-                    snackBarText = snackBarData.visuals.message,
+                    snackBarText = data.visuals.message,
                     onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }
                 )
             }
         },
         modifier = Modifier.consumeWindowInsets(TopAppBarDefaults.windowInsets)
     ) { paddingValues ->
-        ForgotPasswordContent(
+        PhoneAuthContent(
             slots = slots,
             state = uiState,
             modifier = Modifier.padding(paddingValues),
-            onAction = viewModel::onAction
+            onAction = viewModel::onAction,
         )
     }
 }
 
-/**
- * A private composable that defines the layout and UI for the Forgot Password screen.
- * It is stateless and receives all data and callbacks as parameters.
- *
- * @param slots The [ForgotPasswordScreenSlots] defining the UI components.
- * @param state The current [ForgotPasswordUiState] of the screen.
- * @param isSuccess A flag indicating if a password reset email was sent successfully.
- * @param modifier The modifier to be applied to the root container, including padding from the Scaffold.
- * @param onAction A callback to send actions to the ViewModel.
- */
 @Composable
-private fun ForgotPasswordContent(
-    slots: ForgotPasswordScreenSlots,
-    state: ForgotPasswordUiState,
+private fun PhoneAuthContent(
+    slots: PhoneAuthScreenSlots,
+    state: PhoneAuthUiState,
     modifier: Modifier = Modifier,
-    onAction: (ForgotPasswordAction) -> Unit,
+    onAction: (PhoneAuthAction) -> Unit,
 ) {
     Box(modifier = modifier) {
-        AnimatedContent(
-            targetState = state.isSuccess,
-        ) { success ->
-            if (success) {
-                slots.successContent()
-            } else {
-                DefaultAuthContainer(
-                    verticalArrangement = slots.layoutVerticalArrangement,
-                ) {
-                    slots.header()
+        AnimatedContent(targetState = state.verificationId != null) { isOtpStep ->
+            if (isOtpStep) {
+                // --- Step 2: OTP entry ---
+                DefaultAuthContainer(verticalArrangement = slots.layoutVerticalArrangement) {
+                    slots.otpHeader()
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    slots.description()
+                    slots.otpDescription(state.phoneNumber)
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    slots.emailField(
-                        state.email,
-                        { onAction(ForgotPasswordAction.EmailChanged(it)) },
-                        state.emailError,
+                    slots.otpField(
+                        state.otpCode,
+                        { onAction(PhoneAuthAction.OtpCodeChanged(it)) },
+                        state.otpError,
                         !state.isLoading
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    slots.submitButton(
-                        { onAction(ForgotPasswordAction.SendResetEmailClicked) },
+                    slots.verifyButton(
+                        { onAction(PhoneAuthAction.VerifyCodeClicked) },
                         state.isLoading,
-                        state.email.isNotBlank() && !state.isLoading,
-                        stringResource(Res.string.forgot_password_screen_send_button)
+                        state.otpCode.isNotBlank() && !state.isLoading,
+                        stringResource(Res.string.phone_auth_screen_verify_button)
+                    )
+                }
+            } else {
+                // --- Step 1: Phone number entry ---
+                DefaultAuthContainer(verticalArrangement = slots.layoutVerticalArrangement) {
+                    slots.phoneHeader()
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    slots.phoneDescription()
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    slots.phoneField(
+                        state.phoneNumber,
+                        { onAction(PhoneAuthAction.PhoneNumberChanged(it)) },
+                        state.phoneError,
+                        !state.isLoading
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    slots.sendCodeButton(
+                        { onAction(PhoneAuthAction.SendCodeClicked) },
+                        state.isLoading,
+                        state.phoneNumber.isNotBlank() && !state.isLoading,
+                        stringResource(Res.string.phone_auth_screen_send_button)
                     )
                 }
             }

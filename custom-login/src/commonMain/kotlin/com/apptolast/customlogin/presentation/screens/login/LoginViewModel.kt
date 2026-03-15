@@ -6,6 +6,7 @@ import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -48,6 +49,10 @@ class LoginViewModel(
     }
 
     private fun onSocialSignIn(provider: IdentityProvider) {
+        if (provider == IdentityProvider.Phone) {
+            viewModelScope.launch { _effect.emit(LoginEffect.NavigateToPhoneAuth) }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
@@ -109,9 +114,7 @@ class LoginViewModel(
     private fun validate(state: LoginUiState): Pair<String?, String?> {
         val emailError = when {
             state.email.isBlank() -> "Email cannot be empty"
-            !"^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$".toRegex()
-                .matches(state.email) -> "Invalid email format"
-
+            !Validators.isValidEmail(state.email) -> "Invalid email format"
             else -> null
         }
 

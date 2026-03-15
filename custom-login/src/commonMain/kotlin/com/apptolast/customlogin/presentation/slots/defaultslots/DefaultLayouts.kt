@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
@@ -38,6 +39,10 @@ import login.custom_login.generated.resources.forgot_password_screen_description
 import login.custom_login.generated.resources.forgot_password_screen_success_description
 import login.custom_login.generated.resources.forgot_password_screen_success_title
 import login.custom_login.generated.resources.forgot_password_screen_title
+import login.custom_login.generated.resources.phone_auth_screen_otp_description
+import login.custom_login.generated.resources.phone_auth_screen_otp_header
+import login.custom_login.generated.resources.phone_auth_screen_phone_description
+import login.custom_login.generated.resources.phone_auth_screen_phone_header
 import login.custom_login.generated.resources.register_screen_privacy_policy
 import login.custom_login.generated.resources.register_screen_terms_and_conditions
 import login.custom_login.generated.resources.register_screen_terms_conjunction
@@ -190,6 +195,72 @@ fun DefaultResetPasswordHeader() {
 fun DefaultResetPasswordDescription() {
     Text(
         text = stringResource(Res.string.reset_password_screen_description),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
+}
+
+/**
+ * Default implementation for the header of the Phone Auth screen (phone number step).
+ */
+@Composable
+fun DefaultPhoneAuthHeader() {
+    Icon(
+        imageVector = Icons.Default.Phone,
+        contentDescription = null,
+        modifier = Modifier.size(40.dp),
+        tint = MaterialTheme.colorScheme.primary
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+    Text(
+        text = stringResource(Res.string.phone_auth_screen_phone_header),
+        style = MaterialTheme.typography.headlineMedium,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+/**
+ * Default implementation for the description of the Phone Auth screen (phone number step).
+ */
+@Composable
+fun DefaultPhoneAuthDescription() {
+    Text(
+        text = stringResource(Res.string.phone_auth_screen_phone_description),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
+}
+
+/**
+ * Default implementation for the header of the Phone Auth screen (OTP step).
+ */
+@Composable
+fun DefaultOtpHeader() {
+    Icon(
+        imageVector = Icons.Default.Phone,
+        contentDescription = null,
+        modifier = Modifier.size(40.dp),
+        tint = MaterialTheme.colorScheme.primary
+    )
+    Spacer(modifier = Modifier.height(16.dp))
+    Text(
+        text = stringResource(Res.string.phone_auth_screen_otp_header),
+        style = MaterialTheme.typography.headlineMedium,
+        color = MaterialTheme.colorScheme.onSurface
+    )
+}
+
+/**
+ * Default implementation for the description of the Phone Auth screen (OTP step).
+ *
+ * @param phoneNumber The phone number the code was sent to.
+ */
+@Composable
+fun DefaultOtpDescription(phoneNumber: String) {
+    Text(
+        text = stringResource(Res.string.phone_auth_screen_otp_description, phoneNumber),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center

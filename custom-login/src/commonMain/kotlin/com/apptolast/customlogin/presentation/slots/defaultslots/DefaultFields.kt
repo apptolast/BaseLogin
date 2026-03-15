@@ -26,9 +26,12 @@ import androidx.compose.ui.unit.dp
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_hide_password
 import login.custom_login.generated.resources.cd_show_password
+import androidx.compose.material.icons.filled.Phone
 import login.custom_login.generated.resources.common_email_label
 import login.custom_login.generated.resources.common_full_name_label
 import login.custom_login.generated.resources.common_password_label
+import login.custom_login.generated.resources.phone_auth_screen_otp_label
+import login.custom_login.generated.resources.phone_auth_screen_phone_label
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -130,6 +133,69 @@ fun DefaultNameField(
         onValueChange = onValueChange,
         label = { Text(label) },
         leadingIcon = { Icon(Icons.Default.Person, contentDescription = label) },
+        singleLine = true,
+        isError = error != null,
+        supportingText = error?.let { { Text(it) } },
+        modifier = Modifier.fillMaxWidth(),
+        enabled = enabled,
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
+/**
+ * Default implementation for a phone number input field.
+ *
+ * @param value The current text value of the field.
+ * @param onValueChange The callback that is triggered when the input service updates the text.
+ * @param error An optional error message to display below the field.
+ * @param enabled Controls the enabled state of the field.
+ * @param label The text to be displayed as a label for the field.
+ */
+@Composable
+fun DefaultPhoneField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    error: String?,
+    enabled: Boolean,
+    label: String = stringResource(Res.string.phone_auth_screen_phone_label)
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        leadingIcon = { Icon(Icons.Default.Phone, contentDescription = label) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+        singleLine = true,
+        isError = error != null,
+        supportingText = error?.let { { Text(it) } },
+        modifier = Modifier.fillMaxWidth(),
+        enabled = enabled,
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
+/**
+ * Default implementation for an OTP (One-Time Password) input field.
+ *
+ * @param value The current text value of the field.
+ * @param onValueChange The callback that is triggered when the input service updates the text.
+ * @param error An optional error message to display below the field.
+ * @param enabled Controls the enabled state of the field.
+ * @param label The text to be displayed as a label for the field.
+ */
+@Composable
+fun DefaultOtpField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    error: String?,
+    enabled: Boolean,
+    label: String = stringResource(Res.string.phone_auth_screen_otp_label)
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it) } },

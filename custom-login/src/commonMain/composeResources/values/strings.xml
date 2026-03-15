@@ -36,6 +36,26 @@
     <string name="forgot_password_screen_success_title">Check Your Inbox</string>
     <string name="forgot_password_screen_success_description">We've sent a password reset link to your email address.</string>
 
+    <!-- Validation Messages -->
+    <string name="validation_email_empty">Email cannot be empty</string>
+    <string name="validation_email_invalid">Invalid email format</string>
+    <string name="validation_password_empty">Password cannot be empty</string>
+    <string name="validation_password_too_short">Password must be at least 6 characters</string>
+    <string name="validation_name_required">Full name is required</string>
+    <string name="validation_confirm_password_empty">Please confirm your password</string>
+    <string name="validation_passwords_no_match">Passwords do not match</string>
+
+    <!-- Phone Auth Screen -->
+    <string name="phone_auth_screen_title">Sign In with Phone</string>
+    <string name="phone_auth_screen_phone_header">Phone Sign In</string>
+    <string name="phone_auth_screen_phone_description">Enter your phone number to receive a verification code.</string>
+    <string name="phone_auth_screen_send_button">Send Code</string>
+    <string name="phone_auth_screen_otp_header">Enter Verification Code</string>
+    <string name="phone_auth_screen_otp_description">Enter the 6-digit code sent to %1$s</string>
+    <string name="phone_auth_screen_verify_button">Verify</string>
+    <string name="phone_auth_screen_phone_label">Phone Number</string>
+    <string name="phone_auth_screen_otp_label">Verification Code</string>
+
     <!-- Reset Password Screen -->
     <string name="reset_password_screen_title">Create New Password</string>
     <string name="reset_password_screen_new_password_label">New Password</string>

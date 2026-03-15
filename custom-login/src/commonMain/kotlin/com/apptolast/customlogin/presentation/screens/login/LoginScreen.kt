@@ -41,6 +41,7 @@ fun LoginScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToRegister: () -> Unit,
     onNavigateToResetPassword: () -> Unit = {},
+    onNavigateToPhoneAuth: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackBarHostState = remember { SnackbarHostState() }
@@ -49,6 +50,7 @@ fun LoginScreen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is LoginEffect.NavigateToHome -> onNavigateToHome()
+                is LoginEffect.NavigateToPhoneAuth -> onNavigateToPhoneAuth()
                 is LoginEffect.ShowError -> {
                     snackBarHostState.showSnackbar(
                         message = effect.message,
@@ -128,10 +130,11 @@ private fun LoginContent(
         val isFormValid = state.email.isNotBlank() && state.password.isNotBlank()
 
         slots.submitButton(
-            stringResource(Res.string.login_screen_sign_in_button),
-            isFormValid && !state.isLoading,
+            { onAction(LoginAction.SignInClicked) },
             state.isLoading,
-        ) { onAction(LoginAction.SignInClicked) }
+            isFormValid && !state.isLoading,
+            stringResource(Res.string.login_screen_sign_in_button),
+        )
 
         Spacer(Modifier.height(8.dp))
 

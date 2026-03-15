@@ -10,6 +10,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
 import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.platform.ActivityHolder
+import com.apptolast.customlogin.util.Logger
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
@@ -53,20 +54,16 @@ class GoogleSignInProviderAndroid(
 
             handleSignInResult(result)
         } catch (e: GetCredentialCancellationException) {
-            // User cancelled the sign-in flow
-            println("Google Sign-In cancelled by user")
+            Logger.d("GoogleSignIn", "Sign-In cancelled by user")
             null
         } catch (e: NoCredentialException) {
-            // No credentials available
-            println("No Google credentials available: ${e.message}")
+            Logger.w("GoogleSignIn", "No Google credentials available: ${e.message}")
             null
         } catch (e: GetCredentialException) {
-            // Other credential errors
-            println("Google Sign-In failed: ${e.message}")
+            Logger.e("GoogleSignIn", "Sign-In failed: ${e.message}", e)
             null
         } catch (e: IllegalStateException) {
-            // ActivityHolder doesn't have an activity
-            println("Google Sign-In failed: ${e.message}")
+            Logger.e("GoogleSignIn", "Sign-In failed: ${e.message}", e)
             null
         }
     }
@@ -83,13 +80,13 @@ class GoogleSignInProviderAndroid(
                     val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                     googleIdTokenCredential.idToken
                 } else {
-                    println("Unexpected credential type: ${credential.type}")
+                    Logger.w("GoogleSignIn", "Unexpected credential type: ${credential.type}")
                     null
                 }
             }
 
             else -> {
-                println("Unexpected credential class: ${credential.javaClass.name}")
+                Logger.w("GoogleSignIn", "Unexpected credential class: ${credential.javaClass.name}")
                 null
             }
         }

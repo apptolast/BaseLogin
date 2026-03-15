@@ -3,6 +3,7 @@ package com.apptolast.customlogin.domain
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
+import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.SignUpData
 import kotlinx.coroutines.flow.Flow
 
@@ -96,4 +97,17 @@ interface AuthProvider {
      * Re-authenticate the user (required before sensitive operations).
      */
     suspend fun reauthenticate(credentials: Credentials): AuthResult
+
+    /**
+     * Sends a phone verification OTP to the given phone number.
+     * @param phoneNumber E.164 format (e.g. "+34612345678").
+     */
+    suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult
+
+    /**
+     * Verifies the OTP code received via SMS and signs the user in.
+     * @param verificationId The ID returned from [sendPhoneOtp].
+     * @param otpCode The 6-digit SMS code entered by the user.
+     */
+    suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult
 }

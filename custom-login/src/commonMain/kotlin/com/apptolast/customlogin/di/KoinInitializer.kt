@@ -29,6 +29,7 @@ fun initLoginKoin(
 
         // Module for configuration
         val configModule = module {
+            single { config }
             config.googleSignInConfig?.let { googleConfig ->
                 single { googleConfig }
             }

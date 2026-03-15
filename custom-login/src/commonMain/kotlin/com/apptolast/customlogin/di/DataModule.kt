@@ -20,7 +20,7 @@ internal val dataModule = module {
     single<AuthProvider> { FirebaseAuthProvider(get()) }
 
     // Auth Repository using the default provider
-    single<AuthRepository> { AuthRepositoryImpl(get()) }
+    single<AuthRepository> { AuthRepositoryImpl(get(), get()) }
 }
 
 /**

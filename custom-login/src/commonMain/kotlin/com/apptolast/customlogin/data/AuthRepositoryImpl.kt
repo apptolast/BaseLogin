@@ -1,11 +1,14 @@
 package com.apptolast.customlogin.data
 
+import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.domain.AuthProvider
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
+import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PasswordResetData
+import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.domain.model.UserSession
 import kotlinx.coroutines.flow.Flow
@@ -15,7 +18,8 @@ import kotlinx.coroutines.flow.Flow
  * This allows swapping between Firebase, Supabase, or custom backends.
  */
 class AuthRepositoryImpl(
-    private val authProvider: AuthProvider
+    private val authProvider: AuthProvider,
+    private val config: LoginLibraryConfig
 ) : AuthRepository {
 
     override val currentProviderId: String
@@ -82,5 +86,24 @@ class AuthRepositoryImpl(
 
     override suspend fun sendEmailVerification(): Result<Unit> {
         return authProvider.sendEmailVerification()
+    }
+
+    override suspend fun reauthenticate(credentials: Credentials): AuthResult {
+        return authProvider.reauthenticate(credentials)
+    }
+
+    override fun getAvailableProviders(): List<IdentityProvider> {
+        return buildList {
+            if (config.googleSignInConfig != null) add(IdentityProvider.Google)
+            add(IdentityProvider.Phone)
+        }
+    }
+
+    override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult {
+        return authProvider.sendPhoneOtp(phoneNumber)
+    }
+
+    override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult {
+        return authProvider.verifyPhoneOtp(verificationId, otpCode)
     }
 }

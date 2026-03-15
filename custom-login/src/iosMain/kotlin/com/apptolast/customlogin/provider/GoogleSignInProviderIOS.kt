@@ -1,6 +1,7 @@
 package com.apptolast.customlogin.provider
 
 import com.apptolast.customlogin.config.GoogleSignInConfig
+import com.apptolast.customlogin.util.Logger
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.UIKit.UIApplication
@@ -52,7 +53,7 @@ class GoogleSignInProviderIOS(
     suspend fun signIn(): String? = suspendCancellableCoroutine { continuation ->
         val handler = signInHandler
         if (handler == null) {
-            println("Google Sign-In handler not configured. Set GoogleSignInProviderIOS.signInHandler from Swift.")
+            Logger.w("GoogleSignIn", "Handler not configured. Set GoogleSignInProviderIOS.signInHandler from Swift.")
             continuation.resume(null)
             return@suspendCancellableCoroutine
         }

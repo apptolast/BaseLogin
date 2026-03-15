@@ -68,7 +68,7 @@ class ResetPasswordViewModel(
                 _uiState.update { it.copy(isLoading = true) }
                 when (val result = authRepository.confirmPasswordReset(state.toPasswordResetData())) {
                     is AuthResult.PasswordResetSuccess -> {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update { it.copy(isLoading = false, isSuccess = true) }
                         _effect.emit(ResetPasswordEffect.NavigateToLogin)
                     }
                     is AuthResult.Failure -> {
