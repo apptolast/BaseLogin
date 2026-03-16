@@ -11,6 +11,9 @@ import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultMagicLin
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultMagicLinkHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultMagicLinkSuccessContent
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultHeader
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultReauthDescription
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultReauthErrorMessage
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultReauthHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultLoginLink
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultNameField
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultOtpDescription
@@ -79,8 +82,8 @@ data class LoginScreenSlots(
             text = text,
         )
     },
-    val socialProviders: (@Composable (providers: List<IdentityProvider>, onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { providers, onProviderClick ->
-        SocialLoginButtonsSection(providers = providers, onProviderClick = onProviderClick)
+    val socialProviders: (@Composable (providers: List<IdentityProvider>, loadingProvider: IdentityProvider?, onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { providers, loadingProvider, onProviderClick ->
+        SocialLoginButtonsSection(providers = providers, loadingProvider = loadingProvider, onProviderClick = onProviderClick)
     },
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
         DefaultForgotPasswordLink(onForgotPasswordClick = onClick)
@@ -169,6 +172,9 @@ data class RegisterScreenSlots(
             enabled = enabled,
             text = text
         )
+    },
+    val socialProviders: (@Composable (providers: List<IdentityProvider>, loadingProvider: IdentityProvider?, onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { providers, loadingProvider, onProviderClick ->
+        SocialLoginButtonsSection(providers = providers, loadingProvider = loadingProvider, onProviderClick = onProviderClick)
     },
     val loginLink: @Composable (onClick: () -> Unit) -> Unit = { onClick -> DefaultLoginLink(onClick) },
     val logo: (@Composable () -> Unit)? = null,
@@ -371,6 +377,68 @@ data class MagicLinkScreenSlots(
 )
 
 /**
+ * Defines the customizable composable slots for the Re-authentication screen.
+ * Consumers display this screen before sensitive account operations.
+ */
+data class ReauthScreenSlots(
+    val header: @Composable () -> Unit = { DefaultReauthHeader() },
+    val description: @Composable () -> Unit = { DefaultReauthDescription() },
+    val emailField: @Composable (
+        value: String,
+        onValueChange: (String) -> Unit,
+        error: String?,
+        enabled: Boolean
+    ) -> Unit = { value, onValueChange, error, enabled ->
+        DefaultEmailField(
+            value = value,
+            onValueChange = onValueChange,
+            error = error,
+            enabled = enabled
+        )
+    },
+    val passwordField: @Composable (
+        value: String,
+        onValueChange: (String) -> Unit,
+        error: String?,
+        enabled: Boolean
+    ) -> Unit = { value, onValueChange, error, enabled ->
+        DefaultPasswordField(
+            value = value,
+            onValueChange = onValueChange,
+            error = error,
+            enabled = enabled
+        )
+    },
+    val errorMessage: @Composable (message: String) -> Unit = { message ->
+        DefaultReauthErrorMessage(message = message)
+    },
+    val submitButton: @Composable (
+        onClick: () -> Unit,
+        isLoading: Boolean,
+        enabled: Boolean,
+        text: String
+    ) -> Unit = { onClick, isLoading, enabled, text ->
+        DefaultSubmitButton(
+            onClick = onClick,
+            isLoading = isLoading,
+            enabled = enabled,
+            text = text
+        )
+    },
+    val socialSection: @Composable (
+        providers: List<IdentityProvider>,
+        loadingProvider: IdentityProvider?,
+        onProviderClick: (IdentityProvider) -> Unit
+    ) -> Unit = { providers, loadingProvider, onProviderClick ->
+        SocialLoginButtonsSection(
+            providers = providers,
+            loadingProvider = loadingProvider,
+            onProviderClick = onProviderClick
+        )
+    },
+)
+
+/**
  * A container for all authentication-related screen slots.
  * This allows passing all custom UI components in a single object.
  */
@@ -381,4 +449,5 @@ data class AuthScreenSlots(
     val resetPassword: ResetPasswordScreenSlots = ResetPasswordScreenSlots(),
     val phoneAuth: PhoneAuthScreenSlots = PhoneAuthScreenSlots(),
     val magicLink: MagicLinkScreenSlots = MagicLinkScreenSlots(),
+    val reauth: ReauthScreenSlots = ReauthScreenSlots(),
 )

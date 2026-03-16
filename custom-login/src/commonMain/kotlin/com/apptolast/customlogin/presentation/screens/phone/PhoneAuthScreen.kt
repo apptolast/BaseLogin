@@ -28,6 +28,7 @@ import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.PhoneAuthScreenSlots
 import kotlinx.coroutines.flow.collectLatest
+import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.phone_auth_screen_send_button
@@ -126,7 +127,7 @@ private fun PhoneAuthContent(
                     slots.otpField(
                         state.otpCode,
                         { onAction(PhoneAuthAction.OtpCodeChanged(it)) },
-                        state.otpError,
+                        state.otpError?.let { stringResource(it.toStringRes()) },
                         !state.isLoading
                     )
 
@@ -153,7 +154,7 @@ private fun PhoneAuthContent(
                     slots.phoneField(
                         state.phoneNumber,
                         { onAction(PhoneAuthAction.PhoneNumberChanged(it)) },
-                        state.phoneError,
+                        state.phoneError?.let { stringResource(it.toStringRes()) },
                         !state.isLoading,
                         state.countryCode,
                         { onAction(PhoneAuthAction.CountryCodeChanged(it)) },

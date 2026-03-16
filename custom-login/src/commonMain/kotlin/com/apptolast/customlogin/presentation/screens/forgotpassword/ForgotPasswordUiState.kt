@@ -1,15 +1,18 @@
 package com.apptolast.customlogin.presentation.screens.forgotpassword
 
+import com.apptolast.customlogin.util.ValidationError
+
 /**
  * Represents the state of the Forgot Password screen.
  *
  * @property email The email address entered by the user.
- * @property emailError An optional error message for the email field.
+ * @property emailError An optional typed validation error for the email field.
  * @property isLoading Indicates if a request is in progress.
+ * @property isSuccess True after the reset email has been sent successfully.
  */
 data class ForgotPasswordUiState(
     val email: String = "",
-    val emailError: String? = null,
+    val emailError: ValidationError? = null,
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
 )

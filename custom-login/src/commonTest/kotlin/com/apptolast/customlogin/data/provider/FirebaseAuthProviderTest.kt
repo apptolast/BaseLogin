@@ -82,7 +82,7 @@ class FirebaseAuthProviderTest {
 
     @Test
     fun `getAvailableProviders returns configured list`() {
-        repo.availableProviders = listOf(
+        repo.stubbedProviders = listOf(
             com.apptolast.customlogin.domain.model.IdentityProvider.Google,
             com.apptolast.customlogin.domain.model.IdentityProvider.Phone,
         )

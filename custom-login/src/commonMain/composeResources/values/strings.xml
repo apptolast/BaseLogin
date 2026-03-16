@@ -44,6 +44,25 @@
     <string name="validation_name_required">Full name is required</string>
     <string name="validation_confirm_password_empty">Please confirm your password</string>
     <string name="validation_passwords_no_match">Passwords do not match</string>
+    <string name="validation_phone_empty">Phone number cannot be empty</string>
+    <string name="validation_otp_empty">Verification code cannot be empty</string>
+
+    <!-- Auth Error Messages -->
+    <string name="auth_error_invalid_credentials">Invalid email or password</string>
+    <string name="auth_error_user_not_found">No account found with this email</string>
+    <string name="auth_error_email_already_in_use">This email is already registered</string>
+    <string name="auth_error_weak_password">Password is too weak</string>
+    <string name="auth_error_invalid_email">Invalid email format</string>
+    <string name="auth_error_invalid_reset_code">Invalid or expired password reset link</string>
+    <string name="auth_error_network_error">Network error. Please check your connection</string>
+    <string name="auth_error_too_many_requests">Too many attempts. Please try again later</string>
+    <string name="auth_error_user_disabled">This account has been disabled</string>
+    <string name="auth_error_operation_not_allowed">This operation is not allowed</string>
+    <string name="auth_error_session_expired">Your session has expired. Please sign in again</string>
+    <string name="auth_error_unknown">An unexpected error occurred</string>
+    <string name="auth_error_phone_verification_failed">Phone verification failed</string>
+    <string name="auth_error_phone_invalid">Invalid phone number</string>
+    <string name="auth_error_invalid_otp">Invalid verification code</string>
 
     <!-- Phone Auth Screen -->
     <string name="phone_auth_screen_title">Sign In with Phone</string>
@@ -62,6 +81,8 @@
     <string name="login_microsoft_button">Sign in with Microsoft</string>
     <string name="login_magic_link_button">Sign in with Email Link</string>
     <string name="login_phone_button">Sign in with Phone</string>
+    <string name="login_twitter_button">Sign in with Twitter</string>
+    <string name="login_facebook_button">Sign in with Facebook</string>
 
     <!-- Magic Link Screen -->
     <string name="magic_link_screen_title">Email Link Sign-In</string>
@@ -78,5 +99,10 @@
     <string name="reset_password_screen_reset_button">Reset Password</string>
     <string name="reset_password_screen_success_title">Password Reset!</string>
     <string name="reset_password_screen_success_description">You can now use your new password to log in to your account.</string>
+
+    <!-- Re-authentication Screen -->
+    <string name="reauth_screen_title">Confirm Your Identity</string>
+    <string name="reauth_screen_description">For your security, please re-enter your credentials to continue.</string>
+    <string name="reauth_submit_button">Confirm</string>
 
 </resources>

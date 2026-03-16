@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.util.ValidationError
+import com.apptolast.customlogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -84,16 +86,16 @@ class ResetPasswordViewModel(
         }
     }
 
-    private fun validate(state: ResetPasswordUiState): Pair<String?, String?> {
-        val passwordError = when {
-            state.newPassword.isBlank() -> "Password cannot be empty"
-            state.newPassword.length < 6 -> "Password must be at least 6 characters"
+    private fun validate(state: ResetPasswordUiState): Pair<ValidationError?, ValidationError?> {
+        val passwordError: ValidationError? = when {
+            state.newPassword.isBlank() -> ValidationError.PasswordEmpty
+            !Validators.isValidPassword(state.newPassword) -> ValidationError.PasswordTooShort
             else -> null
         }
 
-        val confirmPasswordError = when {
-            state.confirmPassword.isBlank() -> "Please confirm your password"
-            state.newPassword != state.confirmPassword -> "Passwords do not match"
+        val confirmPasswordError: ValidationError? = when {
+            state.confirmPassword.isBlank() -> ValidationError.ConfirmPasswordEmpty
+            state.newPassword != state.confirmPassword -> ValidationError.PasswordsDoNotMatch
             else -> null
         }
 

@@ -181,7 +181,9 @@ class FirebaseAuthProvider(
 
     override suspend fun deleteAccount(): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.delete()
+            val user = firebaseAuth.currentUser
+                ?: return Result.failure(IllegalStateException("No authenticated user"))
+            user.delete()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -190,7 +192,9 @@ class FirebaseAuthProvider(
 
     override suspend fun updateDisplayName(displayName: String): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.updateProfile(displayName = displayName)
+            val user = firebaseAuth.currentUser
+                ?: return Result.failure(IllegalStateException("No authenticated user"))
+            user.updateProfile(displayName = displayName)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -199,7 +203,9 @@ class FirebaseAuthProvider(
 
     override suspend fun updateEmail(newEmail: String): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.updateEmail(newEmail)
+            val user = firebaseAuth.currentUser
+                ?: return Result.failure(IllegalStateException("No authenticated user"))
+            user.updateEmail(newEmail)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -208,7 +214,9 @@ class FirebaseAuthProvider(
 
     override suspend fun updatePassword(newPassword: String): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.updatePassword(newPassword)
+            val user = firebaseAuth.currentUser
+                ?: return Result.failure(IllegalStateException("No authenticated user"))
+            user.updatePassword(newPassword)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -217,7 +225,9 @@ class FirebaseAuthProvider(
 
     override suspend fun sendEmailVerification(): Result<Unit> {
         return try {
-            firebaseAuth.currentUser?.sendEmailVerification()
+            val user = firebaseAuth.currentUser
+                ?: return Result.failure(IllegalStateException("No authenticated user"))
+            user.sendEmailVerification()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -330,7 +340,19 @@ class FirebaseAuthProvider(
                 idToken = tokenData,
                 rawNonce = null
             )
-            else -> null // Facebook, Phone, MagicLink have different flows
+            is IdentityProvider.Twitter -> OAuthProvider.credential(
+                providerId = "twitter.com",
+                accessToken = null,
+                idToken = tokenData,
+                rawNonce = null
+            )
+            is IdentityProvider.Facebook -> OAuthProvider.credential(
+                providerId = "facebook.com",
+                accessToken = tokenData,
+                idToken = null,
+                rawNonce = null
+            )
+            else -> null // Phone, MagicLink, Custom have different flows
         }
     }
 

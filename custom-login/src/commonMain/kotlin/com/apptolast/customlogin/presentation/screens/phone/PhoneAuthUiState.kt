@@ -1,5 +1,7 @@
 package com.apptolast.customlogin.presentation.screens.phone
 
+import com.apptolast.customlogin.util.ValidationError
+
 /**
  * Represents the UI state of the Phone Authentication screen.
  *
@@ -10,9 +12,9 @@ package com.apptolast.customlogin.presentation.screens.phone
 data class PhoneAuthUiState(
     val countryCode: String = "+1",
     val phoneNumber: String = "",
-    val phoneError: String? = null,
+    val phoneError: ValidationError? = null,
     val otpCode: String = "",
-    val otpError: String? = null,
+    val otpError: ValidationError? = null,
     val isLoading: Boolean = false,
     /** Set after [sendPhoneOtp] succeeds. Transitions the screen to the OTP entry step. */
     val verificationId: String? = null,

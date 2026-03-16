@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
+import com.apptolast.customlogin.util.ValidationError
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -43,7 +44,7 @@ class PhoneAuthViewModel(
         val state = _uiState.value
         val digits = state.phoneNumber.filter { it.isDigit() }.trimStart('0')
         if (digits.isBlank()) {
-            _uiState.update { it.copy(phoneError = "Phone number cannot be empty") }
+            _uiState.update { it.copy(phoneError = ValidationError.PhoneEmpty) }
             return
         }
         val phone = "${state.countryCode}$digits"
@@ -71,7 +72,7 @@ class PhoneAuthViewModel(
         val verificationId = state.verificationId ?: return
         val code = state.otpCode.trim()
         if (code.isBlank()) {
-            _uiState.update { it.copy(otpError = "Verification code cannot be empty") }
+            _uiState.update { it.copy(otpError = ValidationError.OtpEmpty) }
             return
         }
         viewModelScope.launch {

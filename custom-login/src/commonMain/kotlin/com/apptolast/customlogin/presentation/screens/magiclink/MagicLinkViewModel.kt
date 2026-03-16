@@ -2,9 +2,9 @@ package com.apptolast.customlogin.presentation.screens.magiclink
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.util.ValidationError
 import com.apptolast.customlogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 
 class MagicLinkViewModel(
     private val authRepository: AuthRepository,
-    private val config: LoginLibraryConfig
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MagicLinkUiState())
@@ -36,12 +35,14 @@ class MagicLinkViewModel(
     private fun onSendLink() {
         val email = _uiState.value.email.trim()
 
-        if (email.isBlank()) {
-            _uiState.update { it.copy(emailError = "Email cannot be empty") }
-            return
+        val emailError: ValidationError? = when {
+            email.isBlank() -> ValidationError.EmailEmpty
+            !Validators.isValidEmail(email) -> ValidationError.EmailInvalid
+            else -> null
         }
-        if (!Validators.isValidEmail(email)) {
-            _uiState.update { it.copy(emailError = "Invalid email format") }
+
+        if (emailError != null) {
+            _uiState.update { it.copy(emailError = emailError) }
             return
         }
 

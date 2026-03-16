@@ -41,6 +41,8 @@ import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.atl_isotipo_basic
 import login.custom_login.generated.resources.common_continue_button
 import login.custom_login.generated.resources.forgot_password_screen_description
+import login.custom_login.generated.resources.reauth_screen_description
+import login.custom_login.generated.resources.reauth_screen_title
 import login.custom_login.generated.resources.forgot_password_screen_success_description
 import login.custom_login.generated.resources.forgot_password_screen_success_title
 import login.custom_login.generated.resources.forgot_password_screen_title
@@ -314,6 +316,42 @@ fun DefaultOtpDescription(phoneNumber: String) {
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center
+    )
+}
+
+// ── Re-authentication ───────────────────────────────────────────────────────────
+
+@Composable
+fun DefaultReauthHeader() {
+    IconInCircle(icon = Icons.Default.Lock, size = 64, iconSize = 28)
+    Spacer(modifier = Modifier.height(20.dp))
+    Text(
+        text = stringResource(Res.string.reauth_screen_title),
+        style = MaterialTheme.typography.headlineMedium,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+        textAlign = TextAlign.Center
+    )
+}
+
+@Composable
+fun DefaultReauthDescription() {
+    Text(
+        text = stringResource(Res.string.reauth_screen_description),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center
+    )
+}
+
+@Composable
+fun DefaultReauthErrorMessage(message: String) {
+    Text(
+        text = message,
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.error,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth()
     )
 }
 

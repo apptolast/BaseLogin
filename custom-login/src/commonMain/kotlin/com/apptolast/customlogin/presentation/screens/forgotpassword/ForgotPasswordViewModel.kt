@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.util.ValidationError
 import com.apptolast.customlogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,10 +71,10 @@ class ForgotPasswordViewModel(
         }
     }
 
-    private fun validate(state: ForgotPasswordUiState): String? {
+    private fun validate(state: ForgotPasswordUiState): ValidationError? {
         return when {
-            state.email.isBlank() -> "Email cannot be empty"
-            !Validators.isValidEmail(state.email) -> "Invalid email format"
+            state.email.isBlank() -> ValidationError.EmailEmpty
+            !Validators.isValidEmail(state.email) -> ValidationError.EmailInvalid
             else -> null
         }
     }

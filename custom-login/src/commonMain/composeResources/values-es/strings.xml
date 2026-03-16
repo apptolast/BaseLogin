@@ -1,0 +1,108 @@
+<resources>
+    <!-- Common -->
+    <string name="common_error">Error</string>
+    <string name="common_email_label">Correo electrónico</string>
+    <string name="common_password_label">Contraseña</string>
+    <string name="common_full_name_label">Nombre completo</string>
+    <string name="common_continue_button">Continuar</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_show_password">Mostrar contraseña</string>
+    <string name="cd_hide_password">Ocultar contraseña</string>
+    <string name="cd_navigate_back">Atrás</string>
+
+    <!-- Login Screen -->
+    <string name="login_screen_sign_in_button">Iniciar sesión</string>
+    <string name="login_screen_forgot_password_link">¿Olvidaste tu contraseña?</string>
+    <string name="login_screen_no_account_text">¿No tienes una cuenta?</string>
+    <string name="login_screen_sign_up_link">Regístrate</string>
+    <string name="login_google_button">Iniciar sesión con Google</string>
+    <string name="login_loading_text">Iniciando sesión...</string>
+
+    <!-- Register Screen -->
+    <string name="register_screen_register_button">Registrarse</string>
+    <string name="register_screen_confirm_password_label">Confirmar contraseña</string>
+    <string name="register_screen_terms_prefix">Acepto los</string>
+    <string name="register_screen_terms_and_conditions">Términos y condiciones</string>
+    <string name="register_screen_terms_conjunction">y la</string>
+    <string name="register_screen_privacy_policy">Política de privacidad</string>
+    <string name="register_screen_already_have_account_text">¿Ya tienes una cuenta?</string>
+    <string name="register_screen_sign_in_link">Iniciar sesión</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_screen_title">Olvidé mi contraseña</string>
+    <string name="forgot_password_screen_description">Introduce tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.</string>
+    <string name="forgot_password_screen_send_button">Enviar enlace</string>
+    <string name="forgot_password_screen_success_title">Revisa tu bandeja de entrada</string>
+    <string name="forgot_password_screen_success_description">Hemos enviado un enlace de restablecimiento a tu correo electrónico.</string>
+
+    <!-- Validation Messages -->
+    <string name="validation_email_empty">El correo electrónico no puede estar vacío</string>
+    <string name="validation_email_invalid">Formato de correo electrónico inválido</string>
+    <string name="validation_password_empty">La contraseña no puede estar vacía</string>
+    <string name="validation_password_too_short">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="validation_name_required">El nombre completo es obligatorio</string>
+    <string name="validation_confirm_password_empty">Por favor, confirma tu contraseña</string>
+    <string name="validation_passwords_no_match">Las contraseñas no coinciden</string>
+    <string name="validation_phone_empty">El número de teléfono no puede estar vacío</string>
+    <string name="validation_otp_empty">El código de verificación no puede estar vacío</string>
+
+    <!-- Auth Error Messages -->
+    <string name="auth_error_invalid_credentials">Correo electrónico o contraseña incorrectos</string>
+    <string name="auth_error_user_not_found">No se encontró ninguna cuenta con este correo</string>
+    <string name="auth_error_email_already_in_use">Este correo electrónico ya está registrado</string>
+    <string name="auth_error_weak_password">La contraseña es demasiado débil</string>
+    <string name="auth_error_invalid_email">Formato de correo electrónico inválido</string>
+    <string name="auth_error_invalid_reset_code">Enlace de restablecimiento inválido o caducado</string>
+    <string name="auth_error_network_error">Error de red. Comprueba tu conexión</string>
+    <string name="auth_error_too_many_requests">Demasiados intentos. Inténtalo de nuevo más tarde</string>
+    <string name="auth_error_user_disabled">Esta cuenta ha sido desactivada</string>
+    <string name="auth_error_operation_not_allowed">Esta operación no está permitida</string>
+    <string name="auth_error_session_expired">Tu sesión ha caducado. Por favor, inicia sesión de nuevo</string>
+    <string name="auth_error_unknown">Se produjo un error inesperado</string>
+    <string name="auth_error_phone_verification_failed">La verificación del teléfono falló</string>
+    <string name="auth_error_phone_invalid">Número de teléfono no válido</string>
+    <string name="auth_error_invalid_otp">Código de verificación no válido</string>
+
+    <!-- Phone Auth Screen -->
+    <string name="phone_auth_screen_title">Iniciar sesión con teléfono</string>
+    <string name="phone_auth_screen_phone_header">Acceso por teléfono</string>
+    <string name="phone_auth_screen_phone_description">Introduce tu número de teléfono para recibir un código de verificación.</string>
+    <string name="phone_auth_screen_send_button">Enviar código</string>
+    <string name="phone_auth_screen_otp_header">Introduce el código de verificación</string>
+    <string name="phone_auth_screen_otp_description">Introduce el código de 6 dígitos enviado a %1$s</string>
+    <string name="phone_auth_screen_verify_button">Verificar</string>
+    <string name="phone_auth_screen_phone_label">Número de teléfono</string>
+    <string name="phone_auth_screen_otp_label">Código de verificación</string>
+
+    <!-- Social Sign-In Buttons -->
+    <string name="login_apple_button">Iniciar sesión con Apple</string>
+    <string name="login_github_button">Iniciar sesión con GitHub</string>
+    <string name="login_microsoft_button">Iniciar sesión con Microsoft</string>
+    <string name="login_magic_link_button">Iniciar sesión con enlace de email</string>
+    <string name="login_phone_button">Iniciar sesión con teléfono</string>
+    <string name="login_twitter_button">Iniciar sesión con Twitter</string>
+    <string name="login_facebook_button">Iniciar sesión con Facebook</string>
+
+    <!-- Magic Link Screen -->
+    <string name="magic_link_screen_title">Acceso por enlace de email</string>
+    <string name="magic_link_screen_description">Introduce tu correo y te enviaremos un enlace de acceso. Sin contraseña.</string>
+    <string name="magic_link_screen_send_button">Enviar enlace de acceso</string>
+    <string name="magic_link_screen_success_title">Revisa tu bandeja de entrada</string>
+    <string name="magic_link_screen_success_description">Hemos enviado un enlace de acceso a %1$s. Haz clic en el enlace para completar el acceso.</string>
+
+    <!-- Reset Password Screen -->
+    <string name="reset_password_screen_title">Crear nueva contraseña</string>
+    <string name="reset_password_screen_new_password_label">Nueva contraseña</string>
+    <string name="reset_password_screen_confirm_new_password_label">Confirmar nueva contraseña</string>
+    <string name="reset_password_screen_description">Tu nueva contraseña debe ser diferente de las anteriores.</string>
+    <string name="reset_password_screen_reset_button">Restablecer contraseña</string>
+    <string name="reset_password_screen_success_title">¡Contraseña restablecida!</string>
+    <string name="reset_password_screen_success_description">Ya puedes usar tu nueva contraseña para iniciar sesión.</string>
+
+    <!-- Re-authentication Screen -->
+    <string name="reauth_screen_title">Confirma tu identidad</string>
+    <string name="reauth_screen_description">Por tu seguridad, vuelve a introducir tus credenciales para continuar.</string>
+    <string name="reauth_submit_button">Confirmar</string>
+
+</resources>

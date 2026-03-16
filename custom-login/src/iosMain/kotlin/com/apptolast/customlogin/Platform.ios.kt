@@ -6,9 +6,11 @@ import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.provider.AppleSignInProviderIOS
+import com.apptolast.customlogin.provider.FacebookSignInProviderIOS
 import com.apptolast.customlogin.provider.GitHubSignInProviderIOS
 import com.apptolast.customlogin.provider.GoogleSignInProviderIOS
 import com.apptolast.customlogin.provider.MicrosoftSignInProviderIOS
+import com.apptolast.customlogin.provider.TwitterSignInProviderIOS
 import com.apptolast.customlogin.util.Logger
 import com.apptolast.customlogin.SocialTokenResult
 import org.koin.core.component.KoinComponent
@@ -56,6 +58,8 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
         is IdentityProvider.Apple -> AppleSignInProviderIOS.signIn()?.let { SocialTokenResult.Token(it) }
         is IdentityProvider.GitHub -> GitHubSignInProviderIOS.signIn()?.toSocialTokenResult()
         is IdentityProvider.Microsoft -> MicrosoftSignInProviderIOS.signIn()?.toSocialTokenResult()
+        is IdentityProvider.Twitter -> TwitterSignInProviderIOS.signIn()?.toSocialTokenResult()
+        is IdentityProvider.Facebook -> FacebookSignInProviderIOS.signIn()?.toSocialTokenResult()
         else -> {
             Logger.w("Platform", "Social sign-in for ${provider.id} is not implemented on iOS yet.")
             null

@@ -28,6 +28,7 @@ import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.ForgotPasswordScreenSlots
 import kotlinx.coroutines.flow.collectLatest
+import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.forgot_password_screen_send_button
@@ -140,7 +141,7 @@ private fun ForgotPasswordContent(
                     slots.emailField(
                         state.email,
                         { onAction(ForgotPasswordAction.EmailChanged(it)) },
-                        state.emailError,
+                        state.emailError?.let { stringResource(it.toStringRes()) },
                         !state.isLoading
                     )
 

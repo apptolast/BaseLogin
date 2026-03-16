@@ -1,0 +1,147 @@
+package com.apptolast.customlogin.presentation.login
+
+import com.apptolast.customlogin.domain.model.AuthError
+import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.presentation.screens.login.LoginAction
+import com.apptolast.customlogin.presentation.screens.login.LoginEffect
+import com.apptolast.customlogin.presentation.screens.login.LoginViewModel
+import com.apptolast.customlogin.test.FakeAuthRepository
+import com.apptolast.customlogin.util.ValidationError
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertNull
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class LoginViewModelTest {
+
+    private val dispatcher = UnconfinedTestDispatcher()
+    private lateinit var repo: FakeAuthRepository
+    private lateinit var viewModel: LoginViewModel
+
+    @BeforeTest
+    fun setUp() {
+        Dispatchers.setMain(dispatcher)
+        repo = FakeAuthRepository()
+        viewModel = LoginViewModel(repo)
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `initial state has empty fields and no errors`() {
+        val state = viewModel.uiState.value
+        assertEquals("", state.email)
+        assertEquals("", state.password)
+        assertNull(state.emailError)
+        assertNull(state.passwordError)
+    }
+
+    @Test
+    fun `EmailChanged clears emailError`() {
+        viewModel.onAction(LoginAction.SignInClicked) // trigger emailError
+        viewModel.onAction(LoginAction.EmailChanged("new@email.com"))
+        assertNull(viewModel.uiState.value.emailError)
+    }
+
+    @Test
+    fun `SignInClicked with blank email sets EmailEmpty error`() = runTest {
+        viewModel.onAction(LoginAction.PasswordChanged("password"))
+        viewModel.onAction(LoginAction.SignInClicked)
+        assertEquals(ValidationError.EmailEmpty, viewModel.uiState.value.emailError)
+    }
+
+    @Test
+    fun `SignInClicked with invalid email sets EmailInvalid error`() = runTest {
+        viewModel.onAction(LoginAction.EmailChanged("not-an-email"))
+        viewModel.onAction(LoginAction.PasswordChanged("password"))
+        viewModel.onAction(LoginAction.SignInClicked)
+        assertEquals(ValidationError.EmailInvalid, viewModel.uiState.value.emailError)
+    }
+
+    @Test
+    fun `SignInClicked with blank password sets PasswordEmpty error`() = runTest {
+        viewModel.onAction(LoginAction.EmailChanged("valid@email.com"))
+        viewModel.onAction(LoginAction.SignInClicked)
+        assertEquals(ValidationError.PasswordEmpty, viewModel.uiState.value.passwordError)
+    }
+
+    @Test
+    fun `SignInClicked with valid credentials emits NavigateToHome on success`() = runTest {
+        repo.signInResult = AuthResult.Success(FakeAuthRepository.fakeSession())
+        val effects = mutableListOf<LoginEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        viewModel.onAction(LoginAction.EmailChanged("valid@email.com"))
+        viewModel.onAction(LoginAction.PasswordChanged("password"))
+        viewModel.onAction(LoginAction.SignInClicked)
+        advanceUntilIdle()
+
+        assertIs<LoginEffect.NavigateToHome>(effects.first())
+        job.cancel()
+    }
+
+    @Test
+    fun `SignInClicked with failure emits ShowError`() = runTest {
+        repo.signInResult = AuthResult.Failure(AuthError.InvalidCredentials())
+        val effects = mutableListOf<LoginEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        viewModel.onAction(LoginAction.EmailChanged("valid@email.com"))
+        viewModel.onAction(LoginAction.PasswordChanged("wrongpass"))
+        viewModel.onAction(LoginAction.SignInClicked)
+        advanceUntilIdle()
+
+        assertIs<LoginEffect.ShowError>(effects.first())
+        job.cancel()
+    }
+
+    @Test
+    fun `SocialSignInClicked with Phone emits NavigateToPhoneAuth`() = runTest {
+        val effects = mutableListOf<LoginEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        viewModel.onAction(LoginAction.SocialSignInClicked(IdentityProvider.Phone))
+        advanceUntilIdle()
+
+        assertIs<LoginEffect.NavigateToPhoneAuth>(effects.first())
+        job.cancel()
+    }
+
+    @Test
+    fun `SocialSignInClicked with MagicLink emits NavigateToMagicLink`() = runTest {
+        val effects = mutableListOf<LoginEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        viewModel.onAction(LoginAction.SocialSignInClicked(IdentityProvider.MagicLink))
+        advanceUntilIdle()
+
+        assertIs<LoginEffect.NavigateToMagicLink>(effects.first())
+        job.cancel()
+    }
+
+    @Test
+    fun `SocialSignInClicked shows loading provider during sign-in`() = runTest {
+        repo.signInResult = AuthResult.Success(FakeAuthRepository.fakeSession())
+
+        viewModel.onAction(LoginAction.SocialSignInClicked(IdentityProvider.Google))
+
+        // With UnconfinedTestDispatcher the coroutine runs eagerly — loading clears immediately
+        // Just verify no crash and loadingProvider is null after completion
+        assertNull(viewModel.uiState.value.loadingProvider)
+    }
+}

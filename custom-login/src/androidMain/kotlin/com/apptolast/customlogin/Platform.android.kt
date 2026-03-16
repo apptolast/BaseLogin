@@ -81,6 +81,16 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
                 providerId = "microsoft.com",
                 scopes = listOf("email", "profile")
             )
+        is IdentityProvider.Twitter ->
+            WebOAuthProviderAndroid.signIn(
+                providerId = "twitter.com",
+                scopes = listOf("email")
+            )
+        is IdentityProvider.Facebook ->
+            WebOAuthProviderAndroid.signIn(
+                providerId = "facebook.com",
+                scopes = listOf("email", "public_profile")
+            )
         else -> {
             Logger.w("Platform", "Social sign-in for ${provider.id} is not implemented on Android yet.")
             null

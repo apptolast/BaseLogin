@@ -1,0 +1,108 @@
+<resources>
+    <!-- Common -->
+    <string name="common_error">Errore</string>
+    <string name="common_email_label">E-mail</string>
+    <string name="common_password_label">Password</string>
+    <string name="common_full_name_label">Nome completo</string>
+    <string name="common_continue_button">Continua</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_show_password">Mostra password</string>
+    <string name="cd_hide_password">Nascondi password</string>
+    <string name="cd_navigate_back">Indietro</string>
+
+    <!-- Login Screen -->
+    <string name="login_screen_sign_in_button">Accedi</string>
+    <string name="login_screen_forgot_password_link">Password dimenticata?</string>
+    <string name="login_screen_no_account_text">Non hai un account?</string>
+    <string name="login_screen_sign_up_link">Registrati</string>
+    <string name="login_google_button">Accedi con Google</string>
+    <string name="login_loading_text">Accesso in corso...</string>
+
+    <!-- Register Screen -->
+    <string name="register_screen_register_button">Registrati</string>
+    <string name="register_screen_confirm_password_label">Conferma password</string>
+    <string name="register_screen_terms_prefix">Accetto i</string>
+    <string name="register_screen_terms_and_conditions">Termini e condizioni</string>
+    <string name="register_screen_terms_conjunction">e la</string>
+    <string name="register_screen_privacy_policy">Informativa sulla privacy</string>
+    <string name="register_screen_already_have_account_text">Hai già un account?</string>
+    <string name="register_screen_sign_in_link">Accedi</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_screen_title">Password dimenticata</string>
+    <string name="forgot_password_screen_description">Inserisci il tuo indirizzo e-mail e ti invieremo un link per reimpostare la password.</string>
+    <string name="forgot_password_screen_send_button">Invia link</string>
+    <string name="forgot_password_screen_success_title">Controlla la tua casella di posta</string>
+    <string name="forgot_password_screen_success_description">Abbiamo inviato un link di reimpostazione al tuo indirizzo e-mail.</string>
+
+    <!-- Validation Messages -->
+    <string name="validation_email_empty">L'indirizzo e-mail non può essere vuoto</string>
+    <string name="validation_email_invalid">Formato e-mail non valido</string>
+    <string name="validation_password_empty">La password non può essere vuota</string>
+    <string name="validation_password_too_short">La password deve contenere almeno 6 caratteri</string>
+    <string name="validation_name_required">Il nome completo è obbligatorio</string>
+    <string name="validation_confirm_password_empty">Conferma la tua password</string>
+    <string name="validation_passwords_no_match">Le password non corrispondono</string>
+    <string name="validation_phone_empty">Il numero di telefono non può essere vuoto</string>
+    <string name="validation_otp_empty">Il codice di verifica non può essere vuoto</string>
+
+    <!-- Auth Error Messages -->
+    <string name="auth_error_invalid_credentials">Indirizzo e-mail o password errati</string>
+    <string name="auth_error_user_not_found">Nessun account trovato con questa e-mail</string>
+    <string name="auth_error_email_already_in_use">Questa e-mail è già registrata</string>
+    <string name="auth_error_weak_password">La password è troppo debole</string>
+    <string name="auth_error_invalid_email">Formato e-mail non valido</string>
+    <string name="auth_error_invalid_reset_code">Link di reimpostazione non valido o scaduto</string>
+    <string name="auth_error_network_error">Errore di rete. Controlla la connessione</string>
+    <string name="auth_error_too_many_requests">Troppi tentativi. Riprova più tardi</string>
+    <string name="auth_error_user_disabled">Questo account è stato disabilitato</string>
+    <string name="auth_error_operation_not_allowed">Questa operazione non è consentita</string>
+    <string name="auth_error_session_expired">La sessione è scaduta. Accedi di nuovo</string>
+    <string name="auth_error_unknown">Si è verificato un errore imprevisto</string>
+    <string name="auth_error_phone_verification_failed">La verifica del telefono non è riuscita</string>
+    <string name="auth_error_phone_invalid">Numero di telefono non valido</string>
+    <string name="auth_error_invalid_otp">Codice di verifica non valido</string>
+
+    <!-- Phone Auth Screen -->
+    <string name="phone_auth_screen_title">Accedi con telefono</string>
+    <string name="phone_auth_screen_phone_header">Accesso tramite telefono</string>
+    <string name="phone_auth_screen_phone_description">Inserisci il tuo numero di telefono per ricevere un codice di verifica.</string>
+    <string name="phone_auth_screen_send_button">Invia codice</string>
+    <string name="phone_auth_screen_otp_header">Inserisci il codice di verifica</string>
+    <string name="phone_auth_screen_otp_description">Inserisci il codice a 6 cifre inviato a %1$s</string>
+    <string name="phone_auth_screen_verify_button">Verifica</string>
+    <string name="phone_auth_screen_phone_label">Numero di telefono</string>
+    <string name="phone_auth_screen_otp_label">Codice di verifica</string>
+
+    <!-- Social Sign-In Buttons -->
+    <string name="login_apple_button">Accedi con Apple</string>
+    <string name="login_github_button">Accedi con GitHub</string>
+    <string name="login_microsoft_button">Accedi con Microsoft</string>
+    <string name="login_magic_link_button">Accedi con link e-mail</string>
+    <string name="login_phone_button">Accedi con telefono</string>
+    <string name="login_twitter_button">Accedi con Twitter</string>
+    <string name="login_facebook_button">Accedi con Facebook</string>
+
+    <!-- Magic Link Screen -->
+    <string name="magic_link_screen_title">Accesso tramite link e-mail</string>
+    <string name="magic_link_screen_description">Inserisci la tua e-mail e ti invieremo un link di accesso. Nessuna password richiesta.</string>
+    <string name="magic_link_screen_send_button">Invia link di accesso</string>
+    <string name="magic_link_screen_success_title">Controlla la tua casella di posta</string>
+    <string name="magic_link_screen_success_description">Abbiamo inviato un link di accesso a %1$s. Clicca sul link per completare l'accesso.</string>
+
+    <!-- Reset Password Screen -->
+    <string name="reset_password_screen_title">Crea nuova password</string>
+    <string name="reset_password_screen_new_password_label">Nuova password</string>
+    <string name="reset_password_screen_confirm_new_password_label">Conferma nuova password</string>
+    <string name="reset_password_screen_description">La nuova password deve essere diversa da quelle precedenti.</string>
+    <string name="reset_password_screen_reset_button">Reimposta password</string>
+    <string name="reset_password_screen_success_title">Password reimpostata!</string>
+    <string name="reset_password_screen_success_description">Ora puoi usare la tua nuova password per accedere al tuo account.</string>
+
+    <!-- Re-authentication Screen -->
+    <string name="reauth_screen_title">Conferma la tua identità</string>
+    <string name="reauth_screen_description">Per la tua sicurezza, inserisci nuovamente le tue credenziali per continuare.</string>
+    <string name="reauth_submit_button">Conferma</string>
+
+</resources>

@@ -14,10 +14,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.LoginScreenSlots
 import kotlinx.coroutines.flow.collectLatest
+import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.login_screen_sign_in_button
 import org.jetbrains.compose.resources.stringResource
@@ -112,7 +114,7 @@ private fun LoginContent(
         slots.emailField(
             state.email,
             { onAction(LoginAction.EmailChanged(it)) },
-            state.emailError,
+            state.emailError?.let { stringResource(it.toStringRes()) },
             !state.isLoading
         )
 
@@ -121,7 +123,7 @@ private fun LoginContent(
         slots.passwordField(
             state.password,
             { onAction(LoginAction.PasswordChanged(it)) },
-            state.passwordError,
+            state.passwordError?.let { stringResource(it.toStringRes()) },
             !state.isLoading
         )
 
@@ -141,7 +143,7 @@ private fun LoginContent(
         Spacer(Modifier.height(8.dp))
 
         slots.socialProviders?.let { socialProviders ->
-            socialProviders(state.availableProviders) { provider ->
+            socialProviders(state.availableProviders, state.loadingProvider) { provider ->
                 onAction(LoginAction.SocialSignInClicked(provider))
             }
         }
@@ -173,6 +175,19 @@ private fun LoginScreenLoadingPreview() {
             email = "test@apptolast.com",
             password = "Password123",
             isLoading = true
+        )
+    )
+}
+
+@Preview
+@Composable
+private fun LoginScreenSocialLoadingPreview() {
+    LoginContent(
+        slots = LoginScreenSlots(),
+        state = LoginUiState(
+            email = "test@apptolast.com",
+            password = "Password123",
+            loadingProvider = IdentityProvider.Google
         )
     )
 }

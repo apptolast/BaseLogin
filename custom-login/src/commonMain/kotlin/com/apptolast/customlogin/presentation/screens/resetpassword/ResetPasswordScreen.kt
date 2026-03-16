@@ -28,6 +28,7 @@ import com.apptolast.customlogin.presentation.screens.components.DefaultAuthCont
 import com.apptolast.customlogin.presentation.slots.ResetPasswordScreenSlots
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.reset_password_screen_reset_button
@@ -153,7 +154,7 @@ private fun ResetPasswordContent(
                 slots.passwordField(
                     state.newPassword,
                     { onAction(ResetPasswordAction.NewPasswordChanged(it)) },
-                    state.passwordError,
+                    state.passwordError?.let { stringResource(it.toStringRes()) },
                     !state.isLoading
                 )
 
@@ -162,7 +163,7 @@ private fun ResetPasswordContent(
                 slots.confirmPasswordField(
                     state.confirmPassword,
                     { onAction(ResetPasswordAction.ConfirmPasswordChanged(it)) },
-                    state.confirmPasswordError,
+                    state.confirmPasswordError?.let { stringResource(it.toStringRes()) },
                     !state.isLoading
                 )
 

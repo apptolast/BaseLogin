@@ -81,6 +81,15 @@ internal fun mapFirebaseErrorMessage(errorMessage: String): AuthError {
             "NETWORK", "network-request-failed", "ERROR_NETWORK_REQUEST_FAILED",
         ) -> AuthError.NetworkError(errorMessage)
 
+        errorMessage.containsAny(
+            "INVALID_PHONE_NUMBER", "invalid-phone-number", "ERROR_INVALID_PHONE_NUMBER",
+        ) -> AuthError.PhoneNumberInvalid()
+
+        errorMessage.containsAny(
+            "INVALID_VERIFICATION_CODE", "invalid-verification-code",
+            "ERROR_INVALID_VERIFICATION_CODE",
+        ) -> AuthError.InvalidVerificationCode()
+
         else -> AuthError.Unknown(errorMessage)
     }
 }

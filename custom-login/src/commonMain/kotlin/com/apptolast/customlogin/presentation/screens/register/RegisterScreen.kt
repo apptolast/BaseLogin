@@ -17,6 +17,7 @@ import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.RegisterScreenSlots
 import kotlinx.coroutines.flow.collectLatest
+import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.register_screen_register_button
 import org.jetbrains.compose.resources.stringResource
@@ -104,7 +105,7 @@ private fun RegisterContent(
         slots.nameField(
             state.fullName,
             { onAction(RegisterAction.FullNameChanged(it)) },
-            state.fullNameError,
+            state.fullNameError?.let { stringResource(it.toStringRes()) },
             !state.isLoading
         )
 
@@ -113,7 +114,7 @@ private fun RegisterContent(
         slots.emailField(
             state.email,
             { onAction(RegisterAction.EmailChanged(it)) },
-            state.emailError,
+            state.emailError?.let { stringResource(it.toStringRes()) },
             !state.isLoading
         )
 
@@ -122,7 +123,7 @@ private fun RegisterContent(
         slots.passwordField(
             state.password,
             { onAction(RegisterAction.PasswordChanged(it)) },
-            state.passwordError,
+            state.passwordError?.let { stringResource(it.toStringRes()) },
             !state.isLoading
         )
 
@@ -131,7 +132,7 @@ private fun RegisterContent(
         slots.confirmPasswordField(
             state.confirmPassword,
             { onAction(RegisterAction.ConfirmPasswordChanged(it)) },
-            state.confirmPasswordError,
+            state.confirmPasswordError?.let { stringResource(it.toStringRes()) },
             !state.isLoading
         )
 
@@ -157,7 +158,15 @@ private fun RegisterContent(
             stringResource(Res.string.register_screen_register_button)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        slots.socialProviders?.let { socialProviders ->
+            socialProviders(state.availableProviders, state.loadingProvider) { provider ->
+                onAction(RegisterAction.SignUpWithOAuth(provider))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         slots.loginLink(onNavigateToLogin)
     }

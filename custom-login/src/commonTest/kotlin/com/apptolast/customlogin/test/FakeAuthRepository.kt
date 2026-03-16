@@ -41,7 +41,7 @@ class FakeAuthRepository : AuthRepository {
     var updatePasswordResult: Result<Unit> = Result.success(Unit)
     var sendEmailVerificationResult: Result<Unit> = Result.success(Unit)
     var reauthenticateResult: AuthResult = AuthResult.Success(fakeSession())
-    var availableProviders: List<IdentityProvider> = emptyList()
+    var stubbedProviders: List<IdentityProvider> = emptyList()
     var sendPhoneOtpResult: PhoneAuthResult = PhoneAuthResult.CodeSent("fake-verification-id")
     var verifyPhoneOtpResult: AuthResult = AuthResult.Success(fakeSession())
     var sendMagicLinkResult: AuthResult = AuthResult.MagicLinkSent
@@ -79,7 +79,7 @@ class FakeAuthRepository : AuthRepository {
     override suspend fun updatePassword(newPassword: String): Result<Unit> = updatePasswordResult
     override suspend fun sendEmailVerification(): Result<Unit> = sendEmailVerificationResult
     override suspend fun reauthenticate(credentials: Credentials): AuthResult = reauthenticateResult
-    override fun getAvailableProviders(): List<IdentityProvider> = availableProviders
+    override fun getAvailableProviders(): List<IdentityProvider> = stubbedProviders
     override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult = sendPhoneOtpResult
     override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult = verifyPhoneOtpResult
     override suspend fun sendMagicLink(email: String): AuthResult = sendMagicLinkResult

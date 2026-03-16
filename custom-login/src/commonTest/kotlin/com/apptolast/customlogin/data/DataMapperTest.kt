@@ -142,6 +142,40 @@ class DataMapperTest {
         assertTrue(mapFirebaseErrorMessage("network-request-failed") is AuthError.NetworkError)
     }
 
+    // ── PhoneNumberInvalid ────────────────────────────────────────────────
+
+    @Test
+    fun `INVALID_PHONE_NUMBER maps to PhoneNumberInvalid`() {
+        assertTrue(mapFirebaseErrorMessage("INVALID_PHONE_NUMBER") is AuthError.PhoneNumberInvalid)
+    }
+
+    @Test
+    fun `invalid-phone-number maps to PhoneNumberInvalid`() {
+        assertTrue(mapFirebaseErrorMessage("invalid-phone-number") is AuthError.PhoneNumberInvalid)
+    }
+
+    @Test
+    fun `ERROR_INVALID_PHONE_NUMBER maps to PhoneNumberInvalid`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_INVALID_PHONE_NUMBER") is AuthError.PhoneNumberInvalid)
+    }
+
+    // ── InvalidVerificationCode ───────────────────────────────────────────
+
+    @Test
+    fun `INVALID_VERIFICATION_CODE maps to InvalidVerificationCode`() {
+        assertTrue(mapFirebaseErrorMessage("INVALID_VERIFICATION_CODE") is AuthError.InvalidVerificationCode)
+    }
+
+    @Test
+    fun `invalid-verification-code maps to InvalidVerificationCode`() {
+        assertTrue(mapFirebaseErrorMessage("invalid-verification-code") is AuthError.InvalidVerificationCode)
+    }
+
+    @Test
+    fun `ERROR_INVALID_VERIFICATION_CODE maps to InvalidVerificationCode`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_INVALID_VERIFICATION_CODE") is AuthError.InvalidVerificationCode)
+    }
+
     // ── Unknown ───────────────────────────────────────────────────────────
 
     @Test

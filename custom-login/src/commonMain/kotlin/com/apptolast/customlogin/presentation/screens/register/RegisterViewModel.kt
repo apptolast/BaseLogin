@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.domain.model.Credentials
+import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.util.ValidationError
 import com.apptolast.customlogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +26,12 @@ class RegisterViewModel(
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState = _uiState.asStateFlow()
 
+    init {
+        val providers = authRepository.getAvailableProviders()
+            .filter { it != IdentityProvider.Phone && it != IdentityProvider.MagicLink }
+        _uiState.update { it.copy(availableProviders = providers) }
+    }
+
     private val _effect = MutableSharedFlow<RegisterEffect>()
     val effect = _effect.asSharedFlow()
 
@@ -37,7 +46,7 @@ class RegisterViewModel(
             is RegisterAction.ConfirmPasswordChanged -> onConfirmPasswordChange(action.confirmPassword)
             is RegisterAction.TermsAcceptedChanged -> onTermsAcceptedChange(action.accepted)
             is RegisterAction.SignUpClicked -> onSignUpClicked()
-            is RegisterAction.ErrorMessageDismissed -> { /* No-op, errors are now one-time effects */ }
+            is RegisterAction.SignUpWithOAuth -> onSocialSignUp(action.provider)
         }
     }
 
@@ -59,6 +68,26 @@ class RegisterViewModel(
 
     private fun onTermsAcceptedChange(accepted: Boolean) {
         _uiState.update { it.copy(termsAccepted = accepted) }
+    }
+
+    private fun onSocialSignUp(provider: IdentityProvider) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(loadingProvider = provider) }
+            when (val result = authRepository.signIn(Credentials.OAuthToken(provider = provider))) {
+                is AuthResult.Success -> {
+                    _uiState.update { it.copy(loadingProvider = null) }
+                    _effect.emit(RegisterEffect.NavigateToHome)
+                }
+                is AuthResult.Failure -> {
+                    _uiState.update { it.copy(loadingProvider = null) }
+                    _effect.emit(RegisterEffect.ShowError(result.error.message))
+                }
+                else -> {
+                    _uiState.update { it.copy(loadingProvider = null) }
+                    _effect.emit(RegisterEffect.ShowError("An unexpected error occurred"))
+                }
+            }
+        }
     }
 
     private fun onSignUpClicked() {
@@ -100,22 +129,22 @@ class RegisterViewModel(
     }
 
     private fun validate(state: RegisterUiState): ValidationErrors {
-        val fullNameError = when {
-            state.fullName.isBlank() -> "Full name is required"
+        val fullNameError: ValidationError? = when {
+            state.fullName.isBlank() -> ValidationError.NameRequired
             else -> null
         }
-        val emailError = when {
-            state.email.isBlank() -> "Email cannot be empty"
-            !Validators.isValidEmail(state.email) -> "Invalid email format"
+        val emailError: ValidationError? = when {
+            state.email.isBlank() -> ValidationError.EmailEmpty
+            !Validators.isValidEmail(state.email) -> ValidationError.EmailInvalid
             else -> null
         }
-        val passwordError = when {
-            !Validators.isValidPassword(state.password) -> "Password must be at least 6 characters"
+        val passwordError: ValidationError? = when {
+            !Validators.isValidPassword(state.password) -> ValidationError.PasswordTooShort
             else -> null
         }
-        val confirmPasswordError = when {
-            state.confirmPassword.isBlank() -> "Please confirm your password"
-            state.password != state.confirmPassword -> "Passwords do not match"
+        val confirmPasswordError: ValidationError? = when {
+            state.confirmPassword.isBlank() -> ValidationError.ConfirmPasswordEmpty
+            state.password != state.confirmPassword -> ValidationError.PasswordsDoNotMatch
             else -> null
         }
         return ValidationErrors(
@@ -127,10 +156,10 @@ class RegisterViewModel(
     }
 
     private data class ValidationErrors(
-        val fullNameError: String?,
-        val emailError: String?,
-        val passwordError: String?,
-        val confirmPasswordError: String?
+        val fullNameError: ValidationError?,
+        val emailError: ValidationError?,
+        val passwordError: ValidationError?,
+        val confirmPasswordError: ValidationError?
     ) {
         val isValid: Boolean
             get() = fullNameError == null && emailError == null && passwordError == null && confirmPasswordError == null

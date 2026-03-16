@@ -100,7 +100,9 @@ class AuthRepositoryImpl(
             if (config.githubEnabled) add(IdentityProvider.GitHub)
             if (config.microsoftEnabled) add(IdentityProvider.Microsoft)
             if (config.magicLinkConfig != null) add(IdentityProvider.MagicLink)
-            add(IdentityProvider.Phone)
+            if (config.phoneEnabled) add(IdentityProvider.Phone)
+            if (config.twitterEnabled) add(IdentityProvider.Twitter)
+            if (config.facebookEnabled) add(IdentityProvider.Facebook)
         }
     }
 

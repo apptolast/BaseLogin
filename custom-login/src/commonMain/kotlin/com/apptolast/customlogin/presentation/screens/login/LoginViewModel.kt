@@ -6,6 +6,7 @@ import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.util.ValidationError
 import com.apptolast.customlogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,22 +63,22 @@ class LoginViewModel(
             return
         }
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(loadingProvider = provider) }
 
             val credentials = Credentials.OAuthToken(provider = provider)
             when (val result = authRepository.signIn(credentials)) {
                 is AuthResult.Success -> {
-                    _uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { it.copy(loadingProvider = null) }
                     _effect.emit(LoginEffect.NavigateToHome)
                 }
 
                 is AuthResult.Failure -> {
-                    _uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { it.copy(loadingProvider = null) }
                     _effect.emit(LoginEffect.ShowError("$provider: ${result.error.message}"))
                 }
 
                 else -> {
-                    _uiState.update { it.copy(isLoading = false) }
+                    _uiState.update { it.copy(loadingProvider = null) }
                     _effect.emit(LoginEffect.ShowError("An unexpected error occurred"))
                 }
             }
@@ -119,15 +120,15 @@ class LoginViewModel(
         }
     }
 
-    private fun validate(state: LoginUiState): Pair<String?, String?> {
-        val emailError = when {
-            state.email.isBlank() -> "Email cannot be empty"
-            !Validators.isValidEmail(state.email) -> "Invalid email format"
+    private fun validate(state: LoginUiState): Pair<ValidationError?, ValidationError?> {
+        val emailError: ValidationError? = when {
+            state.email.isBlank() -> ValidationError.EmailEmpty
+            !Validators.isValidEmail(state.email) -> ValidationError.EmailInvalid
             else -> null
         }
 
-        val passwordError = when {
-            state.password.isBlank() -> "Password cannot be empty"
+        val passwordError: ValidationError? = when {
+            state.password.isBlank() -> ValidationError.PasswordEmpty
             else -> null
         }
 

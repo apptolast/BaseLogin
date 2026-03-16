@@ -49,6 +49,14 @@ sealed class AuthError(open val message: String, open val cause: Throwable? = nu
         override val message: String = "Operation not allowed"
     ) : AuthError(message)
 
+    data class PhoneNumberInvalid(
+        override val message: String = "Invalid phone number"
+    ) : AuthError(message)
+
+    data class InvalidVerificationCode(
+        override val message: String = "Invalid verification code"
+    ) : AuthError(message)
+
     data class Unknown(
         override val message: String = "An unknown error occurred",
         override val cause: Throwable? = null

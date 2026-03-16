@@ -1,5 +1,7 @@
 package com.apptolast.customlogin.presentation.screens.register
 
+import com.apptolast.customlogin.domain.model.IdentityProvider
+
 /**
  * Defines the contract for UI events and one-time side effects in the Register screen.
  */
@@ -14,5 +16,5 @@ sealed interface RegisterAction {
     data class ConfirmPasswordChanged(val confirmPassword: String) : RegisterAction
     data class TermsAcceptedChanged(val accepted: Boolean) : RegisterAction
     data object SignUpClicked : RegisterAction
-    data object ErrorMessageDismissed : RegisterAction
+    data class SignUpWithOAuth(val provider: IdentityProvider) : RegisterAction
 }

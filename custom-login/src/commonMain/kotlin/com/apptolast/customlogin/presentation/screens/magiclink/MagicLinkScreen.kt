@@ -18,6 +18,7 @@ import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.MagicLinkScreenSlots
 import kotlinx.coroutines.flow.collectLatest
+import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.magic_link_screen_send_button
 import org.jetbrains.compose.resources.stringResource
@@ -87,7 +88,7 @@ private fun MagicLinkContent(
             slots.emailField(
                 state.email,
                 { onAction(MagicLinkAction.EmailChanged(it)) },
-                state.emailError,
+                state.emailError?.let { stringResource(it.toStringRes()) },
                 !state.isLoading
             )
 
