@@ -90,7 +90,17 @@ fun NavGraphBuilder.authRoutesFlow(
                         }
                         launchSingleTop = true
                     }
-                }
+                },
+                onNavigateToPhoneAuth = {
+                    navController.navigate(PhoneAuthRoute) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToMagicLink = {
+                    navController.navigate(MagicLinkRoute) {
+                        launchSingleTop = true
+                    }
+                },
             )
         }
 

@@ -33,6 +33,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.welcome_screen_create_account_button
+import login.custom_login.generated.resources.welcome_screen_sign_in_button
+import login.custom_login.generated.resources.welcome_screen_subtitle
+import login.custom_login.generated.resources.welcome_screen_title
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -69,10 +75,9 @@ fun WelcomeScreen(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Welcome back! \uD83D\uDE04",
+                    text = stringResource(Res.string.welcome_screen_title),
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontWeight = FontWeight.Bold,
-//                        lineHeight = MaterialTheme.typography.displaySmall.lineHeight * 1.1
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start,
@@ -80,7 +85,7 @@ fun WelcomeScreen(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Your secure access starts here. Create an account or sign in to continue.",
+                    text = stringResource(Res.string.welcome_screen_subtitle),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Start,
@@ -118,7 +123,7 @@ fun WelcomeScreen(
                     )
                 ) {
                     Text(
-                        text = "Create Account",
+                        text = stringResource(Res.string.welcome_screen_create_account_button),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -138,7 +143,7 @@ fun WelcomeScreen(
                     )
                 ) {
                     Text(
-                        text = "Sign In",
+                        text = stringResource(Res.string.welcome_screen_sign_in_button),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium
                     )

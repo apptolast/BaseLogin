@@ -4,5 +4,7 @@ package com.apptolast.customlogin.presentation.screens.register
  */
 sealed interface RegisterEffect {
     data object NavigateToHome : RegisterEffect
+    data object NavigateToPhoneAuth : RegisterEffect
+    data object NavigateToMagicLink : RegisterEffect
     data class ShowError(val message: String) : RegisterEffect
 }

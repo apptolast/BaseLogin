@@ -16,6 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.cd_dismiss
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun CustomSnackBar(
@@ -29,7 +32,7 @@ fun CustomSnackBar(
             IconButton(onClick = onDismiss) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Dismiss",
+                    contentDescription = stringResource(Res.string.cd_dismiss),
                     tint = MaterialTheme.colorScheme.onErrorContainer
                 )
             }

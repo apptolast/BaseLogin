@@ -34,6 +34,8 @@ private fun initKoinIfNeeded() {
             appleSignInConfig = AppleSignInConfig(),
             githubEnabled = true,
             microsoftEnabled = true,
+            twitterEnabled = true,
+            facebookEnabled = true,
             magicLinkConfig = MagicLinkConfig(
                 continueUrl = "https://apptolast.com/login",
                 iosBundleId = "com.apptolast.login"

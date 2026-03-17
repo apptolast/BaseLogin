@@ -29,6 +29,7 @@ import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultResetPas
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultSubmitButton
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultSuccessContent
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultTermsCheckbox
+import com.apptolast.customlogin.presentation.slots.defaultslots.IconSocialLoginButtonsSection
 import com.apptolast.customlogin.presentation.slots.defaultslots.SocialLoginButtonsSection
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.register_screen_confirm_password_label
@@ -83,7 +84,7 @@ data class LoginScreenSlots(
         )
     },
     val socialProviders: (@Composable (providers: List<IdentityProvider>, loadingProvider: IdentityProvider?, onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { providers, loadingProvider, onProviderClick ->
-        SocialLoginButtonsSection(providers = providers, loadingProvider = loadingProvider, onProviderClick = onProviderClick)
+        IconSocialLoginButtonsSection(providers = providers, loadingProvider = loadingProvider, onProviderClick = onProviderClick)
     },
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
         DefaultForgotPasswordLink(onForgotPasswordClick = onClick)
@@ -174,7 +175,7 @@ data class RegisterScreenSlots(
         )
     },
     val socialProviders: (@Composable (providers: List<IdentityProvider>, loadingProvider: IdentityProvider?, onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { providers, loadingProvider, onProviderClick ->
-        SocialLoginButtonsSection(providers = providers, loadingProvider = loadingProvider, onProviderClick = onProviderClick)
+        IconSocialLoginButtonsSection(providers = providers, loadingProvider = loadingProvider, onProviderClick = onProviderClick)
     },
     val loginLink: @Composable (onClick: () -> Unit) -> Unit = { onClick -> DefaultLoginLink(onClick) },
     val logo: (@Composable () -> Unit)? = null,
@@ -430,7 +431,7 @@ data class ReauthScreenSlots(
         loadingProvider: IdentityProvider?,
         onProviderClick: (IdentityProvider) -> Unit
     ) -> Unit = { providers, loadingProvider, onProviderClick ->
-        SocialLoginButtonsSection(
+        IconSocialLoginButtonsSection(
             providers = providers,
             loadingProvider = loadingProvider,
             onProviderClick = onProviderClick

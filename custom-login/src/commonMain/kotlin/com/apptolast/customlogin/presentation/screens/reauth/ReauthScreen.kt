@@ -1,7 +1,10 @@
 package com.apptolast.customlogin.presentation.screens.reauth
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
@@ -14,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
@@ -64,8 +68,10 @@ fun ReauthScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = Color.Transparent,
         snackbarHost = {
-            SnackbarHost(snackBarHostState) { snackBarData ->
+            SnackbarHost(snackBarHostState, modifier = Modifier.navigationBarsPadding()) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
                     onDismiss = { snackBarHostState.currentSnackbarData?.dismiss() }
@@ -73,7 +79,7 @@ fun ReauthScreen(
             }
         }
     ) { paddingValues ->
-        DefaultAuthContainer(modifier = modifier.padding(paddingValues)) {
+        DefaultAuthContainer(modifier = modifier.padding(paddingValues).consumeWindowInsets(paddingValues)) {
             slots.header()
 
             Spacer(Modifier.height(8.dp))

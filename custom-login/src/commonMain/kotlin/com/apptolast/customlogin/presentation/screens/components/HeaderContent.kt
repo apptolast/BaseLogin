@@ -34,7 +34,7 @@ fun HeaderContent(
     ) {
         Surface(
             shape = RoundedCornerShape(20.dp),
-            color = MaterialTheme.colorScheme.primaryContainer,
+            color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(80.dp)
         ) {
             Image(

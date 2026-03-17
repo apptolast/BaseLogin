@@ -11,14 +11,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.RegisterScreenSlots
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultDivider
 import kotlinx.coroutines.flow.collectLatest
 import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.divider_or
 import login.custom_login.generated.resources.register_screen_register_button
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -37,7 +43,9 @@ fun RegisterScreen(
     viewModel: RegisterViewModel = koinViewModel(),
     registerSlots: RegisterScreenSlots = RegisterScreenSlots(),
     onNavigateToHome: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onNavigateToPhoneAuth: () -> Unit = {},
+    onNavigateToMagicLink: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -46,6 +54,8 @@ fun RegisterScreen(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is RegisterEffect.NavigateToHome -> onNavigateToHome()
+                is RegisterEffect.NavigateToPhoneAuth -> onNavigateToPhoneAuth()
+                is RegisterEffect.NavigateToMagicLink -> onNavigateToMagicLink()
                 is RegisterEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
                         message = effect.message,
@@ -57,8 +67,10 @@ fun RegisterScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = Color.Transparent,
         snackbarHost = {
-            SnackbarHost(snackbarHostState) { snackBarData ->
+            SnackbarHost(snackbarHostState, modifier = Modifier.navigationBarsPadding()) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
                     onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }
@@ -69,7 +81,7 @@ fun RegisterScreen(
         RegisterContent(
             slots = registerSlots,
             state = uiState,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(paddingValues).consumeWindowInsets(paddingValues),
             onAction = viewModel::onAction,
             onNavigateToLogin = onNavigateToLogin
         )
@@ -158,15 +170,13 @@ private fun RegisterContent(
             stringResource(Res.string.register_screen_register_button)
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        slots.socialProviders?.let { socialProviders ->
-            socialProviders(state.availableProviders, state.loadingProvider) { provider ->
+        if (slots.socialProviders != null && state.availableProviders.isNotEmpty()) {
+            DefaultDivider(stringResource(Res.string.divider_or))
+            slots.socialProviders.invoke(state.availableProviders, state.loadingProvider) { provider ->
                 onAction(RegisterAction.SignUpWithOAuth(provider))
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         slots.loginLink(onNavigateToLogin)
     }

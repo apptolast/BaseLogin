@@ -37,6 +37,8 @@ class LoginApplication : Application() {
             appleSignInConfig = AppleSignInConfig(),
             githubEnabled = true,
             microsoftEnabled = true,
+            twitterEnabled = true,
+            facebookEnabled = true,
             magicLinkConfig = MagicLinkConfig(
                 continueUrl = "https://apptolast.com/login"
             )

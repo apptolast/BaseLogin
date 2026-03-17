@@ -10,6 +10,16 @@
     <string name="cd_show_password">Afficher le mot de passe</string>
     <string name="cd_hide_password">Masquer le mot de passe</string>
     <string name="cd_navigate_back">Retour</string>
+    <string name="cd_dismiss">Fermer</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_screen_title">Bienvenue ! 😊</string>
+    <string name="welcome_screen_subtitle">Votre accès sécurisé commence ici. Créez un compte ou connectez-vous pour continuer.</string>
+    <string name="welcome_screen_create_account_button">Créer un compte</string>
+    <string name="welcome_screen_sign_in_button">Se connecter</string>
+
+    <!-- Divider -->
+    <string name="divider_or">OU</string>
 
     <!-- Login Screen -->
     <string name="login_screen_sign_in_button">Se connecter</string>
@@ -72,6 +82,7 @@
     <string name="phone_auth_screen_otp_header">Entrez le code de vérification</string>
     <string name="phone_auth_screen_otp_description">Entrez le code à 6 chiffres envoyé au %1$s</string>
     <string name="phone_auth_screen_verify_button">Vérifier</string>
+    <string name="phone_auth_screen_country_code_label">Code</string>
     <string name="phone_auth_screen_phone_label">Numéro de téléphone</string>
     <string name="phone_auth_screen_otp_label">Code de vérification</string>
 

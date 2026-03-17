@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -29,6 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -40,6 +44,7 @@ import login.custom_login.generated.resources.cd_show_password
 import login.custom_login.generated.resources.common_email_label
 import login.custom_login.generated.resources.common_full_name_label
 import login.custom_login.generated.resources.common_password_label
+import login.custom_login.generated.resources.phone_auth_screen_country_code_label
 import login.custom_login.generated.resources.phone_auth_screen_otp_label
 import login.custom_login.generated.resources.phone_auth_screen_phone_label
 import org.jetbrains.compose.resources.stringResource
@@ -59,14 +64,21 @@ fun DefaultEmailField(
     onValueChange: (String) -> Unit,
     error: String?,
     enabled: Boolean,
-    label: String = stringResource(Res.string.common_email_label)
+    label: String = stringResource(Res.string.common_email_label),
+    imeAction: ImeAction = ImeAction.Next,
+    onImeAction: () -> Unit = {},
 ) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         leadingIcon = { Icon(Icons.Default.Email, contentDescription = label) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = imeAction),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Down) },
+            onDone = { onImeAction(); focusManager.clearFocus() },
+        ),
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it) } },
@@ -91,11 +103,14 @@ fun DefaultPasswordField(
     onValueChange: (String) -> Unit,
     error: String?,
     enabled: Boolean,
-    label: String = stringResource(Res.string.common_password_label)
+    label: String = stringResource(Res.string.common_password_label),
+    imeAction: ImeAction = ImeAction.Done,
+    onImeAction: () -> Unit = {},
 ) {
     var isVisible by remember { mutableStateOf(false) }
     val showPasswordRes = stringResource(Res.string.cd_show_password)
     val hidePasswordRes = stringResource(Res.string.cd_hide_password)
+    val focusManager = LocalFocusManager.current
 
     OutlinedTextField(
         value = value,
@@ -111,7 +126,11 @@ fun DefaultPasswordField(
             }
         },
         visualTransformation = if (isVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = imeAction),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Down) },
+            onDone = { onImeAction(); focusManager.clearFocus() },
+        ),
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it) } },
@@ -136,13 +155,22 @@ fun DefaultNameField(
     onValueChange: (String) -> Unit,
     error: String?,
     enabled: Boolean,
-    label: String = stringResource(Res.string.common_full_name_label)
+    label: String = stringResource(Res.string.common_full_name_label),
 ) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         leadingIcon = { Icon(Icons.Default.Person, contentDescription = label) },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next,
+            autoCorrectEnabled = false,
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(FocusDirection.Down) },
+        ),
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it) } },
@@ -173,6 +201,7 @@ fun DefaultPhoneField(
     label: String = stringResource(Res.string.phone_auth_screen_phone_label)
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val countryCodeLabel = stringResource(Res.string.phone_auth_screen_country_code_label)
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -189,6 +218,7 @@ fun DefaultPhoneField(
                 onValueChange = {},
                 readOnly = true,
                 singleLine = true,
+                label = { Text(countryCodeLabel) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                 modifier = Modifier
@@ -219,7 +249,7 @@ fun DefaultPhoneField(
             onValueChange = onValueChange,
             label = { Text(label) },
             leadingIcon = { Icon(Icons.Default.Phone, contentDescription = label) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone, imeAction = ImeAction.Done),
             singleLine = true,
             isError = error != null,
             supportingText = error?.let { { Text(it) } },
@@ -245,13 +275,21 @@ fun DefaultOtpField(
     onValueChange: (String) -> Unit,
     error: String?,
     enabled: Boolean,
-    label: String = stringResource(Res.string.phone_auth_screen_otp_label)
+    label: String = stringResource(Res.string.phone_auth_screen_otp_label),
+    onDone: () -> Unit = {},
 ) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.NumberPassword,
+            imeAction = ImeAction.Done,
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { onDone(); focusManager.clearFocus() },
+        ),
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it) } },

@@ -12,15 +12,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.LoginScreenSlots
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultDivider
 import kotlinx.coroutines.flow.collectLatest
 import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
+import login.custom_login.generated.resources.divider_or
 import login.custom_login.generated.resources.login_screen_sign_in_button
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -67,8 +73,10 @@ fun LoginScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = Color.Transparent,
         snackbarHost = {
-            SnackbarHost(snackBarHostState) { snackBarData ->
+            SnackbarHost(snackBarHostState, modifier = Modifier.navigationBarsPadding()) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
                     onDismiss = { snackBarHostState.currentSnackbarData?.dismiss() }
@@ -79,7 +87,7 @@ fun LoginScreen(
         LoginContent(
             slots = loginSlots,
             state = uiState,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(paddingValues).consumeWindowInsets(paddingValues),
             onAction = viewModel::onAction,
             onNavigateToRegister = onNavigateToRegister,
             onNavigateToForgotPassword = onNavigateToResetPassword,
@@ -140,12 +148,12 @@ private fun LoginContent(
             stringResource(Res.string.login_screen_sign_in_button),
         )
 
-        Spacer(Modifier.height(8.dp))
-
-        slots.socialProviders?.let { socialProviders ->
-            socialProviders(state.availableProviders, state.loadingProvider) { provider ->
+        if (slots.socialProviders != null && state.availableProviders.isNotEmpty()) {
+            DefaultDivider(stringResource(Res.string.divider_or))
+            slots.socialProviders.invoke(state.availableProviders, state.loadingProvider) { provider ->
                 onAction(LoginAction.SocialSignInClicked(provider))
             }
+            Spacer(Modifier.height(8.dp))
         }
 
         slots.registerLink(onNavigateToRegister)

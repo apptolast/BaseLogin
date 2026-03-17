@@ -3,8 +3,10 @@ package com.apptolast.customlogin.presentation.screens.forgotpassword
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,13 +18,13 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
@@ -85,19 +87,20 @@ fun ForgotPasswordScreen(
             )
         },
         snackbarHost = {
-            SnackbarHost(snackbarHostState) { snackBarData ->
+            SnackbarHost(snackbarHostState, modifier = Modifier.navigationBarsPadding()) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
                     onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }
                 )
             }
         },
-        modifier = Modifier.consumeWindowInsets(TopAppBarDefaults.windowInsets)
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        containerColor = Color.Transparent,
     ) { paddingValues ->
         ForgotPasswordContent(
             slots = slots,
             state = uiState,
-            modifier = Modifier.padding(paddingValues),
+            modifier = Modifier.padding(paddingValues).consumeWindowInsets(paddingValues),
             onAction = viewModel::onAction
         )
     }

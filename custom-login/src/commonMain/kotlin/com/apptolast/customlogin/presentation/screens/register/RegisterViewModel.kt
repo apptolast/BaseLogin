@@ -27,9 +27,7 @@ class RegisterViewModel(
     val uiState = _uiState.asStateFlow()
 
     init {
-        val providers = authRepository.getAvailableProviders()
-            .filter { it != IdentityProvider.Phone && it != IdentityProvider.MagicLink }
-        _uiState.update { it.copy(availableProviders = providers) }
+        _uiState.update { it.copy(availableProviders = authRepository.getAvailableProviders()) }
     }
 
     private val _effect = MutableSharedFlow<RegisterEffect>()
@@ -71,6 +69,14 @@ class RegisterViewModel(
     }
 
     private fun onSocialSignUp(provider: IdentityProvider) {
+        if (provider == IdentityProvider.Phone) {
+            viewModelScope.launch { _effect.emit(RegisterEffect.NavigateToPhoneAuth) }
+            return
+        }
+        if (provider == IdentityProvider.MagicLink) {
+            viewModelScope.launch { _effect.emit(RegisterEffect.NavigateToMagicLink) }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(loadingProvider = provider) }
             when (val result = authRepository.signIn(Credentials.OAuthToken(provider = provider))) {
