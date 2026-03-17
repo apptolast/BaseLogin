@@ -71,7 +71,6 @@
     <string name="auth_error_session_expired">Votre session a expiré. Veuillez vous reconnecter</string>
     <string name="auth_error_requires_email_verification">Veuillez vérifier votre adresse e-mail avant de vous connecter</string>
     <string name="auth_error_unknown">Une erreur inattendue s'est produite</string>
-    <string name="auth_error_requires_email_verification">Veuillez vérifier votre adresse e-mail pour activer votre compte</string>
     <string name="auth_error_registration_failed">L'inscription a échoué. Veuillez réessayer</string>
     <string name="auth_error_phone_unexpected">Erreur inattendue lors de la vérification du téléphone</string>
     <string name="auth_error_phone_verification_failed">La vérification du téléphone a échoué</string>

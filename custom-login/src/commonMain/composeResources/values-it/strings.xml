@@ -71,7 +71,6 @@
     <string name="auth_error_session_expired">La sessione è scaduta. Accedi di nuovo</string>
     <string name="auth_error_requires_email_verification">Verifica il tuo indirizzo email prima di accedere</string>
     <string name="auth_error_unknown">Si è verificato un errore imprevisto</string>
-    <string name="auth_error_requires_email_verification">Controlla la tua e-mail per verificare il tuo account</string>
     <string name="auth_error_registration_failed">Registrazione non riuscita. Riprova</string>
     <string name="auth_error_phone_unexpected">Errore imprevisto durante la verifica del telefono</string>
     <string name="auth_error_phone_verification_failed">La verifica del telefono non è riuscita</string>
