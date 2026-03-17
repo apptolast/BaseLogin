@@ -3,6 +3,7 @@ package com.apptolast.customlogin.presentation.screens.phone
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
+import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.util.ValidationError
@@ -61,7 +62,7 @@ class PhoneAuthViewModel(
                 }
                 is PhoneAuthResult.Failure -> {
                     _uiState.update { it.copy(isLoading = false) }
-                    _effect.emit(PhoneAuthEffect.ShowError(result.error.message))
+                    _effect.emit(PhoneAuthEffect.ShowError(result.error))
                 }
             }
         }
@@ -84,11 +85,11 @@ class PhoneAuthViewModel(
                 }
                 is AuthResult.Failure -> {
                     _uiState.update { it.copy(isLoading = false) }
-                    _effect.emit(PhoneAuthEffect.ShowError(result.error.message))
+                    _effect.emit(PhoneAuthEffect.ShowError(result.error))
                 }
                 else -> {
                     _uiState.update { it.copy(isLoading = false) }
-                    _effect.emit(PhoneAuthEffect.ShowError("Unexpected error during verification"))
+                    _effect.emit(PhoneAuthEffect.ShowError(AuthError.Unknown()))
                 }
             }
         }

@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -29,11 +28,13 @@ import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.MagicLinkScreenSlots
 import kotlinx.coroutines.flow.collectLatest
+import com.apptolast.customlogin.presentation.util.toStringRes
 import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.magic_link_screen_send_button
 import login.custom_login.generated.resources.magic_link_screen_title
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -52,7 +53,7 @@ fun MagicLinkScreen(
             when (effect) {
                 is MagicLinkEffect.ShowError -> {
                     snackBarHostState.showSnackbar(
-                        message = effect.message,
+                        message = getString(effect.error.toStringRes()),
                         withDismissAction = true,
                         duration = SnackbarDuration.Indefinite
                     )
@@ -76,7 +77,7 @@ fun MagicLinkScreen(
             )
         },
         snackbarHost = {
-            SnackbarHost(snackBarHostState, modifier = Modifier.navigationBarsPadding()) { snackBarData ->
+            SnackbarHost(snackBarHostState) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
                     onDismiss = { snackBarHostState.currentSnackbarData?.dismiss() }

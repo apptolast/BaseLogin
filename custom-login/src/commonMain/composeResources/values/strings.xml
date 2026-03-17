@@ -27,7 +27,7 @@
     <string name="login_screen_no_account_text">Don't have an account?</string>
     <string name="login_screen_sign_up_link">Sign Up</string>
     <string name="login_google_button">Sign in with Google</string>
-    <string name="login_loading_text"> "Signing in..."</string>
+    <string name="login_loading_text">Signing in...</string>
 
     <!-- Register Screen -->
     <string name="register_screen_register_button">Register</string>
@@ -70,6 +70,9 @@
     <string name="auth_error_operation_not_allowed">This operation is not allowed</string>
     <string name="auth_error_session_expired">Your session has expired. Please sign in again</string>
     <string name="auth_error_unknown">An unexpected error occurred</string>
+    <string name="auth_error_requires_email_verification">Please check your email to verify your account</string>
+    <string name="auth_error_registration_failed">Registration failed. Please try again</string>
+    <string name="auth_error_phone_unexpected">Unexpected error during phone verification</string>
     <string name="auth_error_phone_verification_failed">Phone verification failed</string>
     <string name="auth_error_phone_invalid">Invalid phone number</string>
     <string name="auth_error_invalid_otp">Invalid verification code</string>

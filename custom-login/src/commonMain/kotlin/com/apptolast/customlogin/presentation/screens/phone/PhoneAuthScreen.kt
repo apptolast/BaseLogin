@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -30,12 +29,14 @@ import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.PhoneAuthScreenSlots
 import kotlinx.coroutines.flow.collectLatest
+import com.apptolast.customlogin.presentation.util.toStringRes
 import com.apptolast.customlogin.util.toStringRes
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.phone_auth_screen_send_button
 import login.custom_login.generated.resources.phone_auth_screen_title
 import login.custom_login.generated.resources.phone_auth_screen_verify_button
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -65,7 +66,7 @@ fun PhoneAuthScreen(
                 is PhoneAuthEffect.NavigateToHome -> onNavigateToHome()
                 is PhoneAuthEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
-                        message = effect.message,
+                        message = getString(effect.error.toStringRes()),
                         withDismissAction = true
                     )
                 }
@@ -88,7 +89,7 @@ fun PhoneAuthScreen(
             )
         },
         snackbarHost = {
-            SnackbarHost(snackbarHostState, modifier = Modifier.navigationBarsPadding()) { data ->
+            SnackbarHost(snackbarHostState) { data ->
                 CustomSnackBar(
                     snackBarText = data.visuals.message,
                     onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }

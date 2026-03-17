@@ -3,6 +3,7 @@ package com.apptolast.customlogin.presentation.screens.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
+import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
@@ -74,12 +75,12 @@ class LoginViewModel(
 
                 is AuthResult.Failure -> {
                     _uiState.update { it.copy(loadingProvider = null) }
-                    _effect.emit(LoginEffect.ShowError("$provider: ${result.error.message}"))
+                    _effect.emit(LoginEffect.ShowError(result.error))
                 }
 
                 else -> {
                     _uiState.update { it.copy(loadingProvider = null) }
-                    _effect.emit(LoginEffect.ShowError("An unexpected error occurred"))
+                    _effect.emit(LoginEffect.ShowError(AuthError.Unknown()))
                 }
             }
         }
@@ -108,12 +109,12 @@ class LoginViewModel(
 
                     is AuthResult.Failure -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        _effect.emit(LoginEffect.ShowError(result.error.message))
+                        _effect.emit(LoginEffect.ShowError(result.error))
                     }
 
                     else -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        _effect.emit(LoginEffect.ShowError("An unexpected error occurred"))
+                        _effect.emit(LoginEffect.ShowError(AuthError.Unknown()))
                     }
                 }
             }

@@ -3,6 +3,7 @@ package com.apptolast.customlogin.presentation.screens.reauth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
+import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
@@ -75,7 +76,7 @@ class ReauthViewModel(
                 }
                 else -> {
                     _uiState.update { it.copy(isLoading = false) }
-                    _effect.emit(ReauthEffect.Error("An unexpected error occurred"))
+                    _effect.emit(ReauthEffect.ShowError(AuthError.Unknown()))
                 }
             }
         }
@@ -95,7 +96,7 @@ class ReauthViewModel(
                 }
                 else -> {
                     _uiState.update { it.copy(loadingProvider = null) }
-                    _effect.emit(ReauthEffect.Error("An unexpected error occurred"))
+                    _effect.emit(ReauthEffect.ShowError(AuthError.Unknown()))
                 }
             }
         }

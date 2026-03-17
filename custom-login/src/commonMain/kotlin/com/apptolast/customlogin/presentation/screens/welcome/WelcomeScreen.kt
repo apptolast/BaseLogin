@@ -39,7 +39,7 @@ import login.custom_login.generated.resources.welcome_screen_sign_in_button
 import login.custom_login.generated.resources.welcome_screen_subtitle
 import login.custom_login.generated.resources.welcome_screen_title
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun WelcomeScreen(

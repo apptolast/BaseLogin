@@ -3,6 +3,7 @@ package com.apptolast.customlogin.presentation.screens.register
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
+import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
@@ -86,11 +87,11 @@ class RegisterViewModel(
                 }
                 is AuthResult.Failure -> {
                     _uiState.update { it.copy(loadingProvider = null) }
-                    _effect.emit(RegisterEffect.ShowError(result.error.message))
+                    _effect.emit(RegisterEffect.ShowError(result.error))
                 }
                 else -> {
                     _uiState.update { it.copy(loadingProvider = null) }
-                    _effect.emit(RegisterEffect.ShowError("An unexpected error occurred"))
+                    _effect.emit(RegisterEffect.ShowError(AuthError.Unknown()))
                 }
             }
         }
@@ -119,15 +120,15 @@ class RegisterViewModel(
                     }
                     is AuthResult.Failure -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        _effect.emit(RegisterEffect.ShowError(result.error.message))
+                        _effect.emit(RegisterEffect.ShowError(result.error))
                     }
                     is AuthResult.RequiresEmailVerification -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        _effect.emit(RegisterEffect.ShowError("Please check your email to verify your account"))
+                        _effect.emit(RegisterEffect.ShowError(AuthError.RequiresEmailVerification()))
                     }
                     else -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        _effect.emit(RegisterEffect.ShowError("Registration failed"))
+                        _effect.emit(RegisterEffect.ShowError(AuthError.Unknown()))
                     }
                 }
             }

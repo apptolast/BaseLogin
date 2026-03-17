@@ -70,6 +70,9 @@
     <string name="auth_error_operation_not_allowed">Esta operación no está permitida</string>
     <string name="auth_error_session_expired">Tu sesión ha caducado. Por favor, inicia sesión de nuevo</string>
     <string name="auth_error_unknown">Se produjo un error inesperado</string>
+    <string name="auth_error_requires_email_verification">Por favor, verifica tu correo electrónico para activar tu cuenta</string>
+    <string name="auth_error_registration_failed">El registro falló. Por favor, inténtalo de nuevo</string>
+    <string name="auth_error_phone_unexpected">Error inesperado durante la verificación del teléfono</string>
     <string name="auth_error_phone_verification_failed">La verificación del teléfono falló</string>
     <string name="auth_error_phone_invalid">Número de teléfono no válido</string>
     <string name="auth_error_invalid_otp">Código de verificación no válido</string>

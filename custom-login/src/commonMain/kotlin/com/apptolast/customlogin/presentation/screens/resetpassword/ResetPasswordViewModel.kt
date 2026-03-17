@@ -3,6 +3,7 @@ package com.apptolast.customlogin.presentation.screens.resetpassword
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptolast.customlogin.domain.AuthRepository
+import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.util.ValidationError
 import com.apptolast.customlogin.util.Validators
@@ -75,11 +76,11 @@ class ResetPasswordViewModel(
                     }
                     is AuthResult.Failure -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        _effect.emit(ResetPasswordEffect.ShowError(result.error.message))
+                        _effect.emit(ResetPasswordEffect.ShowError(result.error))
                     }
                     else -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        _effect.emit(ResetPasswordEffect.ShowError("An unexpected error occurred"))
+                        _effect.emit(ResetPasswordEffect.ShowError(AuthError.Unknown()))
                     }
                 }
             }

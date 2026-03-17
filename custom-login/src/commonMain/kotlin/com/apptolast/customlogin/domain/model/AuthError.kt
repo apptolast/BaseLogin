@@ -57,6 +57,10 @@ sealed class AuthError(open val message: String, open val cause: Throwable? = nu
         override val message: String = "Invalid verification code"
     ) : AuthError(message)
 
+    data class RequiresEmailVerification(
+        override val message: String = "Email verification required"
+    ) : AuthError(message)
+
     data class Unknown(
         override val message: String = "An unknown error occurred",
         override val cause: Throwable? = null
