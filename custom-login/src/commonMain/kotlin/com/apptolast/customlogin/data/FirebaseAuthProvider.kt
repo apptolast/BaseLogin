@@ -34,7 +34,8 @@ class FirebaseAuthProvider(
 ) : AuthProvider {
 
     override val id: String = PROVIDER_ID
-    override val displayName: String = "Firebase"
+
+    // ── Core Auth ─────────────────────────────────────────────────────────────
 
     override suspend fun signIn(credentials: Credentials): AuthResult {
         return when (credentials) {
@@ -114,6 +115,8 @@ class FirebaseAuthProvider(
         }
     }
 
+    // ── Password Reset ────────────────────────────────────────────────────────
+
     override suspend fun sendPasswordResetEmail(email: String): AuthResult {
         return try {
             firebaseAuth.sendPasswordResetEmail(email)
@@ -135,6 +138,8 @@ class FirebaseAuthProvider(
             AuthResult.Failure(AuthError.Unknown(e.message ?: "Failed to reset password", e))
         }
     }
+
+    // ── Session Management ────────────────────────────────────────────────────
 
     override fun observeAuthState(): Flow<AuthState> {
         return firebaseAuth.authStateChanged
@@ -179,6 +184,8 @@ class FirebaseAuthProvider(
         }
     }
 
+    // ── Account Management ────────────────────────────────────────────────────
+
     override suspend fun deleteAccount(): Result<Unit> {
         return try {
             val user = firebaseAuth.currentUser
@@ -205,7 +212,7 @@ class FirebaseAuthProvider(
         return try {
             val user = firebaseAuth.currentUser
                 ?: return Result.failure(IllegalStateException("No authenticated user"))
-            user.updateEmail(newEmail)
+            user.verifyBeforeUpdateEmail(newEmail)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -233,6 +240,8 @@ class FirebaseAuthProvider(
             Result.failure(e)
         }
     }
+
+    // ── Re-authentication ─────────────────────────────────────────────────────
 
     override suspend fun reauthenticate(credentials: Credentials): AuthResult {
         return try {
@@ -273,6 +282,8 @@ class FirebaseAuthProvider(
         }
     }
 
+    // ── Phone Auth ────────────────────────────────────────────────────────────
+
     override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult {
         return sendPhoneVerificationCode(phoneNumber)
     }
@@ -280,6 +291,8 @@ class FirebaseAuthProvider(
     override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult {
         return verifyPhoneCode(verificationId, otpCode)
     }
+
+    // ── Magic Link ────────────────────────────────────────────────────────────
 
     override suspend fun sendMagicLink(email: String, continueUrl: String, iosBundleId: String?): AuthResult {
         return try {
@@ -310,24 +323,26 @@ class FirebaseAuthProvider(
         }
     }
 
+    // ── Credential Building ───────────────────────────────────────────────────
+
     private fun IdentityProvider.toCredential(tokenData: String): AuthCredential? {
         return when (this) {
             is IdentityProvider.Google -> {
-                // Parse combined tokens: "idToken|||accessToken|||accessTokenValue"
+                // Parse combined tokens: "idToken<GOOGLE_SEP>accessTokenValue"
                 // or just idToken for Android (which doesn't need accessToken)
-                val parts = tokenData.split("|||accessToken|||")
+                val parts = tokenData.split(GOOGLE_ACCESS_TOKEN_SEPARATOR)
                 val idToken = parts[0]
                 val accessToken = parts.getOrNull(1)
                 GoogleAuthProvider.credential(idToken, accessToken)
             }
 
             is IdentityProvider.Apple -> {
-                // Token format: "idToken|||rawNonce|||rawNonceValue" or just "idToken"
-                val parts = tokenData.split("|||rawNonce|||")
+                // Token format: "idToken<APPLE_SEP>rawNonceValue" or just "idToken"
+                val parts = tokenData.split(APPLE_NONCE_SEPARATOR)
                 val idToken = parts[0]
                 val rawNonce = parts.getOrNull(1)
                 OAuthProvider.credential(
-                    providerId = "apple.com",
+                    providerId = this.id,
                     accessToken = null,
                     idToken = idToken,
                     rawNonce = rawNonce
@@ -335,19 +350,19 @@ class FirebaseAuthProvider(
             }
             is IdentityProvider.GitHub -> GithubAuthProvider.credential(tokenData)
             is IdentityProvider.Microsoft -> OAuthProvider.credential(
-                providerId = "microsoft.com",
+                providerId = this.id,
                 accessToken = null,
                 idToken = tokenData,
                 rawNonce = null
             )
             is IdentityProvider.Twitter -> OAuthProvider.credential(
-                providerId = "twitter.com",
+                providerId = this.id,
                 accessToken = null,
                 idToken = tokenData,
                 rawNonce = null
             )
             is IdentityProvider.Facebook -> OAuthProvider.credential(
-                providerId = "facebook.com",
+                providerId = this.id,
                 accessToken = tokenData,
                 idToken = null,
                 rawNonce = null
@@ -358,5 +373,11 @@ class FirebaseAuthProvider(
 
     companion object {
         const val PROVIDER_ID = "firebase"
+
+        /** Separator used in the Google token string: `"idToken$GOOGLE_ACCESS_TOKEN_SEPARATOR$accessToken"`. */
+        const val GOOGLE_ACCESS_TOKEN_SEPARATOR = "|||accessToken|||"
+
+        /** Separator used in the Apple token string: `"idToken$APPLE_NONCE_SEPARATOR$rawNonce"`. */
+        const val APPLE_NONCE_SEPARATOR = "|||rawNonce|||"
     }
 }

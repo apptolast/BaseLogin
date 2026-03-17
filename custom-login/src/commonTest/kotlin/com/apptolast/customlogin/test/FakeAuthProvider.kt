@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakeAuthProvider : AuthProvider {
 
     override val id: String = "fake"
-    override val displayName: String = "Fake"
 
     var signInResult: AuthResult = AuthResult.Success(fakeSession())
     var signUpResult: AuthResult = AuthResult.Success(fakeSession())

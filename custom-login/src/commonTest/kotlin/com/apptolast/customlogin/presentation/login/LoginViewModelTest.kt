@@ -20,8 +20,10 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginViewModelTest {
@@ -143,5 +145,60 @@ class LoginViewModelTest {
         // With UnconfinedTestDispatcher the coroutine runs eagerly — loading clears immediately
         // Just verify no crash and loadingProvider is null after completion
         assertNull(viewModel.uiState.value.loadingProvider)
+    }
+
+    // ── State updates ──────────────────────────────────────────────────────
+
+    @Test
+    fun `EmailChanged updates email in state`() {
+        viewModel.onAction(LoginAction.EmailChanged("new@example.com"))
+        assertEquals("new@example.com", viewModel.uiState.value.email)
+    }
+
+    @Test
+    fun `PasswordChanged updates password and clears passwordError`() {
+        viewModel.onAction(LoginAction.SignInClicked) // triggers passwordError when email is also blank — so set email first
+        viewModel.onAction(LoginAction.EmailChanged("valid@email.com"))
+        viewModel.onAction(LoginAction.SignInClicked) // now triggers PasswordEmpty
+        viewModel.onAction(LoginAction.PasswordChanged("newpass"))
+        assertEquals("newpass", viewModel.uiState.value.password)
+        assertNull(viewModel.uiState.value.passwordError)
+    }
+
+    @Test
+    fun `init loads availableProviders from repository`() {
+        repo.stubbedProviders = listOf(IdentityProvider.Google, IdentityProvider.GitHub)
+        val vm = LoginViewModel(repo)
+        assertTrue(vm.uiState.value.availableProviders.contains(IdentityProvider.Google))
+        assertTrue(vm.uiState.value.availableProviders.contains(IdentityProvider.GitHub))
+    }
+
+    // ── Loading state ──────────────────────────────────────────────────────
+
+    @Test
+    fun `isLoading is cleared after sign-in failure`() = runTest {
+        repo.signInResult = AuthResult.Failure(AuthError.InvalidCredentials())
+
+        viewModel.onAction(LoginAction.EmailChanged("valid@email.com"))
+        viewModel.onAction(LoginAction.PasswordChanged("password"))
+        viewModel.onAction(LoginAction.SignInClicked)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    // ── Social sign-in failure ─────────────────────────────────────────────
+
+    @Test
+    fun `SocialSignInClicked with Google failure emits ShowError`() = runTest {
+        repo.signInResult = AuthResult.Failure(AuthError.NetworkError())
+        val effects = mutableListOf<LoginEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        viewModel.onAction(LoginAction.SocialSignInClicked(IdentityProvider.Google))
+        advanceUntilIdle()
+
+        assertIs<LoginEffect.ShowError>(effects.first())
+        job.cancel()
     }
 }

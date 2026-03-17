@@ -69,6 +69,7 @@
     <string name="auth_error_user_disabled">Questo account è stato disabilitato</string>
     <string name="auth_error_operation_not_allowed">Questa operazione non è consentita</string>
     <string name="auth_error_session_expired">La sessione è scaduta. Accedi di nuovo</string>
+    <string name="auth_error_requires_email_verification">Verifica il tuo indirizzo email prima di accedere</string>
     <string name="auth_error_unknown">Si è verificato un errore imprevisto</string>
     <string name="auth_error_requires_email_verification">Controlla la tua e-mail per verificare il tuo account</string>
     <string name="auth_error_registration_failed">Registrazione non riuscita. Riprova</string>

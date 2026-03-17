@@ -23,19 +23,29 @@ class AuthRepositoryImpl(
     private val config: LoginLibraryConfig
 ) : AuthRepository {
 
+    // ── Provider Identity ─────────────────────────────────────────────────────
+
+    /** Identifies the backing [AuthProvider] (e.g. "firebase"). Useful for debugging. */
     override val currentProviderId: String
         get() = authProvider.id
 
+    // ── Session Observation ───────────────────────────────────────────────────
+
+    /** Continuous stream of auth state changes — used by the host app to react to sign-in/out. */
     override fun observeAuthState(): Flow<AuthState> {
         return authProvider.observeAuthState()
     }
 
+    /** Returns the active [UserSession] by refreshing the token, or null if not signed in. */
     override suspend fun getCurrentSession(): UserSession? {
         return when (val result = authProvider.refreshSession()) {
             is AuthResult.Success -> result.session
             else -> null
         }
     }
+
+    // ── Core Auth Flows ───────────────────────────────────────────────────────
+    // Used by LoginViewModel, RegisterViewModel, ReauthViewModel, and the host app.
 
     override suspend fun signIn(credentials: Credentials): AuthResult {
         return authProvider.signIn(credentials)
@@ -49,6 +59,13 @@ class AuthRepositoryImpl(
         return authProvider.signOut()
     }
 
+    override suspend fun reauthenticate(credentials: Credentials): AuthResult {
+        return authProvider.reauthenticate(credentials)
+    }
+
+    // ── Password Reset ────────────────────────────────────────────────────────
+    // Used by ForgotPasswordViewModel and ResetPasswordViewModel.
+
     override suspend fun sendPasswordResetEmail(email: String): AuthResult {
         return authProvider.sendPasswordResetEmail(email)
     }
@@ -56,6 +73,9 @@ class AuthRepositoryImpl(
     override suspend fun confirmPasswordReset(data: PasswordResetData): AuthResult {
         return authProvider.confirmPasswordReset(data.code, data.newPassword)
     }
+
+    // ── Session / Token Management ────────────────────────────────────────────
+    // Primarily used by the host app for backend verification and session checks.
 
     override suspend fun refreshSession(): AuthResult {
         return authProvider.refreshSession()
@@ -65,9 +85,13 @@ class AuthRepositoryImpl(
         return authProvider.isSignedIn()
     }
 
+    /** Returns a short-lived JWT for backend verification. Pass forceRefresh=true to bypass cache. */
     override suspend fun getIdToken(forceRefresh: Boolean): String? {
         return authProvider.getIdToken(forceRefresh)
     }
+
+    // ── Account Management ────────────────────────────────────────────────────
+    // Consumer-facing API — not used internally by this library's own screens.
 
     override suspend fun deleteAccount(): Result<Unit> {
         return authProvider.deleteAccount()
@@ -89,10 +113,12 @@ class AuthRepositoryImpl(
         return authProvider.sendEmailVerification()
     }
 
-    override suspend fun reauthenticate(credentials: Credentials): AuthResult {
-        return authProvider.reauthenticate(credentials)
-    }
+    // ── Provider Discovery ────────────────────────────────────────────────────
 
+    /**
+     * Returns the list of identity providers enabled in [LoginLibraryConfig].
+     * Used by LoginScreen and RegisterScreen to render the social button section.
+     */
     override fun getAvailableProviders(): List<IdentityProvider> {
         return buildList {
             if (config.googleSignInConfig != null) add(IdentityProvider.Google)
@@ -106,6 +132,9 @@ class AuthRepositoryImpl(
         }
     }
 
+    // ── Phone Auth ────────────────────────────────────────────────────────────
+    // Used by PhoneAuthViewModel.
+
     override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult {
         return authProvider.sendPhoneOtp(phoneNumber)
     }
@@ -113,6 +142,9 @@ class AuthRepositoryImpl(
     override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult {
         return authProvider.verifyPhoneOtp(verificationId, otpCode)
     }
+
+    // ── Magic Link ────────────────────────────────────────────────────────────
+    // Used by MagicLinkViewModel. Requires MagicLinkConfig to be set in LoginLibraryConfig.
 
     override suspend fun sendMagicLink(email: String): AuthResult {
         val mlConfig = config.magicLinkConfig

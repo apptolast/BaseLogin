@@ -1,5 +1,6 @@
 package com.apptolast.customlogin.data
 
+import com.apptolast.customlogin.config.AppleSignInConfig
 import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.config.MagicLinkConfig
 import com.apptolast.customlogin.di.LoginLibraryConfig
@@ -8,6 +9,7 @@ import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PasswordResetData
+import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.test.FakeAuthProvider
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -141,5 +143,75 @@ class AuthRepositoryImplTest {
         val result = r.confirmPasswordReset(PasswordResetData("code123", "newPass"))
 
         assertEquals(AuthResult.PasswordResetSuccess, result)
+    }
+
+    @Test
+    fun `signUp delegates to provider`() = runTest {
+        val provider = FakeAuthProvider()
+        provider.signUpResult = AuthResult.Failure(AuthError.EmailAlreadyInUse())
+        val r = repo(LoginLibraryConfig(), provider)
+
+        val result = r.signUp(SignUpData(email = "a@b.com", password = "pass123"))
+
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.EmailAlreadyInUse>(result.error)
+    }
+
+    @Test
+    fun `sendPasswordResetEmail delegates to provider`() = runTest {
+        val provider = FakeAuthProvider()
+        provider.sendPasswordResetEmailResult = AuthResult.PasswordResetSent
+        val r = repo(LoginLibraryConfig(), provider)
+
+        val result = r.sendPasswordResetEmail("user@example.com")
+
+        assertEquals(AuthResult.PasswordResetSent, result)
+    }
+
+    @Test
+    fun `reauthenticate delegates to provider`() = runTest {
+        val provider = FakeAuthProvider()
+        provider.reauthenticateResult = AuthResult.Failure(AuthError.InvalidCredentials())
+        val r = repo(LoginLibraryConfig(), provider)
+
+        val result = r.reauthenticate(Credentials.EmailPassword("a@b.com", "wrong"))
+
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.InvalidCredentials>(result.error)
+    }
+
+    @Test
+    fun `signOut delegates to provider`() = runTest {
+        val provider = FakeAuthProvider()
+        provider.signOutResult = Result.success(Unit)
+        val r = repo(LoginLibraryConfig(), provider)
+
+        val result = r.signOut()
+
+        assertTrue(result.isSuccess)
+    }
+
+    @Test
+    fun `getAvailableProviders includes Apple when appleSignInConfig is set`() {
+        val config = LoginLibraryConfig(appleSignInConfig = AppleSignInConfig())
+
+        assertTrue(repo(config).getAvailableProviders().contains(IdentityProvider.Apple))
+    }
+
+    @Test
+    fun `getAvailableProviders excludes Apple when appleSignInConfig is null`() {
+        val config = LoginLibraryConfig(appleSignInConfig = null)
+
+        assertFalse(repo(config).getAvailableProviders().contains(IdentityProvider.Apple))
+    }
+
+    @Test
+    fun `sendMagicLink returns OperationNotAllowed when magicLinkConfig is null`() = runTest {
+        val r = repo(LoginLibraryConfig(magicLinkConfig = null))
+
+        val result = r.sendMagicLink("user@example.com")
+
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.OperationNotAllowed>(result.error)
     }
 }

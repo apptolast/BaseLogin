@@ -196,4 +196,78 @@ class DataMapperTest {
         assertTrue(mapFirebaseErrorMessage("Invalid_Email") is AuthError.InvalidEmail)
         assertTrue(mapFirebaseErrorMessage("INVALID_EMAIL") is AuthError.InvalidEmail)
     }
+
+    // ── Native SDK ERROR_* variants not yet covered ───────────────────────
+
+    @Test
+    fun `invalid-action-code maps to InvalidResetCode`() {
+        assertTrue(mapFirebaseErrorMessage("invalid-action-code") is AuthError.InvalidResetCode)
+    }
+
+    @Test
+    fun `ERROR_USER_NOT_FOUND maps to UserNotFound`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_USER_NOT_FOUND") is AuthError.UserNotFound)
+    }
+
+    @Test
+    fun `ERROR_EMAIL_ALREADY_IN_USE maps to EmailAlreadyInUse`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_EMAIL_ALREADY_IN_USE") is AuthError.EmailAlreadyInUse)
+    }
+
+    @Test
+    fun `weak-password maps to WeakPassword`() {
+        assertTrue(mapFirebaseErrorMessage("weak-password") is AuthError.WeakPassword)
+    }
+
+    @Test
+    fun `ERROR_WEAK_PASSWORD maps to WeakPassword`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_WEAK_PASSWORD") is AuthError.WeakPassword)
+    }
+
+    @Test
+    fun `ERROR_INVALID_EMAIL maps to InvalidEmail`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_INVALID_EMAIL") is AuthError.InvalidEmail)
+    }
+
+    @Test
+    fun `ERROR_TOO_MANY_REQUESTS maps to TooManyRequests`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_TOO_MANY_REQUESTS") is AuthError.TooManyRequests)
+    }
+
+    @Test
+    fun `ERROR_USER_DISABLED maps to UserDisabled`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_USER_DISABLED") is AuthError.UserDisabled)
+    }
+
+    @Test
+    fun `ERROR_OPERATION_NOT_ALLOWED maps to OperationNotAllowed`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_OPERATION_NOT_ALLOWED") is AuthError.OperationNotAllowed)
+    }
+
+    @Test
+    fun `ERROR_NETWORK_REQUEST_FAILED maps to NetworkError`() {
+        assertTrue(mapFirebaseErrorMessage("ERROR_NETWORK_REQUEST_FAILED") is AuthError.NetworkError)
+    }
+
+    // ── NetworkError preserves original message ────────────────────────────
+
+    @Test
+    fun `NetworkError preserves the original error message`() {
+        val msg = "NETWORK_ERROR: connection timed out"
+        val error = mapFirebaseErrorMessage(msg)
+        assertTrue(error is AuthError.NetworkError)
+        assertTrue(error.message.contains(msg))
+    }
+
+    // ── Error code embedded in longer message ──────────────────────────────
+
+    @Test
+    fun `error code embedded in longer message still maps correctly`() {
+        assertTrue(
+            mapFirebaseErrorMessage("Firebase: There is no user record [user-not-found]") is AuthError.UserNotFound
+        )
+        assertTrue(
+            mapFirebaseErrorMessage("The email address is already in use [email-already-in-use].") is AuthError.EmailAlreadyInUse
+        )
+    }
 }

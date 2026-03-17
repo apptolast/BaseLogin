@@ -20,6 +20,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -152,5 +153,38 @@ class PhoneAuthViewModelTest {
         viewModel.onAction(PhoneAuthAction.VerifyCodeClicked) // trigger OtpEmpty
         viewModel.onAction(PhoneAuthAction.OtpCodeChanged("1"))
         assertNull(viewModel.uiState.value.otpError)
+    }
+
+    // ── State updates ──────────────────────────────────────────────────────
+
+    @Test
+    fun `PhoneNumberChanged updates phoneNumber in state`() {
+        viewModel.onAction(PhoneAuthAction.PhoneNumberChanged("612345678"))
+        assertEquals("612345678", viewModel.uiState.value.phoneNumber)
+    }
+
+    @Test
+    fun `isLoading is cleared after SendCode failure`() = runTest {
+        repo.sendPhoneOtpResult = PhoneAuthResult.Failure(AuthError.PhoneNumberInvalid())
+
+        viewModel.onAction(PhoneAuthAction.PhoneNumberChanged("000"))
+        viewModel.onAction(PhoneAuthAction.SendCodeClicked)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `isLoading is cleared after VerifyCode failure`() = runTest {
+        repo.sendPhoneOtpResult = PhoneAuthResult.CodeSent("vid")
+        repo.verifyPhoneOtpResult = AuthResult.Failure(AuthError.InvalidVerificationCode())
+
+        viewModel.onAction(PhoneAuthAction.PhoneNumberChanged("6123456789"))
+        viewModel.onAction(PhoneAuthAction.SendCodeClicked)
+        viewModel.onAction(PhoneAuthAction.OtpCodeChanged("000000"))
+        viewModel.onAction(PhoneAuthAction.VerifyCodeClicked)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
     }
 }

@@ -57,4 +57,34 @@ class ValidatorsTest {
     fun `empty password returns false`() {
         assertFalse(Validators.isValidPassword(""))
     }
+
+    // ── Email edge cases ───────────────────────────────────────────────────
+
+    @Test
+    fun `email with multiple at-signs returns false`() {
+        assertFalse(Validators.isValidEmail("user@@example.com"))
+        assertFalse(Validators.isValidEmail("user@sub@domain.com"))
+    }
+
+    @Test
+    fun `email with space before at-sign returns false`() {
+        assertFalse(Validators.isValidEmail("user name@example.com"))
+    }
+
+    @Test
+    fun `email with space after at-sign returns false`() {
+        assertFalse(Validators.isValidEmail("user@ example.com"))
+    }
+
+    // ── Password edge cases ────────────────────────────────────────────────
+
+    @Test
+    fun `password of 6 spaces is valid (meets length requirement)`() {
+        assertTrue(Validators.isValidPassword("      "))
+    }
+
+    @Test
+    fun `password of 5 spaces returns false`() {
+        assertFalse(Validators.isValidPassword("     "))
+    }
 }

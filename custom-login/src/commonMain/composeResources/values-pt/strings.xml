@@ -69,6 +69,7 @@
     <string name="auth_error_user_disabled">Esta conta foi desativada</string>
     <string name="auth_error_operation_not_allowed">Esta operação não é permitida</string>
     <string name="auth_error_session_expired">Sua sessão expirou. Por favor, entre novamente</string>
+    <string name="auth_error_requires_email_verification">Por favor, verifique o seu endereço de e-mail antes de iniciar sessão</string>
     <string name="auth_error_unknown">Ocorreu um erro inesperado</string>
     <string name="auth_error_requires_email_verification">Por favor, verifique seu e-mail para ativar sua conta</string>
     <string name="auth_error_registration_failed">O cadastro falhou. Por favor, tente novamente</string>

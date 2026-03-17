@@ -19,11 +19,6 @@ interface AuthProvider {
     val id: String
 
     /**
-     * Display name for UI purposes.
-     */
-    val displayName: String
-
-    /**
      * Sign in with the given credentials.
      */
     suspend fun signIn(credentials: Credentials): AuthResult

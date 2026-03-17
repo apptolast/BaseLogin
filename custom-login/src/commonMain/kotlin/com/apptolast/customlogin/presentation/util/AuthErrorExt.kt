@@ -34,6 +34,7 @@ fun AuthError.toStringRes(): StringResource = when (this) {
     is AuthError.TooManyRequests -> Res.string.auth_error_too_many_requests
     is AuthError.UserDisabled -> Res.string.auth_error_user_disabled
     is AuthError.OperationNotAllowed -> Res.string.auth_error_operation_not_allowed
+    is AuthError.RequiresEmailVerification -> Res.string.auth_error_requires_email_verification
     is AuthError.SessionExpired -> Res.string.auth_error_session_expired
     is AuthError.RequiresEmailVerification -> Res.string.auth_error_requires_email_verification
     is AuthError.PhoneNumberInvalid -> Res.string.auth_error_phone_invalid

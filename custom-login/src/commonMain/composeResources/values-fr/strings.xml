@@ -69,6 +69,7 @@
     <string name="auth_error_user_disabled">Ce compte a été désactivé</string>
     <string name="auth_error_operation_not_allowed">Cette opération n'est pas autorisée</string>
     <string name="auth_error_session_expired">Votre session a expiré. Veuillez vous reconnecter</string>
+    <string name="auth_error_requires_email_verification">Veuillez vérifier votre adresse e-mail avant de vous connecter</string>
     <string name="auth_error_unknown">Une erreur inattendue s'est produite</string>
     <string name="auth_error_requires_email_verification">Veuillez vérifier votre adresse e-mail pour activer votre compte</string>
     <string name="auth_error_registration_failed">L'inscription a échoué. Veuillez réessayer</string>

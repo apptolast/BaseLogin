@@ -69,6 +69,7 @@
     <string name="auth_error_user_disabled">This account has been disabled</string>
     <string name="auth_error_operation_not_allowed">This operation is not allowed</string>
     <string name="auth_error_session_expired">Your session has expired. Please sign in again</string>
+    <string name="auth_error_requires_email_verification">Please verify your email address before signing in</string>
     <string name="auth_error_unknown">An unexpected error occurred</string>
     <string name="auth_error_requires_email_verification">Please check your email to verify your account</string>
     <string name="auth_error_registration_failed">Registration failed. Please try again</string>

@@ -33,6 +33,10 @@ sealed class AuthError(open val message: String, open val cause: Throwable? = nu
         override val cause: Throwable? = null
     ) : AuthError(message, cause)
 
+    data class RequiresEmailVerification(
+        override val message: String = "Email verification required"
+    ) : AuthError(message)
+
     data class SessionExpired(
         override val message: String = "Session has expired"
     ) : AuthError(message)

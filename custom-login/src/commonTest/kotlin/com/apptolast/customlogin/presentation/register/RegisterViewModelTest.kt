@@ -2,6 +2,7 @@ package com.apptolast.customlogin.presentation.register
 
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.presentation.screens.register.RegisterAction
 import com.apptolast.customlogin.presentation.screens.register.RegisterEffect
 import com.apptolast.customlogin.presentation.screens.register.RegisterViewModel
@@ -19,8 +20,10 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RegisterViewModelTest {
@@ -144,5 +147,78 @@ class RegisterViewModelTest {
         viewModel.onAction(RegisterAction.SignUpClicked)
         viewModel.onAction(RegisterAction.ConfirmPasswordChanged("confirm"))
         assertNull(viewModel.uiState.value.confirmPasswordError)
+    }
+
+    // ── Additional validation ──────────────────────────────────────────────
+
+    @Test
+    fun `SignUpClicked with blank confirmPassword sets ConfirmPasswordEmpty error`() = runTest {
+        viewModel.onAction(RegisterAction.FullNameChanged("John"))
+        viewModel.onAction(RegisterAction.EmailChanged("a@b.com"))
+        viewModel.onAction(RegisterAction.PasswordChanged("secret123"))
+        // confirmPassword intentionally left blank
+        viewModel.onAction(RegisterAction.SignUpClicked)
+        assertEquals(ValidationError.ConfirmPasswordEmpty, viewModel.uiState.value.confirmPasswordError)
+    }
+
+    @Test
+    fun `SignUpClicked with RequiresEmailVerification result emits ShowError`() = runTest {
+        repo.signUpResult = AuthResult.RequiresEmailVerification
+        val effects = mutableListOf<RegisterEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        fillValidForm()
+        viewModel.onAction(RegisterAction.SignUpClicked)
+        advanceUntilIdle()
+
+        assertIs<RegisterEffect.ShowError>(effects.first())
+        job.cancel()
+    }
+
+    // ── State updates ──────────────────────────────────────────────────────
+
+    @Test
+    fun `TermsAcceptedChanged updates termsAccepted in state`() {
+        viewModel.onAction(RegisterAction.TermsAcceptedChanged(true))
+        assertTrue(viewModel.uiState.value.termsAccepted)
+        viewModel.onAction(RegisterAction.TermsAcceptedChanged(false))
+        assertFalse(viewModel.uiState.value.termsAccepted)
+    }
+
+    @Test
+    fun `isLoading is cleared after sign-up failure`() = runTest {
+        repo.signUpResult = AuthResult.Failure(AuthError.EmailAlreadyInUse())
+
+        fillValidForm()
+        viewModel.onAction(RegisterAction.SignUpClicked)
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.isLoading)
+    }
+
+    // ── Social sign-up navigation ──────────────────────────────────────────
+
+    @Test
+    fun `SignUpWithOAuth with Phone emits NavigateToPhoneAuth`() = runTest {
+        val effects = mutableListOf<RegisterEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        viewModel.onAction(RegisterAction.SignUpWithOAuth(IdentityProvider.Phone))
+        advanceUntilIdle()
+
+        assertIs<RegisterEffect.NavigateToPhoneAuth>(effects.first())
+        job.cancel()
+    }
+
+    @Test
+    fun `SignUpWithOAuth with MagicLink emits NavigateToMagicLink`() = runTest {
+        val effects = mutableListOf<RegisterEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        viewModel.onAction(RegisterAction.SignUpWithOAuth(IdentityProvider.MagicLink))
+        advanceUntilIdle()
+
+        assertIs<RegisterEffect.NavigateToMagicLink>(effects.first())
+        job.cancel()
     }
 }

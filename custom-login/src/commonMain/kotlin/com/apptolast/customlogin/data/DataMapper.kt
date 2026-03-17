@@ -3,11 +3,15 @@ package com.apptolast.customlogin.data
 import com.apptolast.customlogin.data.FirebaseAuthProvider.Companion.PROVIDER_ID
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.UserSession
+import com.apptolast.customlogin.util.Logger
 import dev.gitlive.firebase.auth.FirebaseAuthException
 import dev.gitlive.firebase.auth.FirebaseUser
 
 /**
  * Maps a [FirebaseUser] to a domain [UserSession] object.
+ * The catch is necessary because [getIdToken] is a suspend call that can throw
+ * (e.g. network unavailable or token expired), and we prefer returning null
+ * over propagating the exception to callers.
  */
 internal suspend fun FirebaseUser.toUserSession(accessToken: String? = null): UserSession? {
     return try {
@@ -22,7 +26,8 @@ internal suspend fun FirebaseUser.toUserSession(accessToken: String? = null): Us
             refreshToken = null, // Firebase manages refresh internally
             expiresAt = null,
         )
-    } catch (e: Exception) {
+    } catch (_: Exception) {
+        Logger.w("DataMapper", "toUserSession failed — returning null")
         null
     }
 }
