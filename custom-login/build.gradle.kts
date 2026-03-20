@@ -95,8 +95,10 @@ android {
     }
 }
 
-publishing {
-    publications.withType<MavenPublication> {
-        artifactId = "baselogin"
+afterEvaluate {
+    publishing {
+        publications.withType<MavenPublication> {
+            artifactId = artifactId.replace("custom-login", "baselogin")
+        }
     }
 }
