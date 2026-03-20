@@ -1,3 +1,4 @@
+import org.gradle.api.publish.maven.MavenPublication
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -91,5 +92,11 @@ android {
         singleVariant("release") {
             withSourcesJar()
         }
+    }
+}
+
+publishing {
+    publications.withType<MavenPublication> {
+        artifactId = "baselogin"
     }
 }
