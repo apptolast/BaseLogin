@@ -31,7 +31,7 @@ kotlin {
                 implementation(compose.components.uiToolingPreview)
                 
                 // Add dependency to our new login module from JitPack
-                implementation("com.github.apptolast:BaseLogin:1.0.0")
+                implementation("com.github.apptolast:baselogin:1.0.0")
 
                 // Add navigation dependency for NavGraphBuilder
                 implementation(libs.navigation.compose)
