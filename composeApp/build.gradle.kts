@@ -30,8 +30,8 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
                 
-                // Add dependency to our new login module
-                api(project(":custom-login"))
+                // Add dependency to our new login module from JitPack
+                implementation("com.github.apptolast:BaseLogin:1.0.0")
 
                 // Add navigation dependency for NavGraphBuilder
                 implementation(libs.navigation.compose)
@@ -82,7 +82,6 @@ kotlin {
         framework {
             baseName = "ComposeApp"
             isStatic = true
-            export(project(":custom-login"))
         }
 
         pod("FirebaseCore") {            
