@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.github.apptolast"
-version = "1.0.2"
+version = "1.0.3"
 
 kotlin {
     // Use no-arg overload (non-deprecated) then configure via apply
