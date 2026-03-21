@@ -14,7 +14,6 @@ group = "com.github.apptolast"
 version = "1.0.3"
 
 kotlin {
-    // Use no-arg overload (non-deprecated) then configure via apply
     androidTarget().apply {
         publishLibraryVariants("release")
         compilerOptions {
@@ -29,13 +28,14 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                // Explicit artifact IDs instead of deprecated compose.* shortcuts
-                implementation("org.jetbrains.compose.runtime:runtime")
-                implementation("org.jetbrains.compose.foundation:foundation")
-                implementation("org.jetbrains.compose.material3:material3")
-                implementation("org.jetbrains.compose.components:components-resources")
-                implementation("org.jetbrains.compose.material:material-icons-extended")
-                implementation("org.jetbrains.compose.ui:ui")
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                // compose.components.resources is the correct accessor (not compose.resources)
+                implementation(compose.components.resources)
+                // compose.materialIconsExtended and compose.ui: deprecated but still functional
+                implementation(compose.materialIconsExtended)
+                implementation(compose.ui)
 
                 // Koin
                 implementation(project.dependencies.platform(libs.koin.bom))
@@ -77,7 +77,6 @@ kotlin {
 compose.resources {
     publicResClass = true
     packageOfResClass = "com.apptolast.customlogin.generated.resources"
-    // generateResClass.set(GenerateResClass.Always) removed - API no longer exists in CMP 1.7.0+
 }
 
 android {
