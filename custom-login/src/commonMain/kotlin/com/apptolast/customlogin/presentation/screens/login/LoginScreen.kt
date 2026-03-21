@@ -30,7 +30,7 @@ import login.custom_login.generated.resources.divider_or
 import login.custom_login.generated.resources.login_screen_sign_in_button
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 /**

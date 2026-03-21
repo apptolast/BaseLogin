@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.github.apptolast"
-version = "1.0.5"
+version = "1.0.6"
 
 kotlin {
     androidTarget().apply {
@@ -75,7 +75,7 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "com.apptolast.customlogin.generated.resources"
+    packageOfResClass = "login.custom_login.generated.resources"
     // CMP 1.7.0+ syntax: 'always' is a property of ResourcesExtension (no import needed)
     generateResClass = always
 }
