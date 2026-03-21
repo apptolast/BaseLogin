@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.github.apptolast"
-version = "1.0.0"
+version = "1.0.2"
 
 kotlin {
     androidTarget {
@@ -31,8 +31,8 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material3)
-                implementation(compose.components.resources)
-                implementation(compose.components.uiToolingPreview)
+                implementation(compose.resources)
+                implementation(compose.uiToolingPreview)
 
                 // Material Icons
                 implementation(compose.materialIconsExtended)
@@ -75,6 +75,12 @@ kotlin {
     }
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "com.apptolast.customlogin.generated.resources"
+    generateResClass.set(org.jetbrains.compose.resources.GenerateResClass.Always)
+}
+
 android {
     namespace = "com.apptolast.customlogin"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -98,7 +104,7 @@ android {
 afterEvaluate {
     publishing {
         publications.withType<MavenPublication> {
-            artifactId = artifactId.replace("custom-login", "baselogin")
+            artifactId = "baselogin"
         }
     }
 }
