@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinx.serialization) // Required for @Serializable
+    alias(libs.plugins.kotlinx.serialization)
     id("maven-publish")
 }
 
@@ -14,7 +14,8 @@ group = "com.github.apptolast"
 version = "1.0.2"
 
 kotlin {
-    androidTarget {
+    // Use no-arg overload (non-deprecated) then configure via apply
+    androidTarget().apply {
         publishLibraryVariants("release")
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
@@ -28,15 +29,13 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                implementation(compose.resources)
-                implementation(compose.uiToolingPreview)
-
-                // Material Icons
-                implementation(compose.materialIconsExtended)
-                implementation(compose.ui)
+                // Explicit artifact IDs instead of deprecated compose.* shortcuts
+                implementation("org.jetbrains.compose.runtime:runtime")
+                implementation("org.jetbrains.compose.foundation:foundation")
+                implementation("org.jetbrains.compose.material3:material3")
+                implementation("org.jetbrains.compose.components:components-resources")
+                implementation("org.jetbrains.compose.material:material-icons-extended")
+                implementation("org.jetbrains.compose.ui:ui")
 
                 // Koin
                 implementation(project.dependencies.platform(libs.koin.bom))
@@ -78,7 +77,7 @@ kotlin {
 compose.resources {
     publicResClass = true
     packageOfResClass = "com.apptolast.customlogin.generated.resources"
-    generateResClass.set(org.jetbrains.compose.resources.GenerateResClass.Always)
+    // generateResClass.set(GenerateResClass.Always) removed - API no longer exists in CMP 1.7.0+
 }
 
 android {
