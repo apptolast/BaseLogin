@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.github.apptolast"
-version = "1.0.6"
+version = "1.0.7"
 
 kotlin {
     androidTarget().apply {
@@ -103,7 +103,9 @@ android {
 afterEvaluate {
     publishing {
         publications.withType<MavenPublication> {
-            artifactId = "baselogin"
+            if (name == "kotlinMultiplatform") {
+                artifactId = "baselogin"
+            }
         }
     }
 }
