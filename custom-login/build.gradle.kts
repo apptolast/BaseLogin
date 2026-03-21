@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.github.apptolast"
-version = "1.0.4"
+version = "1.0.5"
 
 kotlin {
     androidTarget().apply {
@@ -31,9 +31,8 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material3)
-                // compose.components.resources is the correct accessor (not compose.resources)
                 implementation(compose.components.resources)
-                // compose.materialIconsExtended and compose.ui: deprecated but still functional
+                implementation(compose.components.uiToolingPreview)
                 implementation(compose.materialIconsExtended)
                 implementation(compose.ui)
 
@@ -77,6 +76,8 @@ kotlin {
 compose.resources {
     publicResClass = true
     packageOfResClass = "com.apptolast.customlogin.generated.resources"
+    // CMP 1.7.0+ syntax: 'always' is a property of ResourcesExtension (no import needed)
+    generateResClass = always
 }
 
 android {
