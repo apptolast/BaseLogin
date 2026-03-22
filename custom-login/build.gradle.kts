@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.github.apptolast"
-version = "1.0.7"
+version = "1.0.8"
 
 kotlin {
     androidTarget().apply {

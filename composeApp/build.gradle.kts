@@ -31,7 +31,7 @@ kotlin {
                 implementation(compose.components.uiToolingPreview)
                 
                 // Add dependency to our new login module from JitPack
-                implementation("com.github.apptolast:baselogin:1.0.7")
+                implementation("com.github.apptolast:baselogin:1.0.8")
 
                 // Add navigation dependency for NavGraphBuilder
                 implementation(libs.navigation.compose)
@@ -131,4 +131,14 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+}
+
+// baselogin doesn't use CocoaPods internally so it never publishes cinterop-klib variants.
+// Without this, commonizeCInterop fails trying to find cinterop from it.
+afterEvaluate {
+    configurations
+        .filter { it.name.endsWith("CInterop") }
+        .forEach { config ->
+            config.exclude(group = "com.github.apptolast.baselogin")
+        }
 }
