@@ -12,10 +12,17 @@ import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.platform.ActivityHolder
 import com.apptolast.customlogin.util.Logger
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 
 /**
  * Android implementation of Google Sign-In using Credential Manager API.
+ *
+ * Sign-in strategy (two-pass):
+ * 1. Try [GetGoogleIdOption] (bottom-sheet picker) — fast path for accounts already on device.
+ * 2. On [NoCredentialException] fall back to [GetSignInWithGoogleOption] — full-screen Google
+ *    Sign-In UI that works even when no Google account is configured on the device (emulators,
+ *    fresh setups, etc.).
  *
  * @property config The Google Sign-In configuration containing the web client ID.
  * @property context The Android application context.
@@ -29,35 +36,68 @@ class GoogleSignInProviderAndroid(
     }
 
     /**
-     * Initiates the Google Sign-In flow and returns the ID token.
-     *
-     * @return The Google ID token on success, or null if cancelled/failed.
+     * Initiates the Google Sign-In flow and returns the ID token, or null if cancelled/failed.
      */
     suspend fun signIn(): String? {
-        return try {
-            val activity = ActivityHolder.requireActivity()
+        val activity = try {
+            ActivityHolder.requireActivity()
+        } catch (e: IllegalStateException) {
+            Logger.e("GoogleSignIn", "No activity available for sign-in", e)
+            return null
+        }
 
-            val googleIdOption = GetGoogleIdOption.Builder()
+        // Pass 1: bottom-sheet picker (requires an existing Google account on device)
+        val idTokenFromPicker = tryGetGoogleIdOption(activity)
+        if (idTokenFromPicker != null) return idTokenFromPicker
+
+        // Pass 2: full-screen Google Sign-In UI (works on emulators / fresh devices)
+        return trySignInWithGoogleOption(activity)
+    }
+
+    private suspend fun tryGetGoogleIdOption(activity: android.app.Activity): String? {
+        return try {
+            val option = GetGoogleIdOption.Builder()
                 .setServerClientId(config.webClientId)
                 .setFilterByAuthorizedAccounts(false)
                 .setAutoSelectEnabled(false)
                 .build()
 
             val request = GetCredentialRequest.Builder()
-                .addCredentialOption(googleIdOption)
+                .addCredentialOption(option)
                 .build()
 
             val result: GetCredentialResponse = credentialManager.getCredential(
                 context = activity,
-                request = request
+                request = request,
             )
-
             handleSignInResult(result)
+        } catch (e: NoCredentialException) {
+            Logger.w("GoogleSignIn", "No credentials for GetGoogleIdOption, trying fallback: ${e.message}")
+            null
         } catch (e: GetCredentialCancellationException) {
             Logger.d("GoogleSignIn", "Sign-In cancelled by user")
             null
-        } catch (e: NoCredentialException) {
-            Logger.w("GoogleSignIn", "No Google credentials available: ${e.message}")
+        } catch (e: GetCredentialException) {
+            Logger.w("GoogleSignIn", "GetGoogleIdOption failed, trying fallback: ${e.message}")
+            null
+        }
+    }
+
+    private suspend fun trySignInWithGoogleOption(activity: android.app.Activity): String? {
+        return try {
+            val option = GetSignInWithGoogleOption.Builder(config.webClientId).build()
+
+            val request = GetCredentialRequest.Builder()
+                .addCredentialOption(option)
+                .build()
+
+            val result: GetCredentialResponse = credentialManager.getCredential(
+                context = activity,
+                request = request,
+            )
+            handleSignInResult(result)
+        } catch (e: GetCredentialCancellationException) {
+            Logger.d("GoogleSignIn", "Sign-In cancelled by user")
             null
         } catch (e: GetCredentialException) {
             Logger.e("GoogleSignIn", "Sign-In failed: ${e.message}", e)
@@ -68,23 +108,17 @@ class GoogleSignInProviderAndroid(
         }
     }
 
-    /**
-     * Handles the credential response and extracts the ID token.
-     */
     private fun handleSignInResult(result: GetCredentialResponse): String? {
         val credential = result.credential
-
         return when (credential) {
             is CustomCredential -> {
                 if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                    googleIdTokenCredential.idToken
+                    GoogleIdTokenCredential.createFrom(credential.data).idToken
                 } else {
                     Logger.w("GoogleSignIn", "Unexpected credential type: ${credential.type}")
                     null
                 }
             }
-
             else -> {
                 Logger.w("GoogleSignIn", "Unexpected credential class: ${credential.javaClass.name}")
                 null
