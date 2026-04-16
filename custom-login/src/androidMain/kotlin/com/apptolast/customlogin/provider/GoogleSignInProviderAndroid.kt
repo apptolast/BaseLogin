@@ -40,7 +40,7 @@ class GoogleSignInProviderAndroid(
             val googleIdOption = GetGoogleIdOption.Builder()
                 .setServerClientId(config.webClientId)
                 .setFilterByAuthorizedAccounts(false)
-                .setAutoSelectEnabled(true)
+                .setAutoSelectEnabled(false)
                 .build()
 
             val request = GetCredentialRequest.Builder()
