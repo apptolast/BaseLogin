@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization) // Required for @Serializable
+    id("maven-publish")
 }
 
 kotlin {
