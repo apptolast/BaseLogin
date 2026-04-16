@@ -1,3 +1,4 @@
+import org.gradle.api.publish.maven.MavenPublication
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -5,12 +6,16 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.kotlinx.serialization) // Required for @Serializable
+    alias(libs.plugins.kotlinx.serialization)
     id("maven-publish")
 }
 
+group = "com.github.apptolast"
+version = "1.0.11"
+
 kotlin {
-    androidTarget {
+    androidTarget().apply {
+        publishLibraryVariants("release")
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
@@ -28,8 +33,6 @@ kotlin {
                 implementation(compose.material3)
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
-
-                // Material Icons
                 implementation(compose.materialIconsExtended)
                 implementation(compose.ui)
 
@@ -70,6 +73,12 @@ kotlin {
     }
 }
 
+compose.resources {
+    publicResClass = true
+    packageOfResClass = "login.custom_login.generated.resources"
+    generateResClass = always
+}
+
 android {
     namespace = "com.apptolast.customlogin"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
@@ -81,5 +90,21 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
+}
+
+afterEvaluate {
+    publishing {
+        publications.withType<MavenPublication> {
+            if (name == "kotlinMultiplatform") {
+                artifactId = "baselogin"
+            }
+        }
     }
 }
