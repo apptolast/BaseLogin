@@ -1,2 +1,6 @@
 jdk:
   - openjdk17
+os:
+  - osx
+install:
+  - ./gradlew :custom-login:publishToMavenLocal
