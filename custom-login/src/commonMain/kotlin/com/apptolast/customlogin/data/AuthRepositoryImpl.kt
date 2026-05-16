@@ -36,12 +36,9 @@ class AuthRepositoryImpl(
         return authProvider.observeAuthState()
     }
 
-    /** Returns the active [UserSession] by refreshing the token, or null if not signed in. */
+    /** Returns the active [UserSession] from the provider's local cache, or null if not signed in. */
     override suspend fun getCurrentSession(): UserSession? {
-        return when (val result = authProvider.refreshSession()) {
-            is AuthResult.Success -> result.session
-            else -> null
-        }
+        return authProvider.getCurrentSession()
     }
 
     // ── Core Auth Flows ───────────────────────────────────────────────────────

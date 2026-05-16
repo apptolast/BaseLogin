@@ -8,6 +8,7 @@ import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.SignUpData
+import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.getSocialIdToken
 import com.apptolast.customlogin.sendPhoneVerificationCode
@@ -154,6 +155,10 @@ class FirebaseAuthProvider(
                 )
                 emit(AuthState.Error(error))
             }
+    }
+
+    override suspend fun getCurrentSession(): UserSession? {
+        return firebaseAuth.currentUser?.toUserSession()
     }
 
     override suspend fun refreshSession(): AuthResult {

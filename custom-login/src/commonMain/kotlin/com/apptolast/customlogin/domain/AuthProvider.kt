@@ -5,6 +5,7 @@ import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.SignUpData
+import com.apptolast.customlogin.domain.model.UserSession
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -49,7 +50,19 @@ interface AuthProvider {
     fun observeAuthState(): Flow<AuthState>
 
     /**
-     * Refresh the current session.
+     * Returns the current authenticated session from local cache, or null if not signed in.
+     *
+     * Unlike [refreshSession], this MUST NOT perform network I/O — it reads only from the
+     * provider's local persistent state. This makes it safe to call offline and from
+     * latency-sensitive contexts (e.g. background detection pipelines that need a userId
+     * without blocking on a token refresh).
+     */
+    suspend fun getCurrentSession(): UserSession?
+
+    /**
+     * Refresh the current session, forcing a token refresh against the backend.
+     * Requires network connectivity. Use [getCurrentSession] when you only need the
+     * cached session and can tolerate a stale token.
      */
     suspend fun refreshSession(): AuthResult
 

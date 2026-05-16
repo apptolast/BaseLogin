@@ -24,6 +24,7 @@ class FakeAuthProvider : AuthProvider {
     var signOutResult: Result<Unit> = Result.success(Unit)
     var sendPasswordResetEmailResult: AuthResult = AuthResult.PasswordResetSent
     var confirmPasswordResetResult: AuthResult = AuthResult.PasswordResetSuccess
+    var getCurrentSessionResult: UserSession? = null
     var refreshSessionResult: AuthResult = AuthResult.Success(fakeSession())
     var isSignedInResult: Boolean = false
     var idTokenResult: String? = "fake-token"
@@ -47,6 +48,7 @@ class FakeAuthProvider : AuthProvider {
     override suspend fun signOut(): Result<Unit> = signOutResult
     override suspend fun sendPasswordResetEmail(email: String): AuthResult = sendPasswordResetEmailResult
     override suspend fun confirmPasswordReset(code: String, newPassword: String): AuthResult = confirmPasswordResetResult
+    override suspend fun getCurrentSession(): UserSession? = getCurrentSessionResult
     override suspend fun refreshSession(): AuthResult = refreshSessionResult
     override suspend fun isSignedIn(): Boolean = isSignedInResult
     override suspend fun getIdToken(forceRefresh: Boolean): String? = idTokenResult

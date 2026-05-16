@@ -214,4 +214,30 @@ class AuthRepositoryImplTest {
         assertIs<AuthResult.Failure>(result)
         assertIs<AuthError.OperationNotAllowed>(result.error)
     }
+
+    // ── getCurrentSession ────────────────────────────────────────────────
+
+    @Test
+    fun `getCurrentSession returns provider session without touching refreshSession`() = runTest {
+        val provider = FakeAuthProvider()
+        provider.getCurrentSessionResult = FakeAuthProvider.fakeSession(userId = "uid-42")
+        provider.refreshSessionResult = AuthResult.Failure(AuthError.SessionExpired())
+        val r = repo(LoginLibraryConfig(), provider)
+
+        val session = r.getCurrentSession()
+
+        assertEquals("uid-42", session?.userId)
+    }
+
+    @Test
+    fun `getCurrentSession returns null when provider has no cached session`() = runTest {
+        val provider = FakeAuthProvider()
+        provider.getCurrentSessionResult = null
+        provider.refreshSessionResult = AuthResult.Success(FakeAuthProvider.fakeSession())
+        val r = repo(LoginLibraryConfig(), provider)
+
+        val session = r.getCurrentSession()
+
+        kotlin.test.assertNull(session)
+    }
 }
