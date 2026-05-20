@@ -115,7 +115,7 @@ private fun LoginContent(
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},
 ) {
-    DefaultAuthContainer(modifier = modifier) {
+    DefaultAuthContainer(modifier = modifier, verticalArrangement = slots.layoutVerticalArrangement) {
         slots.header()
 
         Spacer(modifier = Modifier.height(16.dp))

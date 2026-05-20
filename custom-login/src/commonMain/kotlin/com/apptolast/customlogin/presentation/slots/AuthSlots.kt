@@ -43,6 +43,7 @@ import org.jetbrains.compose.resources.stringResource
  * Default implementations are provided for convenience.
  */
 data class LoginScreenSlots(
+    val layoutVerticalArrangement: Arrangement.Vertical = Arrangement.Center,
     val header: @Composable () -> Unit = { DefaultHeader() },
     val emailField: @Composable (
         value: String,
