@@ -96,9 +96,7 @@ class FirebaseAuthProvider(
                 if (!data.displayName.isNullOrBlank()) {
                     user.updateProfile(displayName = data.displayName)
                 }
-                user.toUserSession()?.let { session ->
-                    AuthResult.Success(session)
-                } ?: AuthResult.Failure(AuthError.Unknown("No user returned after registration"))
+                AuthResult.Success(user.toUserSession())
             } ?: AuthResult.Failure(AuthError.Unknown("No user returned after registration"))
         } catch (e: FirebaseAuthException) {
             AuthResult.Failure(e.toAuthError())
@@ -166,9 +164,7 @@ class FirebaseAuthProvider(
             val user = firebaseAuth.currentUser
             if (user != null) {
                 val token = user.getIdToken(true)
-                user.toUserSession(accessToken = token)?.let { session ->
-                    AuthResult.Success(session)
-                } ?: AuthResult.Failure(AuthError.SessionExpired())
+                AuthResult.Success(user.toUserSession(accessToken = token))
             } else {
                 AuthResult.Failure(AuthError.SessionExpired())
             }
@@ -278,8 +274,7 @@ class FirebaseAuthProvider(
             }
 
             user.reauthenticate(firebaseCredential)
-            user.toUserSession()?.let { AuthResult.Success(it) }
-                ?: AuthResult.Failure(AuthError.Unknown("No user session after reauthentication"))
+            AuthResult.Success(user.toUserSession())
         } catch (e: FirebaseAuthException) {
             AuthResult.Failure(e.toAuthError())
         } catch (e: Exception) {

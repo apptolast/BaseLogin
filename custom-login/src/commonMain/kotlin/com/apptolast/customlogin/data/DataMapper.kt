@@ -9,27 +9,35 @@ import dev.gitlive.firebase.auth.FirebaseUser
 
 /**
  * Maps a [FirebaseUser] to a domain [UserSession] object.
- * The catch is necessary because [getIdToken] is a suspend call that can throw
- * (e.g. network unavailable or token expired), and we prefer returning null
- * over propagating the exception to callers.
+ *
+ * [uid] is always available from the local Firebase cache without a network call.
+ * [getIdToken] is a network operation that can throw if offline or if the token
+ * has expired and cannot be refreshed. The token failure is isolated so that
+ * callers that only need [UserSession.userId] (e.g. ConfirmParkingUseCase during
+ * a background detection session) are not incorrectly treated as unauthenticated.
  */
-internal suspend fun FirebaseUser.toUserSession(accessToken: String? = null): UserSession? {
-    return try {
-        UserSession(
-            userId = uid,
-            email = email,
-            displayName = displayName,
-            photoUrl = photoURL,
-            isEmailVerified = isEmailVerified,
-            providerId = PROVIDER_ID,
-            accessToken = accessToken ?: getIdToken(false),
-            refreshToken = null, // Firebase manages refresh internally
-            expiresAt = null,
-        )
-    } catch (_: Exception) {
-        Logger.w("DataMapper", "toUserSession failed — returning null")
-        null
+internal suspend fun FirebaseUser.toUserSession(accessToken: String? = null): UserSession {
+    val token = if (accessToken != null) {
+        accessToken
+    } else {
+        try {
+            getIdToken(false)
+        } catch (_: Exception) {
+            Logger.w("DataMapper", "getIdToken failed — session returned without accessToken")
+            null
+        }
     }
+    return UserSession(
+        userId = uid,
+        email = email,
+        displayName = displayName,
+        photoUrl = photoURL,
+        isEmailVerified = isEmailVerified,
+        providerId = PROVIDER_ID,
+        accessToken = token,
+        refreshToken = null,
+        expiresAt = null,
+    )
 }
 
 /**
