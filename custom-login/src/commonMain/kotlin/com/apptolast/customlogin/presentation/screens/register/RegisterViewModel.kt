@@ -2,6 +2,7 @@ package com.apptolast.customlogin.presentation.screens.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
@@ -22,6 +23,7 @@ import kotlinx.coroutines.launch
  */
 class RegisterViewModel(
     private val authRepository: AuthRepository,
+    private val config: LoginLibraryConfig,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
@@ -146,7 +148,11 @@ class RegisterViewModel(
             else -> null
         }
         val passwordError: ValidationError? = when {
-            !Validators.isValidPassword(state.password) -> ValidationError.PasswordTooShort
+            !Validators.isValidPassword(
+                password = state.password,
+                minLength = config.passwordPolicy.minLength,
+                rejectBlank = config.passwordPolicy.rejectBlank
+            ) -> ValidationError.PasswordTooShort
             else -> null
         }
         val confirmPasswordError: ValidationError? = when {

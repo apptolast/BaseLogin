@@ -16,7 +16,7 @@ class CountryCallingCodesTest {
     }
 
     @Test
-    fun `all entries have non-blank flag, name, and dialCode`() {
+    fun `all entries have non blank flag name and dialCode`() {
         COMMON_COUNTRIES.forEach { country ->
             assertTrue(country.flag.isNotBlank(), "flag is blank for ${country.name}")
             assertTrue(country.name.isNotBlank(), "name is blank for entry with flag ${country.flag}")

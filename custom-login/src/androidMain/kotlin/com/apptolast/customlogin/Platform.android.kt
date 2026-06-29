@@ -2,6 +2,8 @@ package com.apptolast.customlogin
 
 import android.content.Context
 import com.apptolast.customlogin.config.GoogleSignInConfig
+import com.apptolast.customlogin.di.LoginLibraryConfig
+import com.apptolast.customlogin.di.OAuthProviderConfig
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
@@ -38,6 +40,15 @@ lateinit var appContext: Context
  * Helper object for Koin dependency injection in platform code.
  */
 private object PlatformKoinHelper : KoinComponent {
+    val loginConfig: LoginLibraryConfig by lazy {
+        try {
+            val config: LoginLibraryConfig by inject()
+            config
+        } catch (e: Exception) {
+            LoginLibraryConfig()
+        }
+    }
+
     val googleSignInConfig: GoogleSignInConfig? by lazy {
         try {
             val config: GoogleSignInConfig by inject()
@@ -69,28 +80,16 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
         is IdentityProvider.Apple ->
             WebOAuthProviderAndroid.signIn(
                 providerId = "apple.com",
-                scopes = listOf("email", "name")
+                scopes = PlatformKoinHelper.loginConfig.appleSignInConfig?.scopes ?: listOf("email", "name")
             )
         is IdentityProvider.GitHub ->
-            WebOAuthProviderAndroid.signIn(
-                providerId = "github.com",
-                scopes = listOf("user:email")
-            )
+            signInWithWebOAuth("github.com", PlatformKoinHelper.loginConfig.githubOAuthConfig)
         is IdentityProvider.Microsoft ->
-            WebOAuthProviderAndroid.signIn(
-                providerId = "microsoft.com",
-                scopes = listOf("email", "profile")
-            )
+            signInWithWebOAuth("microsoft.com", PlatformKoinHelper.loginConfig.microsoftOAuthConfig)
         is IdentityProvider.Twitter ->
-            WebOAuthProviderAndroid.signIn(
-                providerId = "twitter.com",
-                scopes = listOf("email")
-            )
+            signInWithWebOAuth("twitter.com", PlatformKoinHelper.loginConfig.twitterOAuthConfig)
         is IdentityProvider.Facebook ->
-            WebOAuthProviderAndroid.signIn(
-                providerId = "facebook.com",
-                scopes = listOf("email", "public_profile")
-            )
+            signInWithWebOAuth("facebook.com", PlatformKoinHelper.loginConfig.facebookOAuthConfig)
         else -> {
             Logger.w("Platform", "Social sign-in for ${provider.id} is not implemented on Android yet.")
             null
@@ -98,11 +97,20 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
     }
 }
 
+private suspend fun signInWithWebOAuth(
+    providerId: String,
+    config: OAuthProviderConfig,
+): SocialTokenResult? = WebOAuthProviderAndroid.signIn(
+    providerId = providerId,
+    scopes = config.scopes,
+    customParams = config.customParameters
+)
+
 /**
  * Android actual implementation: uses native Firebase PhoneAuthProvider with SIM-based
  * instant verification support via [PhoneAuthProvider.OnVerificationStateChangedCallbacks].
  */
-actual suspend fun sendPhoneVerificationCode(phoneNumber: String): PhoneAuthResult =
+actual suspend fun sendPhoneVerificationCode(phoneNumber: String, timeoutSeconds: Long): PhoneAuthResult =
     suspendCancellableCoroutine { cont ->
         val activity = try {
             ActivityHolder.requireActivity()
@@ -156,7 +164,7 @@ actual suspend fun sendPhoneVerificationCode(phoneNumber: String): PhoneAuthResu
 
         val options = PhoneAuthOptions.newBuilder(Firebase.auth)
             .setPhoneNumber(phoneNumber)
-            .setTimeout(60L, TimeUnit.SECONDS)
+            .setTimeout(timeoutSeconds.coerceIn(0L, 120L), TimeUnit.SECONDS)
             .setActivity(activity)
             .setCallbacks(callbacks)
             .build()

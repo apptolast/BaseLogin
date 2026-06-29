@@ -1,7 +1,7 @@
 package com.apptolast.customlogin.test
 
 import com.apptolast.customlogin.domain.AuthProvider
-import com.apptolast.customlogin.domain.model.AuthError
+import com.apptolast.customlogin.domain.PhoneAuthTimeoutProvider
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * Minimal [AuthProvider] test double used in [AuthRepositoryImpl] unit tests.
  * Configure individual results before each test as needed.
  */
-class FakeAuthProvider : AuthProvider {
+class FakeAuthProvider : AuthProvider, PhoneAuthTimeoutProvider {
 
     override val id: String = "fake"
 
@@ -35,6 +35,7 @@ class FakeAuthProvider : AuthProvider {
     var sendEmailVerificationResult: Result<Unit> = Result.success(Unit)
     var reauthenticateResult: AuthResult = AuthResult.Success(fakeSession())
     var sendPhoneOtpResult: PhoneAuthResult = PhoneAuthResult.CodeSent("fake-verification-id")
+    var lastPhoneTimeoutSeconds: Long? = null
     var verifyPhoneOtpResult: AuthResult = AuthResult.Success(fakeSession())
     var sendMagicLinkResult: AuthResult = AuthResult.MagicLinkSent
     var signInWithMagicLinkResult: AuthResult = AuthResult.Success(fakeSession())
@@ -59,8 +60,15 @@ class FakeAuthProvider : AuthProvider {
     override suspend fun sendEmailVerification(): Result<Unit> = sendEmailVerificationResult
     override suspend fun reauthenticate(credentials: Credentials): AuthResult = reauthenticateResult
     override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult = sendPhoneOtpResult
+    override suspend fun sendPhoneOtp(phoneNumber: String, timeoutSeconds: Long): PhoneAuthResult {
+        lastPhoneTimeoutSeconds = timeoutSeconds
+        return sendPhoneOtpResult
+    }
+
     override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult = verifyPhoneOtpResult
-    override suspend fun sendMagicLink(email: String, continueUrl: String, iosBundleId: String?): AuthResult = sendMagicLinkResult
+    override suspend fun sendMagicLink(email: String, continueUrl: String, iosBundleId: String?): AuthResult =
+        sendMagicLinkResult
+
     override suspend fun signInWithMagicLink(email: String, link: String): AuthResult = signInWithMagicLinkResult
 
     companion object {

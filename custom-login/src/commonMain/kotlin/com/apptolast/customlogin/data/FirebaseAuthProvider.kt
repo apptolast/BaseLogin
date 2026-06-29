@@ -1,6 +1,8 @@
 package com.apptolast.customlogin.data
 
+import com.apptolast.customlogin.di.DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS
 import com.apptolast.customlogin.domain.AuthProvider
+import com.apptolast.customlogin.domain.PhoneAuthTimeoutProvider
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
@@ -32,7 +34,7 @@ import kotlinx.coroutines.flow.onStart
  */
 class FirebaseAuthProvider(
     private val firebaseAuth: FirebaseAuth
-) : AuthProvider {
+) : AuthProvider, PhoneAuthTimeoutProvider {
 
     override val id: String = PROVIDER_ID
 
@@ -285,7 +287,11 @@ class FirebaseAuthProvider(
     // ── Phone Auth ────────────────────────────────────────────────────────────
 
     override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult {
-        return sendPhoneVerificationCode(phoneNumber)
+        return sendPhoneOtp(phoneNumber, DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS)
+    }
+
+    override suspend fun sendPhoneOtp(phoneNumber: String, timeoutSeconds: Long): PhoneAuthResult {
+        return sendPhoneVerificationCode(phoneNumber, timeoutSeconds)
     }
 
     override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult {

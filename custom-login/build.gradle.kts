@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.github.apptolast"
-version = "1.0.11"
+version = "1.1.0"
 
 kotlin {
     androidTarget().apply {
@@ -41,17 +41,12 @@ kotlin {
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose)
                 implementation(libs.koin.compose.viewmodel)
-                implementation(libs.koin.compose.viewmodel.navigation)
 
                 // Navigation
                 implementation(libs.navigation.compose)
 
                 // GitLive Firebase (common)
                 implementation(libs.firebase.auth)
-
-                // Coil for KMP
-                implementation(libs.coil.compose)
-                implementation(libs.coil.network)
             }
         }
 
@@ -104,6 +99,28 @@ afterEvaluate {
         publications.withType<MavenPublication> {
             if (name == "kotlinMultiplatform") {
                 artifactId = "baselogin"
+            }
+            pom {
+                name.set("BaseLogin")
+                description.set("Composable Kotlin Multiplatform authentication library with Firebase defaults and replaceable auth providers.")
+                url.set("https://github.com/apptolast/BaseLogin")
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("apptolast")
+                        name.set("AppToLast")
+                    }
+                }
+                scm {
+                    url.set("https://github.com/apptolast/BaseLogin")
+                    connection.set("scm:git:https://github.com/apptolast/BaseLogin.git")
+                    developerConnection.set("scm:git:ssh://git@github.com:apptolast/BaseLogin.git")
+                }
             }
         }
     }

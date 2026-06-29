@@ -3,6 +3,8 @@ package com.apptolast.customlogin.presentation.phone
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
+import com.apptolast.customlogin.di.LoginLibraryConfig
+import com.apptolast.customlogin.di.PhoneAuthConfig
 import com.apptolast.customlogin.presentation.screens.phone.PhoneAuthAction
 import com.apptolast.customlogin.presentation.screens.phone.PhoneAuthEffect
 import com.apptolast.customlogin.presentation.screens.phone.PhoneAuthViewModel
@@ -36,7 +38,7 @@ class PhoneAuthViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         repo = FakeAuthRepository()
-        viewModel = PhoneAuthViewModel(repo)
+        viewModel = PhoneAuthViewModel(repo, LoginLibraryConfig())
     }
 
     @AfterTest
@@ -48,6 +50,16 @@ class PhoneAuthViewModelTest {
     fun `SendCodeClicked with blank phone sets PhoneEmpty error`() = runTest {
         viewModel.onAction(PhoneAuthAction.SendCodeClicked)
         assertEquals(ValidationError.PhoneEmpty, viewModel.uiState.value.phoneError)
+    }
+
+    @Test
+    fun `init uses configured default country code`() {
+        val configuredViewModel = PhoneAuthViewModel(
+            repo,
+            LoginLibraryConfig(phoneAuthConfig = PhoneAuthConfig(defaultCountryCode = "+34"))
+        )
+
+        assertEquals("+34", configuredViewModel.uiState.value.countryCode)
     }
 
     @Test

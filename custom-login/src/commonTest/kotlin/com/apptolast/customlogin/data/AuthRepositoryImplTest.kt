@@ -4,6 +4,8 @@ import com.apptolast.customlogin.config.AppleSignInConfig
 import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.config.MagicLinkConfig
 import com.apptolast.customlogin.di.LoginLibraryConfig
+import com.apptolast.customlogin.di.OAuthProviderConfig
+import com.apptolast.customlogin.di.PhoneAuthConfig
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
@@ -48,6 +50,13 @@ class AuthRepositoryImplTest {
     }
 
     @Test
+    fun `getAvailableProviders excludes Phone when phoneAuthConfig is disabled`() {
+        val config = LoginLibraryConfig(phoneAuthConfig = PhoneAuthConfig(enabled = false))
+
+        assertFalse(repo(config).getAvailableProviders().contains(IdentityProvider.Phone))
+    }
+
+    @Test
     fun `getAvailableProviders includes Google when googleSignInConfig is set`() {
         val config = LoginLibraryConfig(googleSignInConfig = GoogleSignInConfig("client-id"))
 
@@ -62,8 +71,22 @@ class AuthRepositoryImplTest {
     }
 
     @Test
+    fun `getAvailableProviders includes GitHub when githubOAuthConfig is enabled`() {
+        val config = LoginLibraryConfig(githubOAuthConfig = OAuthProviderConfig(enabled = true))
+
+        assertTrue(repo(config).getAvailableProviders().contains(IdentityProvider.GitHub))
+    }
+
+    @Test
     fun `getAvailableProviders includes Microsoft when microsoftEnabled is true`() {
         val config = LoginLibraryConfig(microsoftEnabled = true)
+
+        assertTrue(repo(config).getAvailableProviders().contains(IdentityProvider.Microsoft))
+    }
+
+    @Test
+    fun `getAvailableProviders includes Microsoft when microsoftOAuthConfig is enabled`() {
+        val config = LoginLibraryConfig(microsoftOAuthConfig = OAuthProviderConfig(enabled = true))
 
         assertTrue(repo(config).getAvailableProviders().contains(IdentityProvider.Microsoft))
     }
@@ -239,5 +262,15 @@ class AuthRepositoryImplTest {
         val session = r.getCurrentSession()
 
         kotlin.test.assertNull(session)
+    }
+
+    @Test
+    fun `sendPhoneOtp forwards configured timeout to provider`() = runTest {
+        val provider = FakeAuthProvider()
+        val r = repo(LoginLibraryConfig(phoneAuthConfig = PhoneAuthConfig(timeoutSeconds = 90L)), provider)
+
+        r.sendPhoneOtp("+34612345678")
+
+        assertEquals(90L, provider.lastPhoneTimeoutSeconds)
     }
 }

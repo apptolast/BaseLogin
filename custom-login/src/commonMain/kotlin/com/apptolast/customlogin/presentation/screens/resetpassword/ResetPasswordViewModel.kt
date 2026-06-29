@@ -2,6 +2,7 @@ package com.apptolast.customlogin.presentation.screens.resetpassword
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
@@ -19,7 +20,8 @@ import kotlinx.coroutines.launch
  * Handles the business logic and exposes state and effects to the UI.
  */
 class ResetPasswordViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val config: LoginLibraryConfig,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ResetPasswordUiState())
@@ -90,7 +92,11 @@ class ResetPasswordViewModel(
     private fun validate(state: ResetPasswordUiState): Pair<ValidationError?, ValidationError?> {
         val passwordError: ValidationError? = when {
             state.newPassword.isBlank() -> ValidationError.PasswordEmpty
-            !Validators.isValidPassword(state.newPassword) -> ValidationError.PasswordTooShort
+            !Validators.isValidPassword(
+                password = state.newPassword,
+                minLength = config.passwordPolicy.minLength,
+                rejectBlank = config.passwordPolicy.rejectBlank
+            ) -> ValidationError.PasswordTooShort
             else -> null
         }
 

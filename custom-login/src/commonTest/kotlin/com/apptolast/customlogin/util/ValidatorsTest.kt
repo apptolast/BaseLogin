@@ -79,8 +79,8 @@ class ValidatorsTest {
     // ── Password edge cases ────────────────────────────────────────────────
 
     @Test
-    fun `password of 6 spaces is valid (meets length requirement)`() {
-        assertTrue(Validators.isValidPassword("      "))
+    fun `password of 6 spaces returns false`() {
+        assertFalse(Validators.isValidPassword("      "))
     }
 
     @Test

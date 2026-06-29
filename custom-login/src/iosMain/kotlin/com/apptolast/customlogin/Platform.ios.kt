@@ -76,7 +76,7 @@ private fun String.toSocialTokenResult(): SocialTokenResult =
  * iOS actual implementation: delegates to [PhoneAuthProviderIOS] which uses a Swift callback
  * to call Firebase's [PhoneAuthProvider.provider().verifyPhoneNumber()].
  */
-actual suspend fun sendPhoneVerificationCode(phoneNumber: String): PhoneAuthResult {
+actual suspend fun sendPhoneVerificationCode(phoneNumber: String, timeoutSeconds: Long): PhoneAuthResult {
     return PhoneAuthProviderIOS.sendCode(phoneNumber)
 }
 

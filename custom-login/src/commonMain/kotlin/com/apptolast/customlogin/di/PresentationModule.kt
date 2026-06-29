@@ -8,12 +8,13 @@ import com.apptolast.customlogin.presentation.screens.reauth.ReauthViewModel
 import com.apptolast.customlogin.presentation.screens.register.RegisterViewModel
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordViewModel
 import org.koin.core.module.dsl.viewModelOf
+import org.koin.core.module.Module
 import org.koin.dsl.module
 
 /**
  * Koin module for authentication-related presentation layer.
  */
-internal val presentationModule = module {
+val loginPresentationModule: Module = module {
     viewModelOf(::LoginViewModel)
     viewModelOf(::RegisterViewModel)
     viewModelOf(::ForgotPasswordViewModel)
@@ -22,3 +23,5 @@ internal val presentationModule = module {
     viewModelOf(::MagicLinkViewModel)
     viewModelOf(::ReauthViewModel)
 }
+
+internal val presentationModule: Module = loginPresentationModule

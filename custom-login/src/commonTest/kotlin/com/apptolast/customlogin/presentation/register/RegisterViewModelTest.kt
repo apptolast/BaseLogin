@@ -3,6 +3,8 @@ package com.apptolast.customlogin.presentation.register
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.di.LoginLibraryConfig
+import com.apptolast.customlogin.di.PasswordPolicyConfig
 import com.apptolast.customlogin.presentation.screens.register.RegisterAction
 import com.apptolast.customlogin.presentation.screens.register.RegisterEffect
 import com.apptolast.customlogin.presentation.screens.register.RegisterViewModel
@@ -36,7 +38,7 @@ class RegisterViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         repo = FakeAuthRepository()
-        viewModel = RegisterViewModel(repo)
+        viewModel = RegisterViewModel(repo, LoginLibraryConfig())
     }
 
     @AfterTest
@@ -87,6 +89,22 @@ class RegisterViewModelTest {
         viewModel.onAction(RegisterAction.PasswordChanged("123"))
         viewModel.onAction(RegisterAction.ConfirmPasswordChanged("123"))
         viewModel.onAction(RegisterAction.SignUpClicked)
+        assertEquals(ValidationError.PasswordTooShort, viewModel.uiState.value.passwordError)
+    }
+
+    @Test
+    fun `SignUpClicked uses configured password minimum length`() = runTest {
+        viewModel = RegisterViewModel(
+            repo,
+            LoginLibraryConfig(passwordPolicy = PasswordPolicyConfig(minLength = 10))
+        )
+
+        viewModel.onAction(RegisterAction.FullNameChanged("John"))
+        viewModel.onAction(RegisterAction.EmailChanged("a@b.com"))
+        viewModel.onAction(RegisterAction.PasswordChanged("secret12"))
+        viewModel.onAction(RegisterAction.ConfirmPasswordChanged("secret12"))
+        viewModel.onAction(RegisterAction.SignUpClicked)
+
         assertEquals(ValidationError.PasswordTooShort, viewModel.uiState.value.passwordError)
     }
 

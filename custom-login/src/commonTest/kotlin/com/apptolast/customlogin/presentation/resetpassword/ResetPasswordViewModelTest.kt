@@ -2,6 +2,7 @@ package com.apptolast.customlogin.presentation.resetpassword
 
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordAction
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordEffect
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordViewModel
@@ -35,7 +36,7 @@ class ResetPasswordViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatcher)
         repo = FakeAuthRepository()
-        viewModel = ResetPasswordViewModel(repo)
+        viewModel = ResetPasswordViewModel(repo, LoginLibraryConfig())
     }
 
     @AfterTest

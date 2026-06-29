@@ -3,6 +3,7 @@ package com.apptolast.customlogin.data
 import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.domain.AuthProvider
 import com.apptolast.customlogin.domain.AuthRepository
+import com.apptolast.customlogin.domain.PhoneAuthTimeoutProvider
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.AuthState
@@ -120,12 +121,12 @@ class AuthRepositoryImpl(
         return buildList {
             if (config.googleSignInConfig != null) add(IdentityProvider.Google)
             if (config.appleSignInConfig != null) add(IdentityProvider.Apple)
-            if (config.githubEnabled) add(IdentityProvider.GitHub)
-            if (config.microsoftEnabled) add(IdentityProvider.Microsoft)
+            if (config.isGitHubAuthEnabled) add(IdentityProvider.GitHub)
+            if (config.isMicrosoftAuthEnabled) add(IdentityProvider.Microsoft)
             if (config.magicLinkConfig != null) add(IdentityProvider.MagicLink)
-            if (config.phoneEnabled) add(IdentityProvider.Phone)
-            if (config.twitterEnabled) add(IdentityProvider.Twitter)
-            if (config.facebookEnabled) add(IdentityProvider.Facebook)
+            if (config.isPhoneAuthEnabled) add(IdentityProvider.Phone)
+            if (config.isTwitterAuthEnabled) add(IdentityProvider.Twitter)
+            if (config.isFacebookAuthEnabled) add(IdentityProvider.Facebook)
         }
     }
 
@@ -133,7 +134,11 @@ class AuthRepositoryImpl(
     // Used by PhoneAuthViewModel.
 
     override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult {
-        return authProvider.sendPhoneOtp(phoneNumber)
+        return if (authProvider is PhoneAuthTimeoutProvider) {
+            authProvider.sendPhoneOtp(phoneNumber, config.phoneAuthConfig.timeoutSeconds)
+        } else {
+            authProvider.sendPhoneOtp(phoneNumber)
+        }
     }
 
     override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult {

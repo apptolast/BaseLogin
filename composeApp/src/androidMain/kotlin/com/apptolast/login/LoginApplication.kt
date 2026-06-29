@@ -1,7 +1,7 @@
 package com.apptolast.login
 
 import android.app.Application
-import com.apptolast.customlogin.appContext
+import com.apptolast.customlogin.CustomLoginAndroid
 import com.apptolast.customlogin.config.AppleSignInConfig
 import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.config.MagicLinkConfig
@@ -18,8 +18,7 @@ class LoginApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Set the app context for custom-login library
-        appContext = this
+        CustomLoginAndroid.initialize(this)
 
         Firebase.initialize(this)
 

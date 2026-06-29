@@ -1,9 +1,9 @@
 # BaseLogin — custom-login KMP Library
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Kotlin-2.3.0-7F52FF?logo=kotlin&logoColor=white" />
-  <img src="https://img.shields.io/badge/Kotlin%20Multiplatform-2.0-orange?logo=kotlin" />
-  <img src="https://img.shields.io/badge/Compose%20Multiplatform-1.10.0-4285F4?logo=jetpackcompose&logoColor=white" />
+  <img src="https://img.shields.io/badge/Kotlin-2.4.0-7F52FF?logo=kotlin&logoColor=white" />
+  <img src="https://img.shields.io/badge/Kotlin%20Multiplatform-2.4.0-orange?logo=kotlin" />
+  <img src="https://img.shields.io/badge/Compose%20Multiplatform-1.11.1-4285F4?logo=jetpackcompose&logoColor=white" />
   <img src="https://img.shields.io/badge/Firebase-Auth-FFCA28?logo=firebase&logoColor=black" />
   <img src="https://img.shields.io/badge/Android-API%2024+-3DDC84?logo=android&logoColor=white" />
   <img src="https://img.shields.io/badge/iOS-15+-000000?logo=apple&logoColor=white" />
@@ -35,41 +35,41 @@ It is designed to be the **standard authentication baseline** for any new KMP pr
 
 | Technology | Version | Role |
 |-----------|---------|------|
-| [Kotlin](https://kotlinlang.org/) | 2.3.0 | Language |
-| [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) | 2.3.0 | Shared code for Android + iOS |
-| [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) | 1.10.0 | Declarative UI on both platforms |
+| [Kotlin](https://kotlinlang.org/) | 2.4.0 | Language |
+| [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) | 2.4.0 | Shared code for Android + iOS |
+| [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) | 1.11.1 | Declarative UI on both platforms |
 | [Material 3](https://m3.material.io/) | (via Compose MP) | Design system |
 
 ### Authentication
 
 | Technology | Version | Role |
 |-----------|---------|------|
-| [Firebase Authentication](https://firebase.google.com/docs/auth) | BOM 33.7.0 | Auth backend |
+| [Firebase Authentication](https://firebase.google.com/docs/auth) | BOM 34.14.1 | Auth backend |
 | [GitLive Firebase SDK](https://github.com/GitLiveApp/firebase-kotlin-sdk) | 2.4.0 | KMP wrapper for Firebase |
-| [Google Sign-In (Android)](https://developer.android.com/identity/sign-in/credential-manager) | Credential Manager 1.5.0 | Native Google sign-in on Android |
+| [Google Sign-In (Android)](https://developer.android.com/identity/sign-in/credential-manager) | Credential Manager 1.6.0 | Native Google sign-in on Android |
 
 ### Architecture & DI
 
 | Technology | Version | Role |
 |-----------|---------|------|
-| [Koin](https://insert-koin.io/) | 4.1.1 | Dependency injection |
-| [Navigation Compose](https://developer.android.com/jetpack/compose/navigation) | 2.9.1 | In-app navigation |
-| [Lifecycle ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) | 2.9.6 | MVI ViewModels |
+| [Koin](https://insert-koin.io/) | 4.2.1 | Dependency injection |
+| [Navigation Compose](https://developer.android.com/jetpack/compose/navigation) | 2.9.2 | In-app navigation |
+| [Lifecycle ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) | 2.10.0 | MVI ViewModels |
 
 ### Other
 
 | Technology | Version | Role |
 |-----------|---------|------|
-| [Coil](https://coil-kt.github.io/coil/) | 3.3.0 | Image loading (KMP) |
-| [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization) | 1.10.0 | Route serialization for navigation |
-| [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) | 1.10.2 | Async / Flow |
+| [Coil](https://coil-kt.github.io/coil/) | 3.5.0 | Image loading in the sample app |
+| [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization) | 1.11.0 | Route serialization for navigation |
+| [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) | 1.11.0 | Async / Flow |
 
 ### Testing
 
 | Technology | Version | Role |
 |-----------|---------|------|
-| [kotlin.test](https://kotlinlang.org/api/latest/kotlin.test/) | 2.3.0 | Multiplatform unit tests |
-| [kotlinx-coroutines-test](https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test) | 1.10.2 | ViewModel / Flow testing |
+| [kotlin.test](https://kotlinlang.org/api/latest/kotlin.test/) | 2.4.0 | Multiplatform unit tests |
+| [kotlinx-coroutines-test](https://github.com/Kotlin/kotlinx.coroutines/tree/master/kotlinx-coroutines-test) | 1.11.0 | ViewModel / Flow testing |
 
 ---
 
@@ -79,7 +79,7 @@ It is designed to be the **standard authentication baseline** for any new KMP pr
 |----------|---------|-----|--------|
 | Email / Password | ✅ | ✅ | Firebase built-in |
 | Google | ✅ | ✅ | Credential Manager (Android) / GIDSignIn (iOS) |
-| Apple | — | ✅ | AuthenticationServices (iOS only) |
+| Apple | ✅ | ✅ | Firebase web OAuth (Android) / AuthenticationServices (iOS) |
 | GitHub | ✅ | ✅ | Firebase web OAuth |
 | Microsoft | ✅ | ✅ | Firebase web OAuth |
 | Twitter / X | ✅ | ✅ | Firebase web OAuth |
@@ -193,7 +193,7 @@ Each screen follows the same MVI pattern:
 
 1. **Firebase project** with Authentication enabled and the desired sign-in methods activated in the Firebase console.
 2. Add `google-services.json` (Android) and `GoogleService-Info.plist` (iOS) to your project.
-3. Koin dependency injection configured in the host app (the library registers its own modules via `initLoginKoin`).
+3. Koin dependency injection configured in the host app. Use `initLoginKoin` if the library should start/load its own modules, or `loginModules` when the host owns `startKoin`.
 
 ---
 
@@ -213,11 +213,13 @@ dependencies {
 
 The library's own dependencies (Firebase, Koin, Compose, etc.) are defined in `custom-login/build.gradle.kts` and are transitively available.
 
+> AGP note: the project currently remains on Android Gradle Plugin `8.13.2`. AGP 9 migration is intentionally deferred until Android Studio's AGP Upgrade Assistant is run, because the official migration recipe requires that assisted step before manual DSL changes.
+
 ---
 
 ## Initialization
 
-Call `initLoginKoin` **once at app startup**, before any Composable is shown. Pass a `LoginLibraryConfig` with the providers you want to enable.
+Call `initLoginKoin` before any auth Composable is shown. If Koin is already running, `initLoginKoin` loads the login modules into the existing container instead of calling `startKoin` again. Apps that need full control can use `loginModules` directly.
 
 ### Android — `Application.onCreate()`
 
@@ -225,6 +227,9 @@ Call `initLoginKoin` **once at app startup**, before any Composable is shown. Pa
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        Firebase.initialize(this)
+        CustomLoginAndroid.initialize(this)
+
         initLoginKoin(
             config = LoginLibraryConfig(
                 googleSignInConfig = GoogleSignInConfig(
@@ -237,6 +242,11 @@ class MyApplication : Application() {
                 twitterEnabled = false,
                 facebookEnabled = false,
                 phoneEnabled = true,
+                phoneAuthConfig = PhoneAuthConfig(
+                    defaultCountryCode = "+34",
+                    timeoutSeconds = 90
+                ),
+                passwordPolicy = PasswordPolicyConfig(minLength = 8),
                 magicLinkConfig = MagicLinkConfig(
                     continueUrl = "https://yourapp.page.link/signin",
                     iosBundleId = "com.yourcompany.yourapp"
@@ -250,6 +260,40 @@ class MyApplication : Application() {
     }
 }
 ```
+
+Attach the foreground `Activity` for Google, web OAuth, and phone flows:
+
+```kotlin
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        CustomLoginAndroid.attachActivity(this)
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CustomLoginAndroid.detachActivity(this)
+    }
+}
+```
+
+### Host-owned Koin
+
+```kotlin
+startKoin {
+    androidContext(appContext)
+    modules(appModule)
+    modules(loginModules(loginConfig))
+}
+```
+
+For a custom backend, pass your own provider:
+
+```kotlin
+modules(loginModules(loginConfig, authProvider = MyAuthProvider(api)))
+```
+
+When `authProvider` is provided, the library does not register the default `FirebaseAuthProvider`.
 
 ### iOS — `MainViewController.kt` (Kotlin side)
 
@@ -281,13 +325,14 @@ The library exposes `authRoutesFlow`, a `NavGraphBuilder` extension. Add it to y
 fun AppNavHost() {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "auth") {
+    NavHost(navController = navController, startDestination = AuthRoutesFlow) {
 
         authRoutesFlow(
             navController = navController,
+            startDestination = WelcomeRoute,
             onNavigateToHome = {
                 navController.navigate("home") {
-                    popUpTo("auth") { inclusive = true }
+                    popUpTo(AuthRoutesFlow) { inclusive = true }
                 }
             }
             // slots = AuthScreenSlots()  ← optional, see Slots section
@@ -334,8 +379,8 @@ LoginLibraryConfig(
 )
 ```
 
-Apple Sign-In is **iOS only**. It will not appear as a provider on Android.
-Requires the **Sign in with Apple** capability in Xcode and the entitlement in your app.
+Apple Sign-In uses a native AuthenticationServices handler on iOS and Firebase web OAuth on Android.
+On iOS it requires the **Sign in with Apple** capability in Xcode and the entitlement in your app.
 **iOS** — requires a Swift handler with nonce. See [Apple (iOS)](#apple-ios).
 
 ---
@@ -343,7 +388,12 @@ Requires the **Sign in with Apple** capability in Xcode and the entitlement in y
 ### GitHub
 
 ```kotlin
-LoginLibraryConfig(githubEnabled = true)
+LoginLibraryConfig(
+    githubOAuthConfig = OAuthProviderConfig(
+        enabled = true,
+        scopes = listOf("user:email", "read:user")
+    )
+)
 ```
 
 Enable **GitHub** in the Firebase console (Authentication → Sign-in method → GitHub) and provide your GitHub OAuth App credentials there.
@@ -356,7 +406,13 @@ Enable **GitHub** in the Firebase console (Authentication → Sign-in method →
 ### Microsoft
 
 ```kotlin
-LoginLibraryConfig(microsoftEnabled = true)
+LoginLibraryConfig(
+    microsoftOAuthConfig = OAuthProviderConfig(
+        enabled = true,
+        scopes = listOf("email", "profile"),
+        customParameters = mapOf("tenant" to "common")
+    )
+)
 ```
 
 Enable **Microsoft** in Firebase console.
@@ -392,12 +448,31 @@ Enable **Facebook** in Firebase console. You also need a Facebook Developer App 
 ### Phone OTP
 
 ```kotlin
-LoginLibraryConfig(phoneEnabled = true)  // default
+LoginLibraryConfig(
+    phoneEnabled = true,  // default
+    phoneAuthConfig = PhoneAuthConfig(
+        defaultCountryCode = "+34",
+        timeoutSeconds = 90
+    )
+)
 ```
 
 Enable **Phone** in Firebase console. The library provides a full Phone Auth screen with country code picker and OTP verification step.
 **Android** — uses Firebase native `PhoneAuthProvider` with SIM-based instant verification support.
 **iOS** — requires two Swift handlers. See [Phone OTP (iOS)](#phone-otp-ios).
+
+### Password Policy
+
+```kotlin
+LoginLibraryConfig(
+    passwordPolicy = PasswordPolicyConfig(
+        minLength = 10,
+        rejectBlank = true
+    )
+)
+```
+
+The policy is applied by the default Register and Reset Password screens.
 
 ---
 

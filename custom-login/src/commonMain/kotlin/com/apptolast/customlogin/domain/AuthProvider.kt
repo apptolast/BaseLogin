@@ -6,6 +6,7 @@ import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.domain.model.UserSession
+import com.apptolast.customlogin.di.DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -134,4 +135,17 @@ interface AuthProvider {
      * @return [AuthResult.Success] on sign-in, [AuthResult.Failure] on error.
      */
     suspend fun signInWithMagicLink(email: String, link: String): AuthResult
+}
+
+/**
+ * Optional capability for providers that support an SMS auto-retrieval timeout.
+ *
+ * Custom [AuthProvider] implementations do not need to implement this interface unless they want
+ * [com.apptolast.customlogin.di.PhoneAuthConfig.timeoutSeconds] to be forwarded to the provider.
+ */
+interface PhoneAuthTimeoutProvider {
+    suspend fun sendPhoneOtp(
+        phoneNumber: String,
+        timeoutSeconds: Long = DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS,
+    ): PhoneAuthResult
 }

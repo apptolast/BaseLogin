@@ -1,245 +1,126 @@
-# CustomLogin - KMP Authentication Library
+# BaseLogin custom-login module
 
-A **Kotlin Multiplatform** authentication library for Android and iOS with **Compose Multiplatform** UI.
+Kotlin Multiplatform authentication UI and domain library for Android and iOS. It ships Firebase-backed defaults, but the auth backend can be replaced by providing your own `AuthProvider`.
 
-## Features
+## Dependency
 
-- ✅ **Complete Auth Flow**: Login → Register → Forgot Password → Reset Password
-- ✅ **Provider Architecture**: Swap between Firebase, Supabase, or custom backends
-- ✅ **Customizable UI**: Theming system + Slots pattern for full UI customization
-- ✅ **Multiplatform**: Shared code for Android and iOS
-- ✅ **Type-Safe**: Sealed classes for results and errors
-- ✅ **Coroutines-First**: Suspend functions and Flow for reactive state
-
-## Quick Start
-
-### 1. Add Dependency
+For local development:
 
 ```kotlin
-// settings.gradle.kts
-include(":custom-login")
-
-// Your app's build.gradle.kts
 dependencies {
     implementation(project(":custom-login"))
 }
 ```
 
-### 2. Initialize Koin
+Published artifact:
 
 ```kotlin
-// In your Application class or App entry point
-initKoin {
-    modules(
-        configModule,     // LoginConfig
-        dataModule,       // Repository + Provider
-        presentationModule // ViewModels
-    )
+dependencies {
+    implementation("com.github.apptolast:baselogin:1.1.0")
 }
 ```
 
-### 3. Use the AuthFlow
+## Koin Integration
+
+If the host app does not start Koin elsewhere, use the convenience initializer:
 
 ```kotlin
-@Composable
-fun App() {
-    CustomLogin.AuthFlow(
-        onAuthSuccess = {
-            // Navigate to your main app
-        }
-    )
-}
-```
-
-## Customization
-
-### Custom Theme
-
-```kotlin
-CustomLogin.AuthFlow(
-    theme = AuthTheme(
-        colors = AuthColors.Light.copy(
-            primary = Color(0xFF0D47A1),
-            onPrimary = Color.White
-        ),
-        typography = AuthTypography.Default,
-        shapes = AuthShapes.Default,
-        spacing = AuthSpacing.Default
-    ),
-    onAuthSuccess = { }
-)
-```
-
-### Custom Slots
-
-Replace any UI component with your own:
-
-```kotlin
-CustomLogin.AuthFlow(
-    slots = AuthScreenSlots(
-        login = LoginScreenSlots(
-            logo = { 
-                Image(
-                    painter = painterResource(R.drawable.my_logo),
-                    contentDescription = "Logo"
-                )
-            },
-            socialProviders = { onProviderClick ->
-                GoogleSignInButton { onProviderClick("google") }
-                AppleSignInButton { onProviderClick("apple") }
-            },
-            submitButton = { onClick, isLoading, enabled, text ->
-                MyCustomButton(
-                    onClick = onClick,
-                    isLoading = isLoading,
-                    enabled = enabled,
-                    text = text
-                )
-            }
+initLoginKoin(
+    config = LoginLibraryConfig(
+        googleSignInConfig = GoogleSignInConfig("YOUR_WEB_CLIENT_ID"),
+        phoneAuthConfig = PhoneAuthConfig(defaultCountryCode = "+34", timeoutSeconds = 90),
+        passwordPolicy = PasswordPolicyConfig(minLength = 8),
+        githubOAuthConfig = OAuthProviderConfig(
+            enabled = true,
+            scopes = listOf("user:email", "read:user")
         )
-    ),
-    onAuthSuccess = { }
+    )
 )
 ```
 
-### LoginConfig
-
-Configure app branding and features:
+If the host app already owns Koin startup, do not call `startKoin` twice. Add the library modules to the existing container:
 
 ```kotlin
-val myConfig = LoginConfig(
-    appName = "My App",
-    subtitle = "Welcome back!",
-    drawableResource = Res.drawable.my_logo,
-    
-    // Features
-    emailEnabled = true,
-    googleEnabled = true,
-    appleEnabled = true,
-    showRegisterLink = true,
-    showForgotPassword = true,
-    
-    // Validation
-    passwordMinLength = 8,
-    
-    // Labels (i18n)
-    signInButtonText = "Sign In",
-    signInWithGoogleText = "Continue with Google"
-)
+startKoin {
+    modules(appModule)
+    modules(loginModules(loginConfig))
+}
 ```
 
-## Architecture
-
-```
-custom-login/
-├── domain/
-│   ├── model/          # AuthResult, UserSession, Credentials, AuthError
-│   ├── provider/       # AuthProvider interface, AuthProviderRegistry
-│   └── repository/     # AuthRepository interface
-├── data/
-│   ├── provider/       # FirebaseAuthProvider implementation
-│   └── repository/     # AuthRepositoryImpl
-├── presentation/
-│   ├── navigation/     # Routes, RootNavGraph
-│   ├── screens/        # Login, Register, ForgotPassword, ResetPassword
-│   └── theme/          # AuthTheme, AuthColors, AuthSlots
-└── di/                 # Koin modules
-```
-
-## Adding a Custom Provider
-
-Implement the `AuthProvider` interface:
+For runtime loading or tests:
 
 ```kotlin
-class MyCustomAuthProvider(
-    private val httpClient: HttpClient,
-    private val baseUrl: String
-) : AuthProvider {
-    override val id: String = "custom"
-    override val displayName: String = "My Backend"
-    
-    override suspend fun signIn(credentials: Credentials): AuthResult {
-        return when (credentials) {
-            is Credentials.EmailPassword -> {
-                try {
-                    val response = httpClient.post("$baseUrl/auth/login") {
-                        setBody(LoginRequest(credentials.email, credentials.password))
-                    }
-                    AuthResult.Success(response.body<UserSession>())
-                } catch (e: Exception) {
-                    AuthResult.Failure(AuthError.NetworkError(e.message ?: "Error"))
-                }
-            }
-            else -> AuthResult.Failure(AuthError.OperationNotAllowed("Unsupported"))
+val modules = loadLoginKoinModules(loginConfig)
+unloadLoginKoinModules(modules)
+```
+
+## Custom Auth Provider
+
+Pass a custom provider when your backend is not Firebase:
+
+```kotlin
+val customProvider = MyAuthProvider(api)
+
+startKoin {
+    modules(appModule)
+    modules(loginModules(loginConfig, authProvider = customProvider))
+}
+```
+
+The library will not register `Firebase.auth` when `authProvider` is provided.
+
+If the provider supports an SMS timeout, implement `PhoneAuthTimeoutProvider` as well. Otherwise the library falls back to `AuthProvider.sendPhoneOtp(phoneNumber)`.
+
+## Android Setup
+
+Initialize the Android integration helper from `Application.onCreate()`:
+
+```kotlin
+class MyApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        Firebase.initialize(this)
+        CustomLoginAndroid.initialize(this)
+        initLoginKoin(config = loginConfig) {
+            androidContext(this@MyApplication)
+            modules(appModule)
         }
     }
-    
-    // ... implement other methods
-}
-
-// Register your provider
-CustomLogin.registerProvider(myProvider, isDefault = true)
-```
-
-## Auth Results
-
-```kotlin
-sealed interface AuthResult {
-    data class Success(val session: UserSession)
-    data class Failure(val error: AuthError)
-    data object RequiresEmailVerification
-    data object PasswordResetSent
-}
-
-sealed class AuthError(val message: String) {
-    class InvalidCredentials
-    class UserNotFound
-    class EmailAlreadyInUse
-    class WeakPassword
-    class NetworkError
-    class SessionExpired
-    // ... more
 }
 ```
 
-## Observing Auth State
+Attach the foreground activity for Google, web OAuth, and phone auth flows:
 
 ```kotlin
-val authRepository: AuthRepository by inject()
-
-// In a ViewModel
-authRepository.observeAuthState()
-    .collect { state ->
-        when (state) {
-            is AuthState.Loading -> showLoading()
-            is AuthState.Authenticated -> navigateToHome(state.session)
-            is AuthState.Unauthenticated -> showLogin()
-            is AuthState.Error -> showError(state.error)
-        }
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        CustomLoginAndroid.attachActivity(this)
+        super.onCreate(savedInstanceState)
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CustomLoginAndroid.detachActivity(this)
+    }
+}
 ```
 
-## Platforms Supported
+## Navigation
 
-| Platform | Status         |
-|----------|----------------|
-| Android  | ✅ Stable       |
-| iOS      | ✅ Stable       |
-| Desktop  | 🚧 Coming Soon |
-| Web      | 🚧 Coming Soon |
+Use `authRoutesFlow` inside your existing Compose Navigation graph:
 
-## Dependencies
+```kotlin
+NavHost(navController = navController, startDestination = AuthRoutesFlow) {
+    authRoutesFlow(
+        navController = navController,
+        startDestination = WelcomeRoute,
+        onNavigateToHome = { navController.navigate("home") }
+    )
+}
+```
 
-- **Kotlin**: 2.2.21
-- **Compose Multiplatform**: 1.9.3
-- **Koin**: 4.1.1
-- **Firebase (GitLive)**: 2.4.0
-- **Navigation Compose**: 2.9.1
+UI customization is exposed through `AuthScreenSlots`.
 
-## License
+## AGP 9
 
-Apache 2.0
-
----
-
-Made with ❤️ for the KMP community
+This repository currently stays on AGP `8.13.2`. The Google AGP 9 migration recipe requires running Android Studio's AGP Upgrade Assistant before applying the Gradle DSL migration manually.

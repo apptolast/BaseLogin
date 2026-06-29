@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.apptolast.customlogin.platform.ActivityHolder
+import com.apptolast.customlogin.CustomLoginAndroid
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
@@ -13,8 +13,7 @@ class MainActivity : ComponentActivity() {
     private val splashViewModel: SplashViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Set activity reference for Google Sign-In
-        ActivityHolder.setActivity(this)
+        CustomLoginAndroid.attachActivity(this)
 
         val splashScreen = installSplashScreen()
 
@@ -33,7 +32,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        // Clear activity reference to prevent memory leaks
-        ActivityHolder.clearActivity(this)
+        CustomLoginAndroid.detachActivity(this)
     }
 }

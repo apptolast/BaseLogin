@@ -2,6 +2,7 @@ package com.apptolast.customlogin.presentation.screens.phone
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.domain.AuthRepository
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
@@ -19,10 +20,13 @@ import kotlinx.coroutines.launch
  * Manages the two-step phone auth flow: sending the OTP and verifying it.
  */
 class PhoneAuthViewModel(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    config: LoginLibraryConfig,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PhoneAuthUiState())
+    private val _uiState = MutableStateFlow(
+        PhoneAuthUiState(countryCode = config.phoneAuthConfig.defaultCountryCode)
+    )
     val uiState = _uiState.asStateFlow()
 
     private val _effect = MutableSharedFlow<PhoneAuthEffect>()

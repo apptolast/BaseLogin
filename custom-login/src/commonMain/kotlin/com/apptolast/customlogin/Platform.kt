@@ -3,6 +3,7 @@ package com.apptolast.customlogin
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
+import com.apptolast.customlogin.di.DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS
 
 expect fun platform(): String
 
@@ -45,10 +46,14 @@ expect suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
  * On iOS, the Firebase SDK handles APNS token registration automatically.
  *
  * @param phoneNumber E.164 format phone number (e.g. "+34612345678").
+ * @param timeoutSeconds Android SMS auto-retrieval timeout. Other platforms may ignore it.
  * @return [PhoneAuthResult.CodeSent] with the verificationId, [PhoneAuthResult.AutoSignedIn]
  *         on Android instant verification, or [PhoneAuthResult.Failure] on error.
  */
-expect suspend fun sendPhoneVerificationCode(phoneNumber: String): PhoneAuthResult
+expect suspend fun sendPhoneVerificationCode(
+    phoneNumber: String,
+    timeoutSeconds: Long = DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS
+): PhoneAuthResult
 
 /**
  * Verifies a phone OTP code using the platform's native Firebase SDK and signs the user in.
