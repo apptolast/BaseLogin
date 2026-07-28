@@ -221,6 +221,26 @@ sin ella, Xcode enlazaría contra un `ComposeApp.framework` obsoleto o inexisten
 **ktlint**: no está configurado en este repo (lo pide el gate `/validate`). Se aborda en el spec 002,
 que sí toca Kotlin; esta feature apenas toca `.kts`.
 
+> **Evidencia del smoke de AC-09 (2026-07-28) — parcial, y conviene decir qué parte.**
+>
+> Ejecutado sobre el simulador iPhone 17 / iOS 26.2, con la app instalada desde el build de SPM:
+>
+> | Comprobado | Resultado |
+> |---|---|
+> | La app arranca y el proceso sigue vivo | ✅ `UIKitApplication:com.apptolast.login.Login` |
+> | `FirebaseCore` configura, enlazado por SPM | ✅ `[FirebaseCore][I-COR000001] Configuring the default app.` |
+> | `FirebaseAppCheck` carga y alcanza su endpoint | ✅ `error=NoError(0) hostname=firebaseappcheck.googleapis.com` |
+> | El framework de Kotlin carga y pinta | ✅ la pantalla de login se renderiza completa, con los ocho botones sociales |
+> | Crash reports | ✅ ninguno |
+>
+> Esto prueba lo que la migración podía romper: que los frameworks nativos se enlazan y cargan en
+> tiempo de ejecución, y que la build phase «Compile Kotlin Framework» produce un framework válido —
+> si fallara, la app no pintaría nada.
+>
+> **Lo que NO queda probado**: completar un login real con Google o con Apple. Requiere credenciales y
+> la interacción de una persona, así que sigue pendiente de ejecución manual. La UI muestra los
+> botones, pero eso no demuestra que el flujo termine en sesión.
+
 ## Decisiones abiertas (🚦 Gate 1)
 
 | # | Decisión | Propuesta |
@@ -243,7 +263,7 @@ que sí toca Kotlin; esta feature apenas toca `.kts`.
 | AC-06 | *(no unitario)* — `xcodebuild` con DerivedData limpio | n/a — verificable por build |
 | AC-07 | *(no unitario)* — inspección de `project.pbxproj` y `git ls-files` del entitlements | n/a — verificable por build |
 | AC-08 | *(no unitario)* — `:composeApp:assembleDebug`, `:custom-login:testDebugUnitTest` | n/a — verificable por build |
-| AC-09 | *(no unitario)* — smoke manual en el simulador | n/a — verificable por smoke |
+| AC-09 | *(no unitario)* — smoke manual en el simulador | n/a — **parcial**, ver evidencia abajo |
 
 > Nota para `/validate`: **ningún AC de este spec es verificable con un test unitario**, y no se
 > escriben tests de mentira para rellenar la tabla. Es una migración de configuración de build. El
