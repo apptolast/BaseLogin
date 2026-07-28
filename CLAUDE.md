@@ -21,8 +21,40 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # iOS - build Kotlin framework
 ./gradlew :custom-login:linkDebugFrameworkIosArm64
 ./gradlew :custom-login:linkDebugFrameworkIosSimulatorArm64
-# Then build/run from Xcode in /iosApp
+
+# iOS demo app - open iosApp/iosApp.xcodeproj (NOT a .xcworkspace: there is no CocoaPods)
+xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug \
+  -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' build
 ```
+
+## iOS native dependencies
+
+**Swift Package Manager only. No CocoaPods anywhere — do not reintroduce a `Podfile` or the
+`kotlin.cocoapods` plugin** (removed in FLE-91).
+
+`iosApp.xcodeproj` declares two SPM packages:
+
+| Package | Products | Version rule |
+|---|---|---|
+| `firebase/firebase-ios-sdk` | `FirebaseCore`, `FirebaseAuth`, `FirebaseAppCheck` | `upToNextMinor` from **11.8.0** |
+| `google/GoogleSignIn-iOS` | `GoogleSignIn` | `upToNextMajor` from **9.0.0** |
+
+The 11.8.x pin is not arbitrary: GitLive's cinterop is built against that version of the Firebase iOS
+SDK, and it is the same pin Fledge uses. Keeping them equal is what makes validating iOS here say
+anything about consumers. If you bump `gitlive-firebase` in the catalog, check what Firebase iOS
+version its cinterop targets and move the SPM pin with it.
+
+`FirebaseAuth` is linked even though no Swift file imports it: the cinterop klib of
+`dev.gitlive:firebase-auth` requires `-framework FirebaseAuth` at link time.
+
+The Kotlin framework is compiled by the **`Compile Kotlin Framework`** build phase, which must stay
+the *first* phase of the `iosApp` target and runs
+`./gradlew :composeApp:embedAndSignAppleFrameworkForXcode`. Without it Xcode links against a stale or
+missing `ComposeApp.framework`, and the symptom — Kotlin changes not showing up — is confusing to
+diagnose.
+
+Signing reads `DEVELOPMENT_TEAM` from `${TEAM_ID}`, defined in `iosApp/Configuration/Config.xcconfig`.
+Set it locally; **never hardcode a team id into `project.pbxproj`**.
 
 ## Module Structure
 
@@ -30,7 +62,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 custom-login/          ← Library module (the deliverable)
   src/commonMain/      ← Shared code
   src/androidMain/     ← Android-specific (Credential Manager, Logger)
-  src/iosMain/         ← iOS-specific (GoogleSignIn pod, Logger)
+  src/iosMain/         ← iOS-specific (Swift sign-in handlers, Logger)
 composeApp/            ← Sample consumer app
   src/androidMain/     ← Android entry (MainActivity, LoginApplication)
   src/iosMain/         ← iOS entry (MainViewController)

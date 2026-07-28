@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E211B8A02E40C1EE720E16E6 /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F33D2B839BA60705A2BFEC6 /* Pods_iosApp.framework */; };
+		FE91D0000000000000000001 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = FE91C0000000000000000001 /* FirebaseCore */; };
+		FE91D0000000000000000002 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FE91C0000000000000000002 /* FirebaseAuth */; };
+		FE91D0000000000000000003 /* FirebaseAppCheck in Frameworks */ = {isa = PBXBuildFile; productRef = FE91C0000000000000000003 /* FirebaseAppCheck */; };
+		FE91D0000000000000000004 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = FE91C0000000000000000004 /* GoogleSignIn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		11304535EA9493F62F2FCEF5 /* Pods-iosApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.release.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.release.xcconfig"; sourceTree = "<group>"; };
-		45A7FF1C53002ED789BC69CB /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
-		8F33D2B839BA60705A2BFEC6 /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C2C1E9C05DFAD74B754847FE /* Login.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Login.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -30,8 +30,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		50E0BC86E7C9166C933FB97B /* Configuration */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-			);
 			path = Configuration;
 			sourceTree = "<group>";
 		};
@@ -50,7 +48,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E211B8A02E40C1EE720E16E6 /* Pods_iosApp.framework in Frameworks */,
+				FE91D0000000000000000001 /* FirebaseCore in Frameworks */,
+				FE91D0000000000000000002 /* FirebaseAuth in Frameworks */,
+				FE91D0000000000000000003 /* FirebaseAppCheck in Frameworks */,
+				FE91D0000000000000000004 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -68,7 +69,6 @@
 		690E27C2542C07537B9F53AA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				8F33D2B839BA60705A2BFEC6 /* Pods_iosApp.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -79,18 +79,8 @@
 				50E0BC86E7C9166C933FB97B /* Configuration */,
 				CD7A2D14243FCD7391E873B2 /* iosApp */,
 				38B957A074D108DF6E11B1AC /* Products */,
-				9D74364A4F9810526C2B596A /* Pods */,
 				690E27C2542C07537B9F53AA /* Frameworks */,
 			);
-			sourceTree = "<group>";
-		};
-		9D74364A4F9810526C2B596A /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				45A7FF1C53002ED789BC69CB /* Pods-iosApp.debug.xcconfig */,
-				11304535EA9493F62F2FCEF5 /* Pods-iosApp.release.xcconfig */,
-			);
-			path = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -100,12 +90,10 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DBE347FEBEB8FEBE4E977744 /* Build configuration list for PBXNativeTarget "iosApp" */;
 			buildPhases = (
-				2615AFE70D40EA954A5AED99 /* [CP] Check Pods Manifest.lock */,
+				FE91A0000000000000000001 /* Compile Kotlin Framework */,
 				DB5AF8F4D275C57CB1B336D4 /* Sources */,
 				E9CE1DAC6EA714C487F0E8F2 /* Frameworks */,
 				8B189924B23ABB83ACF28E22 /* Resources */,
-				CCD758CEC0BF3CD9054D1B78 /* [CP] Embed Pods Frameworks */,
-				E7F180CC954ACD1A0F2EFD0E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -115,6 +103,12 @@
 				CD7A2D14243FCD7391E873B2 /* iosApp */,
 			);
 			name = iosApp;
+			packageProductDependencies = (
+				FE91C0000000000000000001 /* FirebaseCore */,
+				FE91C0000000000000000002 /* FirebaseAuth */,
+				FE91C0000000000000000003 /* FirebaseAppCheck */,
+				FE91C0000000000000000004 /* GoogleSignIn */,
+			);
 			productName = iosApp;
 			productReference = C2C1E9C05DFAD74B754847FE /* Login.app */;
 			productType = "com.apple.product-type.application";
@@ -143,6 +137,10 @@
 			);
 			mainGroup = 9BCCEFC2A1DADA17B1DC5F7D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FE91B0000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				FE91B0000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 38B957A074D108DF6E11B1AC /* Products */;
 			projectDirPath = "";
@@ -164,61 +162,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		2615AFE70D40EA954A5AED99 /* [CP] Check Pods Manifest.lock */ = {
+		FE91A0000000000000000001 /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
 			);
-			name = "[CP] Check Pods Manifest.lock";
+			name = "Compile Kotlin Framework";
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-iosApp-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		CCD758CEC0BF3CD9054D1B78 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E7F180CC954ACD1A0F2EFD0E /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -235,14 +196,14 @@
 /* Begin XCBuildConfiguration section */
 		4711985B77285BCB5D35E54B /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 11304535EA9493F62F2FCEF5 /* Pods-iosApp.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = "${TEAM_ID}";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;
@@ -330,10 +291,10 @@
 		};
 		D162CFBDBC975FCDA376AFD7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 45A7FF1C53002ED789BC69CB /* Pods-iosApp.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = iosApp/iosApp.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
@@ -438,6 +399,48 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FE91B0000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 11.8.0;
+			};
+		};
+		FE91B0000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FE91C0000000000000000001 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE91B0000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		FE91C0000000000000000002 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE91B0000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		FE91C0000000000000000003 /* FirebaseAppCheck */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE91B0000000000000000001 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAppCheck;
+		};
+		FE91C0000000000000000004 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FE91B0000000000000000002 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1BCC8D2890C2B3C20D316BB7 /* Project object */;
 }
