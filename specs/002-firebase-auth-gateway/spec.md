@@ -78,11 +78,24 @@ Gradle. Excepción necesaria: `function-naming` para `@Composable`.
 
 | Fichero | Rol |
 |---|---|
-| `FirebaseAuthGateway.kt` | El puerto. Tipos propios: `FirebaseAuthUser`, `FirebaseAuthCredential` (sellado: `EmailPassword` / `Google(idToken, accessToken?)` / `OAuth(providerId, idToken, rawNonce?)` / `Phone`), `FirebaseAuthErrorKind` y `FirebaseAuthFailure` |
+| `FirebaseAuthGateway.kt` | El puerto. Tipos propios: `FirebaseAuthUser`, `FirebaseAuthCredential` (sellado: `EmailPassword` / `Google(idToken, accessToken?)` / `OAuth(providerId, idToken, rawNonce?)` / `Phone`) y `FirebaseAuthFailure`. **Sin `FirebaseAuthErrorKind`** — ver corrección abajo |
 | `GitLiveFirebaseAuthGateway.kt` | El adaptador. **Único** fichero que importa `dev.gitlive.firebase.auth.*`. Resuelve `Firebase.auth` de forma perezosa. Un funnel convierte cualquier throwable del SDK en `FirebaseAuthFailure` |
 
 `FirebaseAuthProvider(firebaseAuth: FirebaseAuth)` pasa a `FirebaseAuthProvider(gateway:
 FirebaseAuthGateway)`.
+
+> **Corrección introducida en `/plan` (29-07-2026).** El spec preveía un enum `FirebaseAuthErrorKind`
+> propio del puerto. **Se descarta**: `data/DataMapper.kt` ya tiene `mapFirebaseErrorMessage(String)`,
+> una función pura que mapea las tres familias de string —códigos REST (`INVALID_CREDENTIAL`), del SDK
+> nativo de Android (`ERROR_WRONG_PASSWORD`) y del SDK web (`wrong-password`)— a los `AuthError`
+> tipados, y ya tiene **43 tests** en `DataMapperTest`.
+>
+> El defecto real, verificado con `grep`, es otro: **los 12 bloques `catch (e: Exception)` de
+> `FirebaseAuthProvider` nunca llaman a ese mapper**. Como `FirebaseNetworkException` no hereda de
+> `FirebaseAuthException`, cae al catch genérico y acaba en `AuthError.Unknown`, cuando el mapper ya
+> sabía devolver `NetworkError` para ese mismo mensaje. El arreglo es **enrutar el catch**, no añadir
+> un enum ni un clasificador nuevo. `FirebaseAuthFailure` solo necesita transportar el `message`
+> original del SDK.
 
 > ⚠️ **Es un cambio de firma en API pública.** Quien construya `FirebaseAuthProvider` a mano rompe.
 > Quien use `loginDataModule()` —el camino documentado y el que usan las apps— no se entera. Va aquí
@@ -192,7 +205,7 @@ Scenario [AC-08]: El formato antiguo de Apple sigue funcionando
    And  ningún consumidor con el Swift ya integrado necesita cambiar nada
 
 Scenario [AC-09]: Los errores del SDK se mapean a los AuthError tipados
-  Given un gateway falso que lanza FirebaseAuthFailure con cada FirebaseAuthErrorKind
+  Given un gateway falso que lanza FirebaseAuthFailure con cada familia de mensaje del SDK
   When  el provider ejecuta la operación correspondiente
   Then  cada uno produce su AuthError tipado
    And  un fallo de red produce AuthError.NetworkError y no AuthError.Unknown
