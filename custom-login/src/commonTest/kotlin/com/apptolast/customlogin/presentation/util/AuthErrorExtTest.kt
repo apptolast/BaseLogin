@@ -44,14 +44,14 @@ class AuthErrorExtTest {
         assertTrue(
             unique.size == allErrors.size,
             "Expected ${allErrors.size} distinct resources but got ${unique.size}. " +
-                "Possible collision in AuthErrorExt.toStringRes()"
+                "Possible collision in AuthErrorExt.toStringRes()",
         )
     }
 
     @Test
     fun `InvalidCredentials and UserNotFound map to different resources`() {
         assertTrue(
-            AuthError.InvalidCredentials().toStringRes() != AuthError.UserNotFound().toStringRes()
+            AuthError.InvalidCredentials().toStringRes() != AuthError.UserNotFound().toStringRes(),
         )
     }
 
@@ -63,7 +63,7 @@ class AuthErrorExtTest {
             .map { it.toStringRes() }
         assertTrue(
             reqEmail !in others,
-            "RequiresEmailVerification shares a StringResource with another error"
+            "RequiresEmailVerification shares a StringResource with another error",
         )
     }
 
@@ -75,14 +75,14 @@ class AuthErrorExtTest {
             .map { it.toStringRes() }
         assertTrue(
             unknown !in others,
-            "Unknown shares a StringResource with another error"
+            "Unknown shares a StringResource with another error",
         )
     }
 
     @Test
     fun `phone errors map to different resources`() {
         assertTrue(
-            AuthError.PhoneNumberInvalid().toStringRes() != AuthError.InvalidVerificationCode().toStringRes()
+            AuthError.PhoneNumberInvalid().toStringRes() != AuthError.InvalidVerificationCode().toStringRes(),
         )
     }
 }

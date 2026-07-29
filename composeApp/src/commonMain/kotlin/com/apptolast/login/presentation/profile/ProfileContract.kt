@@ -5,10 +5,7 @@ import com.apptolast.customlogin.domain.model.UserSession
 /**
  * Represents the state of the Profile screen.
  */
-data class ProfileUiState(
-    val isLoading: Boolean = false,
-    val userSession: UserSession? = null
-)
+data class ProfileUiState(val isLoading: Boolean = false, val userSession: UserSession? = null)
 
 /**
  * User actions from the Profile screen.

@@ -17,5 +17,5 @@ data class UserSession(
     val accessToken: String? = null,
     val refreshToken: String? = null,
     val expiresAt: Long? = null,
-    val metadata: Map<String, String> = emptyMap()
+    val metadata: Map<String, String> = emptyMap(),
 )

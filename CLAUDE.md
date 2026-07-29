@@ -79,6 +79,7 @@ Every screen uses: `XxxAction` (sealed interface) + `XxxUiState` (data class) + 
 ### Layers
 - `domain/` — `AuthProvider` interface, `AuthRepository` interface, domain models (`AuthResult`, `AuthError`, `Credentials`, `IdentityProvider`, etc.)
 - `data/` — `FirebaseAuthProvider`, `AuthRepositoryImpl`
+- `data/firebase/` — the ports that keep the SDK testable (see below)
 - `di/` — Koin modules: `dataModule`, `presentationModule`; `KoinInitializer.kt` with `LoginLibraryConfig`
 - `presentation/` — ViewModels, Screens, Slots system
 
@@ -95,9 +96,51 @@ Default implementations live in `presentation/slots/defaultslots/`.
 ### Dependency Injection
 `LoginLibraryConfig` is registered as a Koin `single`. If `googleSignInConfig != null`, `GoogleSignInConfig` is also registered. `AuthRepositoryImpl` takes `AuthProvider` and `LoginLibraryConfig`.
 
+### Ports over the SDK (FLE-90)
+`FirebaseAuthProvider` does **not** hold a `FirebaseAuth`. Three ports sit in `data/firebase/`:
+
+| Port | Wraps | Production impl |
+|---|---|---|
+| `FirebaseAuthGateway` | Firebase Auth | `GitLiveFirebaseAuthGateway` |
+| `SocialTokenProvider` | `getSocialIdToken` | `PlatformSocialTokenProvider` |
+| `SocialSignInStateCleaner` | `clearSocialSignInState` | `PlatformSocialSignInStateCleaner` |
+
+All three exist for the same reason: `FirebaseAuth` is a platform `expect` class and the other two are
+top-level `expect` functions, none of which can be faked from `commonTest`. Anything taking them
+directly is untestable by construction — which is why this class had zero real coverage before.
+
+**`GitLiveFirebaseAuthGateway` is the only file in `commonMain` allowed to import `dev.gitlive.*`.**
+Verifiable rule: `grep -rn "dev.gitlive" custom-login/src/commonTest/` must return nothing.
+
+Two invariants inside the adapter:
+
+- **Lazy resolution.** `Firebase.auth` is a getter, never a field: Koin builds the graph before the
+  host app initialises `FirebaseApp`. For the same reason no binding may be `createdAtStart` — in
+  Koin 4.2.x `koinApplication { }` creates eager instances by default.
+- **Every throwable becomes `FirebaseAuthFailure` with the message untouched**, because
+  `mapFirebaseErrorMessage` classifies by message. Catching `FirebaseAuthException` alone is not
+  enough: `FirebaseNetworkException` and `FirebaseTooManyRequestsException` extend
+  `FirebaseException` and are its *siblings*, so they slip through and get mis-mapped as `Unknown`.
+
+### Social token format
+Packed strings crossing Swift → Kotlin. The separators are literal and shared with the host app's
+Swift code, so changing them breaks every integration:
+
+```
+Google:  idToken|||accessToken|||<accessToken>
+Apple:   idToken|||rawNonce|||<rawNonce>
+Apple+:  idToken|||rawNonce|||<rawNonce>|||displayName|||<name>
+```
+
+The `displayName` segment is **optional and appended**, never a replacement: hosts already wired
+against the two-segment form keep working. It matters because Apple sends the full name **only on the
+very first authorisation** of each user — if it is not persisted then, it is lost for good.
+
 ### expect/actual
 - `platform()` — platform name string
 - `getSocialIdToken(provider)` — platform-specific OAuth token acquisition
+- `clearSocialSignInState()` — clears Credential Manager's cached account on Android so the picker
+  reappears after sign-out; no-op on iOS
 - `Logger` — `internal expect object Logger { d(), w(), e() }` in `util/`
 
 ### Key Models

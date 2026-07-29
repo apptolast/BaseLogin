@@ -69,8 +69,8 @@ internal fun DefaultSocialButton(
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         colors = ButtonDefaults.outlinedButtonColors(
             containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-        )
+            contentColor = MaterialTheme.colorScheme.onSurface,
+        ),
     ) {
         Box(modifier = Modifier.size(20.dp), contentAlignment = Alignment.Center) {
             if (isLoading) {
@@ -84,7 +84,7 @@ internal fun DefaultSocialButton(
                     painter = icon,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
-                    tint = tint
+                    tint = tint,
                 )
             }
         }
@@ -92,7 +92,7 @@ internal fun DefaultSocialButton(
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
         )
     }
 }
@@ -210,11 +210,19 @@ fun SocialLoginButtonsSection(
                 is IdentityProvider.Google -> GoogleSocialButton(isThisLoading, isEnabled) { onProviderClick(provider) }
                 is IdentityProvider.Apple -> AppleSocialButton(isThisLoading, isEnabled) { onProviderClick(provider) }
                 is IdentityProvider.GitHub -> GitHubSocialButton(isThisLoading, isEnabled) { onProviderClick(provider) }
-                is IdentityProvider.Microsoft -> MicrosoftSocialButton(isThisLoading, isEnabled) { onProviderClick(provider) }
-                is IdentityProvider.MagicLink -> MagicLinkSocialButton(isThisLoading, isEnabled) { onProviderClick(provider) }
+                is IdentityProvider.Microsoft -> MicrosoftSocialButton(isThisLoading, isEnabled) {
+                    onProviderClick(provider)
+                }
+                is IdentityProvider.MagicLink -> MagicLinkSocialButton(isThisLoading, isEnabled) {
+                    onProviderClick(provider)
+                }
                 is IdentityProvider.Phone -> PhoneSocialButton(isThisLoading, isEnabled) { onProviderClick(provider) }
-                is IdentityProvider.Twitter -> TwitterSocialButton(isThisLoading, isEnabled) { onProviderClick(provider) }
-                is IdentityProvider.Facebook -> FacebookSocialButton(isThisLoading, isEnabled) { onProviderClick(provider) }
+                is IdentityProvider.Twitter -> TwitterSocialButton(isThisLoading, isEnabled) {
+                    onProviderClick(provider)
+                }
+                is IdentityProvider.Facebook -> FacebookSocialButton(isThisLoading, isEnabled) {
+                    onProviderClick(provider)
+                }
                 is IdentityProvider.Custom -> {} // Custom providers are not shown in the default UI
             }
         }

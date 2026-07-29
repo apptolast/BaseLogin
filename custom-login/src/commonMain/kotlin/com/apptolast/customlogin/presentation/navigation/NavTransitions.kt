@@ -21,13 +21,13 @@ object NavTransitions {
         initialOffsetX = { fullWidth -> fullWidth },
         animationSpec = tween(
             durationMillis = DURATION,
-            easing = FastOutSlowInEasing
-        )
+            easing = FastOutSlowInEasing,
+        ),
     ) + fadeIn(
         animationSpec = tween(
             durationMillis = FADE_DURATION,
-            easing = FastOutSlowInEasing
-        )
+            easing = FastOutSlowInEasing,
+        ),
     )
 
     /**
@@ -37,13 +37,13 @@ object NavTransitions {
         targetOffsetX = { fullWidth -> -fullWidth / 3 },
         animationSpec = tween(
             durationMillis = DURATION,
-            easing = FastOutSlowInEasing
-        )
+            easing = FastOutSlowInEasing,
+        ),
     ) + fadeOut(
         animationSpec = tween(
             durationMillis = FADE_DURATION,
-            easing = FastOutSlowInEasing
-        )
+            easing = FastOutSlowInEasing,
+        ),
     )
 
     /**
@@ -53,13 +53,13 @@ object NavTransitions {
         initialOffsetX = { fullWidth -> -fullWidth / 3 },
         animationSpec = tween(
             durationMillis = DURATION,
-            easing = FastOutSlowInEasing
-        )
+            easing = FastOutSlowInEasing,
+        ),
     ) + fadeIn(
         animationSpec = tween(
             durationMillis = FADE_DURATION,
-            easing = FastOutSlowInEasing
-        )
+            easing = FastOutSlowInEasing,
+        ),
     )
 
     /**
@@ -69,12 +69,12 @@ object NavTransitions {
         targetOffsetX = { fullWidth -> fullWidth },
         animationSpec = tween(
             durationMillis = DURATION,
-            easing = FastOutSlowInEasing
-        )
+            easing = FastOutSlowInEasing,
+        ),
     ) + fadeOut(
         animationSpec = tween(
             durationMillis = FADE_DURATION,
-            easing = FastOutSlowInEasing
-        )
+            easing = FastOutSlowInEasing,
+        ),
     )
 }

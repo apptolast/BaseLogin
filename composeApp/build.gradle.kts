@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.google.services) // Required for native Firebase SDK
     alias(libs.plugins.kotlinx.serialization) // Required for type-safe navigation in this module
+    alias(libs.plugins.ktlint.jlleitschuh)
 }
 
 kotlin {
@@ -38,7 +39,7 @@ kotlin {
                 implementation(compose.material3)
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
-                
+
                 // Add dependency to our new login module
                 api(project(":custom-login"))
 
@@ -69,7 +70,6 @@ kotlin {
 //                implementation(libs.compose.ui.tooling)
 //                debugImplementation(libs.compose.ui.test.manifest)
 
-
                 // GitLive Firebase (common)
                 implementation(libs.firebase.auth)
 
@@ -79,7 +79,6 @@ kotlin {
             }
         }
     }
-
 }
 
 android {
@@ -93,7 +92,7 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
-    
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -105,7 +104,7 @@ android {
             isMinifyEnabled = false
         }
     }
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -114,4 +113,10 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+}
+
+ktlint {
+    android = false
+    ignoreFailures = false
+    outputToConsole = true
 }

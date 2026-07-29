@@ -9,10 +9,7 @@ sealed interface Credentials {
     /**
      * Email and password authentication.
      */
-    data class EmailPassword(
-        val email: String,
-        val password: String
-    ) : Credentials
+    data class EmailPassword(val email: String, val password: String) : Credentials
 
     /**
      * OAuth token from external provider (Google, Apple, etc.)
@@ -23,9 +20,7 @@ sealed interface Credentials {
     /**
      * Refresh token for session renewal.
      */
-    data class RefreshToken(
-        val token: String
-    ) : Credentials
+    data class RefreshToken(val token: String) : Credentials
 }
 
 /**
@@ -37,14 +32,11 @@ data class SignUpData(
     val password: String,
     val displayName: String? = null,
     val photoUrl: String? = null,
-    val metadata: Map<String, String> = emptyMap()
+    val metadata: Map<String, String> = emptyMap(),
 )
 
 /**
  * Data required for password reset confirmation.
  */
 @Serializable
-data class PasswordResetData(
-    val code: String,
-    val newPassword: String
-)
+data class PasswordResetData(val code: String, val newPassword: String)

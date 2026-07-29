@@ -37,35 +37,35 @@ class ValidationErrorExtTest {
         assertTrue(
             unique.size == allErrors.size,
             "Expected ${allErrors.size} distinct resources but got ${unique.size}. " +
-                "Possible collision in ValidationErrorExt.toStringRes()"
+                "Possible collision in ValidationErrorExt.toStringRes()",
         )
     }
 
     @Test
     fun `EmailEmpty and EmailInvalid map to different resources`() {
         assertTrue(
-            ValidationError.EmailEmpty.toStringRes() != ValidationError.EmailInvalid.toStringRes()
+            ValidationError.EmailEmpty.toStringRes() != ValidationError.EmailInvalid.toStringRes(),
         )
     }
 
     @Test
     fun `PasswordEmpty and PasswordTooShort map to different resources`() {
         assertTrue(
-            ValidationError.PasswordEmpty.toStringRes() != ValidationError.PasswordTooShort.toStringRes()
+            ValidationError.PasswordEmpty.toStringRes() != ValidationError.PasswordTooShort.toStringRes(),
         )
     }
 
     @Test
     fun `ConfirmPasswordEmpty and PasswordsDoNotMatch map to different resources`() {
         assertTrue(
-            ValidationError.ConfirmPasswordEmpty.toStringRes() != ValidationError.PasswordsDoNotMatch.toStringRes()
+            ValidationError.ConfirmPasswordEmpty.toStringRes() != ValidationError.PasswordsDoNotMatch.toStringRes(),
         )
     }
 
     @Test
     fun `PhoneEmpty and OtpEmpty map to different resources`() {
         assertTrue(
-            ValidationError.PhoneEmpty.toStringRes() != ValidationError.OtpEmpty.toStringRes()
+            ValidationError.PhoneEmpty.toStringRes() != ValidationError.OtpEmpty.toStringRes(),
         )
     }
 }

@@ -13,7 +13,4 @@ package com.apptolast.customlogin.config
  *   Example: "https://yourapp.page.link/signin"
  * @param iosBundleId Your iOS app bundle ID (required for iOS deep link handling).
  */
-data class MagicLinkConfig(
-    val continueUrl: String,
-    val iosBundleId: String? = null
-)
+data class MagicLinkConfig(val continueUrl: String, val iosBundleId: String? = null)

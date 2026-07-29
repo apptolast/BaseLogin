@@ -6,5 +6,5 @@ data class MagicLinkUiState(
     val email: String = "",
     val emailError: ValidationError? = null,
     val isLoading: Boolean = false,
-    val isLinkSent: Boolean = false
+    val isLinkSent: Boolean = false,
 )

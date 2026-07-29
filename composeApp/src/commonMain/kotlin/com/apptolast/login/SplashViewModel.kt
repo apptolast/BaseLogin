@@ -12,9 +12,7 @@ import kotlinx.coroutines.flow.stateIn
 /**
  * ViewModel for managing splash screen state and providing a single source of truth for the authentication state.
  */
-class SplashViewModel(
-    authRepository: AuthRepository
-) : ViewModel() {
+class SplashViewModel(authRepository: AuthRepository) : ViewModel() {
 
     /**
      * The single source of truth for the authentication state.
@@ -25,7 +23,7 @@ class SplashViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Companion.Eagerly,
-            initialValue = AuthState.Loading
+            initialValue = AuthState.Loading,
         )
 
     /**
@@ -37,6 +35,6 @@ class SplashViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Companion.Eagerly,
-            initialValue = false
+            initialValue = false,
         )
 }

@@ -1,6 +1,9 @@
 package com.apptolast.customlogin
 
 import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
+import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.di.OAuthProviderConfig
@@ -9,7 +12,6 @@ import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.UserSession
-import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.platform.ActivityHolder
 import com.apptolast.customlogin.provider.GoogleSignInProviderAndroid
 import com.apptolast.customlogin.provider.WebOAuthProviderAndroid
@@ -19,11 +21,11 @@ import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
 import com.google.firebase.auth.auth
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.util.concurrent.TimeUnit
-import kotlin.coroutines.resume
 
 /**
  * Android-specific implementation of the common `expect` declarations.
@@ -67,20 +69,23 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
         is IdentityProvider.Google -> {
             val config = PlatformKoinHelper.googleSignInConfig
             if (config == null) {
-                Logger.w("Platform", "Google Sign-In is not configured. Provide GoogleSignInConfig in LoginLibraryConfig.")
+                Logger.w(
+                    "Platform",
+                    "Google Sign-In is not configured. Provide GoogleSignInConfig in LoginLibraryConfig.",
+                )
                 return null
             }
 
             val googleProvider = GoogleSignInProviderAndroid(
                 config = config,
-                context = appContext
+                context = appContext,
             )
             googleProvider.signIn()?.let { SocialTokenResult.Token(it) }
         }
         is IdentityProvider.Apple ->
             WebOAuthProviderAndroid.signIn(
                 providerId = "apple.com",
-                scopes = PlatformKoinHelper.loginConfig.appleSignInConfig?.scopes ?: listOf("email", "name")
+                scopes = PlatformKoinHelper.loginConfig.appleSignInConfig?.scopes ?: listOf("email", "name"),
             )
         is IdentityProvider.GitHub ->
             signInWithWebOAuth("github.com", PlatformKoinHelper.loginConfig.githubOAuthConfig)
@@ -97,14 +102,12 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
     }
 }
 
-private suspend fun signInWithWebOAuth(
-    providerId: String,
-    config: OAuthProviderConfig,
-): SocialTokenResult? = WebOAuthProviderAndroid.signIn(
-    providerId = providerId,
-    scopes = config.scopes,
-    customParams = config.customParameters
-)
+private suspend fun signInWithWebOAuth(providerId: String, config: OAuthProviderConfig): SocialTokenResult? =
+    WebOAuthProviderAndroid.signIn(
+        providerId = providerId,
+        scopes = config.scopes,
+        customParams = config.customParameters,
+    )
 
 /**
  * Android actual implementation: uses native Firebase PhoneAuthProvider with SIM-based
@@ -135,8 +138,8 @@ actual suspend fun sendPhoneVerificationCode(phoneNumber: String, timeoutSeconds
                                         photoUrl = user.photoUrl?.toString(),
                                         isEmailVerified = user.isEmailVerified,
                                         providerId = "firebase",
-                                    )
-                                )
+                                    ),
+                                ),
                             )
                         } else if (cont.isActive) {
                             cont.resume(PhoneAuthResult.Failure(AuthError.Unknown("Auto sign-in returned no user")))
@@ -144,7 +147,13 @@ actual suspend fun sendPhoneVerificationCode(phoneNumber: String, timeoutSeconds
                     }
                     .addOnFailureListener { e ->
                         if (cont.isActive) {
-                            cont.resume(PhoneAuthResult.Failure(AuthError.Unknown(e.message ?: "Auto verification failed")))
+                            cont.resume(
+                                PhoneAuthResult.Failure(
+                                    AuthError.Unknown(
+                                        e.message ?: "Auto verification failed",
+                                    ),
+                                ),
+                            )
                         }
                     }
             }
@@ -192,8 +201,8 @@ actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): Aut
                                 photoUrl = user.photoUrl?.toString(),
                                 isEmailVerified = user.isEmailVerified,
                                 providerId = "firebase",
-                            )
-                        )
+                            ),
+                        ),
                     )
                 } else if (cont.isActive) {
                     cont.resume(AuthResult.Failure(AuthError.Unknown("No user returned after phone sign in")))
@@ -205,3 +214,18 @@ actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): Aut
                 }
             }
     }
+
+/**
+ * Clears Credential Manager's cached credential state.
+ *
+ * Without this, after signing out of Firebase the Google account picker does not reappear, because
+ * Credential Manager keeps returning the previously chosen account, and the user cannot switch.
+ */
+actual suspend fun clearSocialSignInState() {
+    try {
+        CredentialManager.create(appContext).clearCredentialState(ClearCredentialStateRequest())
+    } catch (e: Exception) {
+        // Never fail sign-out because of this: the Firebase session is already gone.
+        Logger.w("Platform", "clearCredentialState failed: ${e.message}")
+    }
+}

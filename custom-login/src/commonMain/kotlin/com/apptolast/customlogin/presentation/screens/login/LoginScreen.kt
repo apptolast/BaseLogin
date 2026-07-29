@@ -1,6 +1,8 @@
 package com.apptolast.customlogin.presentation.screens.login
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -12,8 +14,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -22,9 +22,9 @@ import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.LoginScreenSlots
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultDivider
-import kotlinx.coroutines.flow.collectLatest
 import com.apptolast.customlogin.presentation.util.toStringRes
 import com.apptolast.customlogin.util.toStringRes
+import kotlinx.coroutines.flow.collectLatest
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.divider_or
 import login.custom_login.generated.resources.login_screen_sign_in_button
@@ -66,7 +66,7 @@ fun LoginScreen(
                     snackBarHostState.showSnackbar(
                         message = getString(effect.error.toStringRes()),
                         withDismissAction = true,
-                        duration = SnackbarDuration.Indefinite
+                        duration = SnackbarDuration.Indefinite,
                     )
                 }
             }
@@ -80,10 +80,10 @@ fun LoginScreen(
             SnackbarHost(snackBarHostState) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
-                    onDismiss = { snackBarHostState.currentSnackbarData?.dismiss() }
+                    onDismiss = { snackBarHostState.currentSnackbarData?.dismiss() },
                 )
             }
-        }
+        },
     ) { paddingValues ->
         LoginContent(
             slots = loginSlots,
@@ -124,7 +124,7 @@ private fun LoginContent(
             state.email,
             { onAction(LoginAction.EmailChanged(it)) },
             state.emailError?.let { stringResource(it.toStringRes()) },
-            !state.isLoading
+            !state.isLoading,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -133,7 +133,7 @@ private fun LoginContent(
             state.password,
             { onAction(LoginAction.PasswordChanged(it)) },
             state.passwordError?.let { stringResource(it.toStringRes()) },
-            !state.isLoading
+            !state.isLoading,
         )
 
         slots.forgotPasswordLink(onNavigateToForgotPassword)
@@ -169,11 +169,10 @@ private fun LoginScreenPreview() {
         state = LoginUiState(
             email = "test@apptolast.com",
             password = "Password123",
-            isLoading = false
-        )
+            isLoading = false,
+        ),
     )
 }
-
 
 @Preview
 @Composable
@@ -183,8 +182,8 @@ private fun LoginScreenLoadingPreview() {
         state = LoginUiState(
             email = "test@apptolast.com",
             password = "Password123",
-            isLoading = true
-        )
+            isLoading = true,
+        ),
     )
 }
 
@@ -196,7 +195,7 @@ private fun LoginScreenSocialLoadingPreview() {
         state = LoginUiState(
             email = "test@apptolast.com",
             password = "Password123",
-            loadingProvider = IdentityProvider.Google
-        )
+            loadingProvider = IdentityProvider.Google,
+        ),
     )
 }

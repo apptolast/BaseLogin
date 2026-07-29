@@ -28,12 +28,7 @@ import androidx.compose.ui.unit.dp
  * @param text The text to be displayed inside the button.
  */
 @Composable
-fun DefaultSubmitButton(
-    onClick: () -> Unit,
-    isLoading: Boolean,
-    enabled: Boolean,
-    text: String
-) {
+fun DefaultSubmitButton(onClick: () -> Unit, isLoading: Boolean, enabled: Boolean, text: String) {
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -43,21 +38,21 @@ fun DefaultSubmitButton(
         shape = RoundedCornerShape(12.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        )
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+        ),
     ) {
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(18.dp),
                 color = MaterialTheme.colorScheme.onPrimary,
-                strokeWidth = 2.dp
+                strokeWidth = 2.dp,
             )
             Spacer(modifier = Modifier.width(10.dp))
         }
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.SemiBold
+            fontWeight = FontWeight.SemiBold,
         )
     }
 }

@@ -30,7 +30,7 @@ class DataMapperTest {
     @Test
     fun `wrong-password embedded in message maps to InvalidCredentials`() {
         assertTrue(
-            mapFirebaseErrorMessage("The password is invalid. [wrong-password]") is AuthError.InvalidCredentials
+            mapFirebaseErrorMessage("The password is invalid. [wrong-password]") is AuthError.InvalidCredentials,
         )
     }
 
@@ -264,10 +264,12 @@ class DataMapperTest {
     @Test
     fun `error code embedded in longer message still maps correctly`() {
         assertTrue(
-            mapFirebaseErrorMessage("Firebase: There is no user record [user-not-found]") is AuthError.UserNotFound
+            mapFirebaseErrorMessage("Firebase: There is no user record [user-not-found]") is AuthError.UserNotFound,
         )
         assertTrue(
-            mapFirebaseErrorMessage("The email address is already in use [email-already-in-use].") is AuthError.EmailAlreadyInUse
+            mapFirebaseErrorMessage(
+                "The email address is already in use [email-already-in-use].",
+            ) is AuthError.EmailAlreadyInUse,
         )
     }
 }

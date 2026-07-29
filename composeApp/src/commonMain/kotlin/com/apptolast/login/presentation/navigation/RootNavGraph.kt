@@ -7,7 +7,7 @@ import com.apptolast.login.presentation.profile.ProfileScreen
 
 fun NavGraphBuilder.mainRoutesFlow() {
     navigation<MainRoutesFlow>(
-        startDestination = ProfileRoute
+        startDestination = ProfileRoute,
     ) {
         composable<ProfileRoute> {
             ProfileScreen()

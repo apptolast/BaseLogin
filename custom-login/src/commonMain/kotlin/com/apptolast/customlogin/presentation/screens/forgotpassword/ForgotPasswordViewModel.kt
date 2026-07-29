@@ -18,9 +18,7 @@ import kotlinx.coroutines.launch
  * ViewModel for the Forgot Password screen using MVI pattern.
  * Handles business logic and exposes state and effects to the UI.
  */
-class ForgotPasswordViewModel(
-    private val authRepository: AuthRepository
-) : ViewModel() {
+class ForgotPasswordViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ForgotPasswordUiState())
     val uiState = _uiState.asStateFlow()
@@ -72,11 +70,9 @@ class ForgotPasswordViewModel(
         }
     }
 
-    private fun validate(state: ForgotPasswordUiState): ValidationError? {
-        return when {
-            state.email.isBlank() -> ValidationError.EmailEmpty
-            !Validators.isValidEmail(state.email) -> ValidationError.EmailInvalid
-            else -> null
-        }
+    private fun validate(state: ForgotPasswordUiState): ValidationError? = when {
+        state.email.isBlank() -> ValidationError.EmailEmpty
+        !Validators.isValidEmail(state.email) -> ValidationError.EmailInvalid
+        else -> null
     }
 }

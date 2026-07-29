@@ -1,5 +1,6 @@
 package com.apptolast.customlogin
 
+import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.data.PhoneAuthProviderIOS
 import com.apptolast.customlogin.domain.model.AuthResult
@@ -12,7 +13,6 @@ import com.apptolast.customlogin.provider.GoogleSignInProviderIOS
 import com.apptolast.customlogin.provider.MicrosoftSignInProviderIOS
 import com.apptolast.customlogin.provider.TwitterSignInProviderIOS
 import com.apptolast.customlogin.util.Logger
-import com.apptolast.customlogin.SocialTokenResult
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import platform.UIKit.UIDevice
@@ -48,7 +48,10 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
         is IdentityProvider.Google -> {
             val config = PlatformKoinHelper.googleSignInConfig
             if (config == null) {
-                Logger.w("Platform", "Google Sign-In is not configured. Provide GoogleSignInConfig in LoginLibraryConfig.")
+                Logger.w(
+                    "Platform",
+                    "Google Sign-In is not configured. Provide GoogleSignInConfig in LoginLibraryConfig.",
+                )
                 return null
             }
 
@@ -68,22 +71,30 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
 }
 
 /** Converts a raw String callback result from Swift to a type-safe [SocialTokenResult]. */
-private fun String.toSocialTokenResult(): SocialTokenResult =
-    if (this == PLATFORM_AUTH_HANDLED) SocialTokenResult.PlatformHandled
-    else SocialTokenResult.Token(this)
+private fun String.toSocialTokenResult(): SocialTokenResult = if (this == PLATFORM_AUTH_HANDLED) {
+    SocialTokenResult.PlatformHandled
+} else {
+    SocialTokenResult.Token(this)
+}
 
 /**
  * iOS actual implementation: delegates to [PhoneAuthProviderIOS] which uses a Swift callback
  * to call Firebase's [PhoneAuthProvider.provider().verifyPhoneNumber()].
  */
-actual suspend fun sendPhoneVerificationCode(phoneNumber: String, timeoutSeconds: Long): PhoneAuthResult {
-    return PhoneAuthProviderIOS.sendCode(phoneNumber)
-}
+actual suspend fun sendPhoneVerificationCode(phoneNumber: String, timeoutSeconds: Long): PhoneAuthResult =
+    PhoneAuthProviderIOS.sendCode(phoneNumber)
 
 /**
  * iOS actual implementation: delegates to [PhoneAuthProviderIOS] which uses a Swift callback
  * to create the credential and sign in via the native Firebase iOS SDK.
  */
-actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): AuthResult {
-    return PhoneAuthProviderIOS.verifyCode(verificationId, otpCode)
+actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): AuthResult =
+    PhoneAuthProviderIOS.verifyCode(verificationId, otpCode)
+
+/**
+ * No-op on iOS: neither ASAuthorizationController nor GIDSignIn cache an account selection that
+ * survives sign-out the way Credential Manager does on Android.
+ */
+actual suspend fun clearSocialSignInState() {
+    // Intentionally empty.
 }

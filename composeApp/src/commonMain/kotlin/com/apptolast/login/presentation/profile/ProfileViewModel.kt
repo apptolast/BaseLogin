@@ -14,9 +14,7 @@ import kotlinx.coroutines.launch
  * ViewModel for the Profile screen using MVI pattern.
  * It fetches the current user session and handles user actions.
  */
-class ProfileViewModel(
-    private val authRepository: AuthRepository
-) : ViewModel() {
+class ProfileViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState = _uiState.asStateFlow()

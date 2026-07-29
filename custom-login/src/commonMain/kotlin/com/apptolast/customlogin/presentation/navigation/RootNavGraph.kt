@@ -28,9 +28,7 @@ fun NavGraphBuilder.authRoutesFlow(
     slots: AuthScreenSlots = AuthScreenSlots(),
     onNavigateToHome: () -> Unit = {},
 ) {
-
     navigation<AuthRoutesFlow>(startDestination = startDestination) {
-
         // ---------- WELCOME SCREEN ----------
         composable<WelcomeRoute> {
             WelcomeScreen(
@@ -43,7 +41,7 @@ fun NavGraphBuilder.authRoutesFlow(
                     navController.navigate(RegisterRoute) {
                         launchSingleTop = true
                     }
-                }
+                },
             )
         }
 
@@ -110,7 +108,7 @@ fun NavGraphBuilder.authRoutesFlow(
                 slots = slots.forgotPassword,
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
             )
         }
 
@@ -121,7 +119,7 @@ fun NavGraphBuilder.authRoutesFlow(
                 onNavigateToHome = onNavigateToHome,
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
             )
         }
 
@@ -131,7 +129,7 @@ fun NavGraphBuilder.authRoutesFlow(
                 slots = slots.magicLink,
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
             )
         }
 
@@ -146,12 +144,13 @@ fun NavGraphBuilder.authRoutesFlow(
                 },
                 onNavigateToLogin = {
                     navController.navigate(LoginRoute) {
-                        popUpTo(AuthRoutesFlow) { // Pop up to the auth graph
+                        popUpTo(AuthRoutesFlow) {
+                            // Pop up to the auth graph
                             inclusive = true
                         }
                         launchSingleTop = true
                     }
-                }
+                },
             )
         }
     }

@@ -1,8 +1,8 @@
 package com.apptolast.customlogin.provider
 
 import com.apptolast.customlogin.util.Logger
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * iOS implementation of GitHub Sign-In via Firebase's OAuthProvider web flow.
@@ -49,7 +49,7 @@ object GitHubSignInProviderIOS {
         if (handler == null) {
             Logger.w(
                 "GitHubSignIn",
-                "signInHandler not configured. Set GitHubSignInProviderIOS.signInHandler from Swift."
+                "signInHandler not configured. Set GitHubSignInProviderIOS.signInHandler from Swift.",
             )
             cont.resume(null)
             return@suspendCancellableCoroutine

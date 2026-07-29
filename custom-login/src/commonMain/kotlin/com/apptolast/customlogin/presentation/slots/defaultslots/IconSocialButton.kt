@@ -211,11 +211,17 @@ fun IconSocialLoginButtonsSection(
                 is IdentityProvider.Google -> GoogleIconButton(isThisLoading, isEnabled) { onProviderClick(provider) }
                 is IdentityProvider.Apple -> AppleIconButton(isThisLoading, isEnabled) { onProviderClick(provider) }
                 is IdentityProvider.GitHub -> GitHubIconButton(isThisLoading, isEnabled) { onProviderClick(provider) }
-                is IdentityProvider.Microsoft -> MicrosoftIconButton(isThisLoading, isEnabled) { onProviderClick(provider) }
-                is IdentityProvider.MagicLink -> MagicLinkIconButton(isThisLoading, isEnabled) { onProviderClick(provider) }
+                is IdentityProvider.Microsoft -> MicrosoftIconButton(isThisLoading, isEnabled) {
+                    onProviderClick(provider)
+                }
+                is IdentityProvider.MagicLink -> MagicLinkIconButton(isThisLoading, isEnabled) {
+                    onProviderClick(provider)
+                }
                 is IdentityProvider.Phone -> PhoneIconButton(isThisLoading, isEnabled) { onProviderClick(provider) }
                 is IdentityProvider.Twitter -> TwitterIconButton(isThisLoading, isEnabled) { onProviderClick(provider) }
-                is IdentityProvider.Facebook -> FacebookIconButton(isThisLoading, isEnabled) { onProviderClick(provider) }
+                is IdentityProvider.Facebook -> FacebookIconButton(isThisLoading, isEnabled) {
+                    onProviderClick(provider)
+                }
                 is IdentityProvider.Custom -> {}
             }
         }

@@ -2,10 +2,10 @@ package com.apptolast.customlogin.di
 
 import com.apptolast.customlogin.data.AuthRepositoryImpl
 import com.apptolast.customlogin.data.FirebaseAuthProvider
+import com.apptolast.customlogin.data.firebase.FirebaseAuthGateway
+import com.apptolast.customlogin.data.firebase.GitLiveFirebaseAuthGateway
 import com.apptolast.customlogin.domain.AuthProvider
 import com.apptolast.customlogin.domain.AuthRepository
-import dev.gitlive.firebase.Firebase
-import dev.gitlive.firebase.auth.auth
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -15,9 +15,12 @@ import org.koin.dsl.module
  */
 fun loginDataModule(authProvider: AuthProvider? = null): Module = module {
     if (authProvider == null) {
-        // Firebase Auth instance from GitLive. Only registered for the default Firebase provider,
-        // so custom providers do not have to initialize Firebase if they do not use it.
-        single { Firebase.auth }
+        // Port over Firebase Auth. Only registered for the default provider, so custom providers
+        // do not have to initialize Firebase if they do not use it.
+        //
+        // Never createdAtStart: koinApplication { } creates eager instances by default in Koin
+        // 4.2.x, and the adapter must not touch the SDK just because the graph was built.
+        single<FirebaseAuthGateway> { GitLiveFirebaseAuthGateway() }
         single<AuthProvider> { FirebaseAuthProvider(get()) }
     } else {
         single<AuthProvider> { authProvider }

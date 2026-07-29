@@ -25,14 +25,11 @@ import login.custom_login.generated.resources.cd_dismiss
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun CustomSnackBar(
-    snackBarText: String,
-    onDismiss: () -> Unit,
-) {
+fun CustomSnackBar(snackBarText: String, onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.errorContainer)
+            .background(MaterialTheme.colorScheme.errorContainer),
     ) {
         Snackbar(
             shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp, bottomStart = 0.dp, bottomEnd = 0.dp),
@@ -43,24 +40,24 @@ fun CustomSnackBar(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(Res.string.cd_dismiss),
-                        tint = MaterialTheme.colorScheme.onErrorContainer
+                        tint = MaterialTheme.colorScheme.onErrorContainer,
                     )
                 }
-            }
+            },
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Icon(
                     imageVector = Icons.Outlined.Error,
                     contentDescription = null, // error conveyed by text
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.error,
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = snackBarText,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         }

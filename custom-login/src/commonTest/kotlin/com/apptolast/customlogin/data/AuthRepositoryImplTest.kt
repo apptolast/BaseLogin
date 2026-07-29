@@ -13,12 +13,12 @@ import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PasswordResetData
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.test.FakeAuthProvider
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 class AuthRepositoryImplTest {
 

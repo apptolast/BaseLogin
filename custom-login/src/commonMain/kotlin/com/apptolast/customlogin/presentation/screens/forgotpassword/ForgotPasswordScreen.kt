@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.ForgotPasswordScreenSlots
-import kotlinx.coroutines.flow.collectLatest
 import com.apptolast.customlogin.presentation.util.toStringRes
 import com.apptolast.customlogin.util.toStringRes
+import kotlinx.coroutines.flow.collectLatest
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.forgot_password_screen_send_button
@@ -52,7 +52,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ForgotPasswordScreen(
     viewModel: ForgotPasswordViewModel = koinViewModel(),
     slots: ForgotPasswordScreenSlots = ForgotPasswordScreenSlots(),
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -63,7 +63,7 @@ fun ForgotPasswordScreen(
                 is ForgotPasswordEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
                         message = getString(effect.error.toStringRes()),
-                        withDismissAction = true
+                        withDismissAction = true,
                     )
                 }
                 is ForgotPasswordEffect.NavigateBack -> onNavigateBack()
@@ -81,17 +81,17 @@ fun ForgotPasswordScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(Res.string.cd_navigate_back)
+                            contentDescription = stringResource(Res.string.cd_navigate_back),
                         )
                     }
-                }
+                },
             )
         },
         snackbarHost = {
             SnackbarHost(snackbarHostState) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
-                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }
+                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() },
                 )
             }
         },
@@ -102,7 +102,7 @@ fun ForgotPasswordScreen(
             slots = slots,
             state = uiState,
             modifier = Modifier.padding(paddingValues).consumeWindowInsets(paddingValues),
-            onAction = viewModel::onAction
+            onAction = viewModel::onAction,
         )
     }
 }
@@ -146,7 +146,7 @@ private fun ForgotPasswordContent(
                         state.email,
                         { onAction(ForgotPasswordAction.EmailChanged(it)) },
                         state.emailError?.let { stringResource(it.toStringRes()) },
-                        !state.isLoading
+                        !state.isLoading,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -155,7 +155,7 @@ private fun ForgotPasswordContent(
                         { onAction(ForgotPasswordAction.SendResetEmailClicked) },
                         state.isLoading,
                         state.email.isNotBlank() && !state.isLoading,
-                        stringResource(Res.string.forgot_password_screen_send_button)
+                        stringResource(Res.string.forgot_password_screen_send_button),
                     )
                 }
             }

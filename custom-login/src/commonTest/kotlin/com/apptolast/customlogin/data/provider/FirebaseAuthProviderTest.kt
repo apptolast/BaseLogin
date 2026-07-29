@@ -1,94 +1,275 @@
 package com.apptolast.customlogin.data.provider
 
+import com.apptolast.customlogin.data.FirebaseAuthProvider
+import com.apptolast.customlogin.data.firebase.FirebaseAuthCredential
+import com.apptolast.customlogin.data.firebase.FirebaseAuthFailure
+import com.apptolast.customlogin.data.firebase.FirebaseAuthUser
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
+import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
+import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.SignUpData
-import com.apptolast.customlogin.test.FakeAuthRepository
-import kotlinx.coroutines.test.runTest
+import com.apptolast.customlogin.test.FakeFirebaseAuthGateway
+import com.apptolast.customlogin.test.FakeSocialSignInStateCleaner
+import com.apptolast.customlogin.test.FakeSocialTokenProvider
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 
 /**
- * Integration-level tests for auth flows using [FakeAuthRepository].
+ * Unit tests for [FirebaseAuthProvider] against the [FakeFirebaseAuthGateway] port.
  *
- * Direct unit-testing of [FirebaseAuthProvider] is deferred because it requires
- * a live or emulated Firebase instance (FirebaseAuth is a platform expect class).
- * Instead, we test the domain contract through the repository abstraction.
+ * These replace the previous file of the same name, which exercised `FakeAuthRepository` — a fake
+ * asserting against another fake — and proved nothing about the provider. Direct testing became
+ * possible only once `FirebaseAuth`, a platform `expect` type, stopped being a constructor argument.
  */
 class FirebaseAuthProviderTest {
 
-    private val repo = FakeAuthRepository()
+    private val gateway = FakeFirebaseAuthGateway()
+    private val socialTokens = FakeSocialTokenProvider()
+    private val socialCleaner = FakeSocialSignInStateCleaner()
+
+    private fun provider() = FirebaseAuthProvider(gateway, socialTokens, socialCleaner)
+
+    // ── AC-03: email/password ────────────────────────────────────────────────
 
     @Test
-    fun `signIn returns configured success result`() = runTest {
-        repo.signInResult = AuthResult.Success(FakeAuthRepository.fakeSession())
+    fun `FLE-90 email password sign in delegates to the gateway`() = runTest {
+        // Given
+        gateway.user = FirebaseAuthUser(uid = "u-1", email = "user@test.com")
 
-        val result = repo.signIn(Credentials.EmailPassword("user@test.com", "password123"))
+        // When
+        val result = provider().signIn(Credentials.EmailPassword("user@test.com", "secret"))
 
+        // Then
         assertIs<AuthResult.Success>(result)
-        assertEquals("fake-user-id", result.session.userId)
+        assertEquals("u-1", result.session.userId)
+        val credential = gateway.credentials.single()
+        assertIs<FirebaseAuthCredential.EmailPassword>(credential)
+        assertEquals("user@test.com", credential.email)
+    }
+
+    // ── AC-04: registro ──────────────────────────────────────────────────────
+
+    @Test
+    fun `FLE-90 sign up propagates the display name to the profile`() = runTest {
+        // Given
+        gateway.user = FirebaseAuthUser(uid = "u-2", email = "new@test.com")
+
+        // When
+        val result = provider().signUp(SignUpData("new@test.com", "secret", displayName = "Ana"))
+
+        // Then
+        assertIs<AuthResult.Success>(result)
+        assertEquals(1, gateway.signUpCalls)
+        assertEquals(listOf("Ana"), gateway.updatedDisplayNames)
     }
 
     @Test
-    fun `signIn returns configured failure result`() = runTest {
-        repo.signInResult = AuthResult.Failure(AuthError.InvalidCredentials())
+    fun `FLE-90 sign up without display name does not touch the profile`() = runTest {
+        gateway.user = FirebaseAuthUser(uid = "u-2", email = "new@test.com")
 
-        val result = repo.signIn(Credentials.EmailPassword("user@test.com", "wrong"))
+        provider().signUp(SignUpData("new@test.com", "secret"))
+
+        assertTrue(gateway.updatedDisplayNames.isEmpty())
+    }
+
+    // ── AC-05: Google ────────────────────────────────────────────────────────
+
+    @Test
+    fun `FLE-90 google sign in forwards id token and access token`() = runTest {
+        // Given
+        gateway.user = FirebaseAuthUser(uid = "u-3")
+        socialTokens.returnsToken(IdentityProvider.Google, "g-token|||accessToken|||at-1")
+
+        // When
+        val result = provider().signIn(Credentials.OAuthToken(IdentityProvider.Google))
+
+        // Then
+        assertIs<AuthResult.Success>(result)
+        val credential = gateway.credentials.single()
+        assertIs<FirebaseAuthCredential.Google>(credential)
+        assertEquals("g-token", credential.idToken)
+        assertEquals("at-1", credential.accessToken)
+    }
+
+    // ── AC-06 / AC-07 / AC-08: Apple ─────────────────────────────────────────
+
+    @Test
+    fun `FLE-90 apple sign in forwards id token and raw nonce`() = runTest {
+        gateway.user = FirebaseAuthUser(uid = "u-4")
+        socialTokens.returnsToken(IdentityProvider.Apple, "a-token|||rawNonce|||n-1")
+
+        val result = provider().signIn(Credentials.OAuthToken(IdentityProvider.Apple))
+
+        assertIs<AuthResult.Success>(result)
+        val credential = gateway.credentials.single()
+        assertIs<FirebaseAuthCredential.OAuth>(credential)
+        assertEquals("apple.com", credential.providerId)
+        assertEquals("a-token", credential.idToken)
+        assertEquals("n-1", credential.rawNonce)
+    }
+
+    @Test
+    fun `FLE-90 apple sign in propagates the display name`() = runTest {
+        // Given: Apple only sends the full name on the very first authorisation ever,
+        // and the Firebase user comes back without one.
+        gateway.user = FirebaseAuthUser(uid = "u-5", displayName = null)
+        socialTokens.returnsToken(
+            IdentityProvider.Apple,
+            "a-token|||rawNonce|||n-1|||displayName|||Ana Perez",
+        )
+
+        // When
+        val result = provider().signIn(Credentials.OAuthToken(IdentityProvider.Apple))
+
+        // Then
+        assertIs<AuthResult.Success>(result)
+        assertEquals(listOf("Ana Perez"), gateway.updatedDisplayNames)
+        assertEquals("Ana Perez", result.session.displayName)
+
+        // and the nonce still travels
+        val credential = gateway.credentials.single()
+        assertIs<FirebaseAuthCredential.OAuth>(credential)
+        assertEquals("n-1", credential.rawNonce)
+    }
+
+    @Test
+    fun `FLE-90 apple sign in keeps an existing display name`() = runTest {
+        gateway.user = FirebaseAuthUser(uid = "u-6", displayName = "Ya tenia nombre")
+        socialTokens.returnsToken(
+            IdentityProvider.Apple,
+            "a-token|||rawNonce|||n-1|||displayName|||Nombre nuevo",
+        )
+
+        provider().signIn(Credentials.OAuthToken(IdentityProvider.Apple))
+
+        assertTrue(gateway.updatedDisplayNames.isEmpty())
+    }
+
+    @Test
+    fun `FLE-90 legacy apple token format still signs in`() = runTest {
+        // Given: the two-segment format that every already-integrated Swift host produces
+        gateway.user = FirebaseAuthUser(uid = "u-7")
+        socialTokens.returnsToken(IdentityProvider.Apple, "a-token|||rawNonce|||n-1")
+
+        val result = provider().signIn(Credentials.OAuthToken(IdentityProvider.Apple))
+
+        assertIs<AuthResult.Success>(result)
+        assertTrue(gateway.updatedDisplayNames.isEmpty())
+    }
+
+    @Test
+    fun `FLE-90 bare apple token without nonce still signs in`() = runTest {
+        gateway.user = FirebaseAuthUser(uid = "u-8")
+        socialTokens.returnsToken(IdentityProvider.Apple, "a-token")
+
+        val result = provider().signIn(Credentials.OAuthToken(IdentityProvider.Apple))
+
+        assertIs<AuthResult.Success>(result)
+        val credential = gateway.credentials.single()
+        assertIs<FirebaseAuthCredential.OAuth>(credential)
+        assertEquals("a-token", credential.idToken)
+        assertEquals(null, credential.rawNonce)
+    }
+
+    @Test
+    fun `FLE-90 cancelled social sign in never touches the gateway`() = runTest {
+        socialTokens.returnsCancelled(IdentityProvider.Google)
+
+        val result = provider().signIn(Credentials.OAuthToken(IdentityProvider.Google))
 
         assertIs<AuthResult.Failure>(result)
-        assertIs<AuthError.InvalidCredentials>(result.error)
+        assertEquals(0, gateway.totalInteractions)
     }
 
-    @Test
-    fun `signUp returns configured success result`() = runTest {
-        repo.signUpResult = AuthResult.Success(FakeAuthRepository.fakeSession(email = "new@test.com"))
-
-        val result = repo.signUp(SignUpData("new@test.com", "password123"))
-
-        assertIs<AuthResult.Success>(result)
-        assertEquals("new@test.com", result.session.email)
-    }
+    // ── AC-09: mapeo de errores ──────────────────────────────────────────────
 
     @Test
-    fun `sendPasswordResetEmail returns PasswordResetSent`() = runTest {
-        repo.sendPasswordResetEmailResult = AuthResult.PasswordResetSent
+    fun `FLE-90 network failures map to NetworkError and not to Unknown`() = runTest {
+        // Given: FirebaseNetworkException is a SIBLING of FirebaseAuthException, not a subclass,
+        // so it used to slip through catch(FirebaseAuthException) into the generic catch.
+        gateway.failWith = FirebaseAuthFailure("A network error (such as timeout) occurred.")
 
-        val result = repo.sendPasswordResetEmail("user@test.com")
-
-        assertEquals(AuthResult.PasswordResetSent, result)
-    }
-
-    @Test
-    fun `sendPasswordResetEmail returns failure on network error`() = runTest {
-        repo.sendPasswordResetEmailResult = AuthResult.Failure(AuthError.NetworkError())
-
-        val result = repo.sendPasswordResetEmail("user@test.com")
+        val result = provider().signIn(Credentials.EmailPassword("user@test.com", "secret"))
 
         assertIs<AuthResult.Failure>(result)
         assertIs<AuthError.NetworkError>(result.error)
     }
 
     @Test
-    fun `signOut returns success`() = runTest {
-        repo.signOutResult = Result.success(Unit)
+    fun `FLE-90 wrong password maps to InvalidCredentials`() = runTest {
+        gateway.failWith = FirebaseAuthFailure("ERROR_WRONG_PASSWORD")
 
-        val result = repo.signOut()
+        val result = provider().signIn(Credentials.EmailPassword("user@test.com", "bad"))
 
-        assertTrue(result.isSuccess)
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.InvalidCredentials>(result.error)
     }
 
     @Test
-    fun `getAvailableProviders returns configured list`() {
-        repo.stubbedProviders = listOf(
-            com.apptolast.customlogin.domain.model.IdentityProvider.Google,
-            com.apptolast.customlogin.domain.model.IdentityProvider.Phone,
-        )
+    fun `FLE-90 too many requests maps to TooManyRequests`() = runTest {
+        gateway.failWith = FirebaseAuthFailure("We have blocked all requests: too-many-requests")
 
-        val providers = repo.getAvailableProviders()
+        val result = provider().signIn(Credentials.EmailPassword("user@test.com", "secret"))
 
-        assertEquals(2, providers.size)
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.TooManyRequests>(result.error)
+    }
+
+    // ── Cuarto defecto: getCurrentSession no debe hacer I/O ──────────────────
+
+    @Test
+    fun `FLE-90 get current session reads the cache without requesting a token`() = runTest {
+        // Given: AuthProvider documents that getCurrentSession MUST NOT perform network I/O.
+        gateway.user = FirebaseAuthUser(uid = "u-9", email = "cached@test.com")
+
+        // When
+        val session = provider().getCurrentSession()
+
+        // Then
+        assertEquals("u-9", session?.userId)
+        assertEquals(0, gateway.getIdTokenCalls)
+    }
+
+    @Test
+    fun `FLE-90 get current session returns null when signed out`() = runTest {
+        gateway.user = null
+
+        assertEquals(null, provider().getCurrentSession())
+    }
+
+    // ── AC-10: signOut limpia el estado social ───────────────────────────────
+
+    @Test
+    fun `FLE-90 sign out clears the platform social state`() = runTest {
+        gateway.user = FirebaseAuthUser(uid = "u-10")
+
+        val result = provider().signOut()
+
+        assertTrue(result.isSuccess)
+        assertEquals(1, gateway.signOutCalls)
+        assertEquals(1, socialCleaner.clearCalls)
+    }
+
+    // ── AC-11: flujo de estado ───────────────────────────────────────────────
+
+    @Test
+    fun `FLE-90 auth state stream starts with Loading`() = runTest {
+        assertIs<AuthState.Loading>(provider().observeAuthState().first())
+    }
+
+    // ── Reset de contrasena ──────────────────────────────────────────────────
+
+    @Test
+    fun `FLE-90 password reset delegates the email to the gateway`() = runTest {
+        val result = provider().sendPasswordResetEmail("user@test.com")
+
+        assertIs<AuthResult.PasswordResetSent>(result)
+        assertEquals(listOf("user@test.com"), gateway.passwordResetEmails)
     }
 }

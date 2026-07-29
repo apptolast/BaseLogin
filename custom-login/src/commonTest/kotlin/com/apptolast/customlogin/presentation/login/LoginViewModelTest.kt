@@ -8,14 +8,6 @@ import com.apptolast.customlogin.presentation.screens.login.LoginEffect
 import com.apptolast.customlogin.presentation.screens.login.LoginViewModel
 import com.apptolast.customlogin.test.FakeAuthRepository
 import com.apptolast.customlogin.util.ValidationError
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -24,6 +16,14 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginViewModelTest {
@@ -157,7 +157,8 @@ class LoginViewModelTest {
 
     @Test
     fun `PasswordChanged updates password and clears passwordError`() {
-        viewModel.onAction(LoginAction.SignInClicked) // triggers passwordError when email is also blank — so set email first
+        // triggers passwordError when email is also blank, so set the email first
+        viewModel.onAction(LoginAction.SignInClicked)
         viewModel.onAction(LoginAction.EmailChanged("valid@email.com"))
         viewModel.onAction(LoginAction.SignInClicked) // now triggers PasswordEmpty
         viewModel.onAction(LoginAction.PasswordChanged("newpass"))

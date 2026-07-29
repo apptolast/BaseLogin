@@ -25,13 +25,13 @@ class LoginApplication : Application() {
         // Configure App Check
         Firebase.appCheck.installAppCheckProviderFactory(
             // Use Debug provider for development, PlayIntegrity for production
-            DebugAppCheckProviderFactory.getInstance()
+            DebugAppCheckProviderFactory.getInstance(),
         )
 
         // Configure Google Sign-In with the Web Client ID from Firebase Console
         val loginConfig = LoginLibraryConfig(
             googleSignInConfig = GoogleSignInConfig(
-                webClientId = "495458702268-al98mksrlh27v607972b0oaa0g98pfru.apps.googleusercontent.com"
+                webClientId = "495458702268-al98mksrlh27v607972b0oaa0g98pfru.apps.googleusercontent.com",
             ),
             appleSignInConfig = AppleSignInConfig(),
             githubEnabled = true,
@@ -39,8 +39,8 @@ class LoginApplication : Application() {
             twitterEnabled = true,
             facebookEnabled = true,
             magicLinkConfig = MagicLinkConfig(
-                continueUrl = "https://apptolast.com/login"
-            )
+                continueUrl = "https://apptolast.com/login",
+            ),
         )
 
         initLoginKoin(config = loginConfig) {

@@ -7,14 +7,11 @@ import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultEmailFie
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordDescription
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultForgotPasswordLink
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultHeader
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultLoginLink
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultMagicLinkDescription
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultMagicLinkHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultMagicLinkSuccessContent
-import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultHeader
-import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultReauthDescription
-import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultReauthErrorMessage
-import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultReauthHeader
-import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultLoginLink
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultNameField
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultOtpDescription
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultOtpField
@@ -23,6 +20,9 @@ import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultPassword
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultPhoneAuthDescription
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultPhoneAuthHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultPhoneField
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultReauthDescription
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultReauthErrorMessage
+import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultReauthHeader
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultRegisterLink
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultResetPasswordDescription
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultResetPasswordHeader
@@ -30,7 +30,6 @@ import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultSubmitBu
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultSuccessContent
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultTermsCheckbox
 import com.apptolast.customlogin.presentation.slots.defaultslots.IconSocialLoginButtonsSection
-import com.apptolast.customlogin.presentation.slots.defaultslots.SocialLoginButtonsSection
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.register_screen_confirm_password_label
 import login.custom_login.generated.resources.reset_password_screen_confirm_new_password_label
@@ -49,26 +48,26 @@ data class LoginScreenSlots(
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultEmailField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val passwordField: @Composable (
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultPasswordField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val submitButton: @Composable (
@@ -84,8 +83,18 @@ data class LoginScreenSlots(
             text = text,
         )
     },
-    val socialProviders: (@Composable (providers: List<IdentityProvider>, loadingProvider: IdentityProvider?, onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { providers, loadingProvider, onProviderClick ->
-        IconSocialLoginButtonsSection(providers = providers, loadingProvider = loadingProvider, onProviderClick = onProviderClick)
+    val socialProviders: (
+        @Composable (
+            providers: List<IdentityProvider>,
+            loadingProvider: IdentityProvider?,
+            onProviderClick: (IdentityProvider) -> Unit,
+        ) -> Unit
+    )? = { providers, loadingProvider, onProviderClick ->
+        IconSocialLoginButtonsSection(
+            providers = providers,
+            loadingProvider = loadingProvider,
+            onProviderClick = onProviderClick,
+        )
     },
     val forgotPasswordLink: @Composable (onClick: () -> Unit) -> Unit = { onClick ->
         DefaultForgotPasswordLink(onForgotPasswordClick = onClick)
@@ -93,7 +102,7 @@ data class LoginScreenSlots(
     val registerLink: @Composable (onRegisterClick: () -> Unit) -> Unit = { onRegisterClick ->
         DefaultRegisterLink(onRegisterClick = onRegisterClick)
     },
-    val footer: (@Composable () -> Unit)? = null
+    val footer: (@Composable () -> Unit)? = null,
 )
 
 /**
@@ -107,80 +116,93 @@ data class RegisterScreenSlots(
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultNameField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val emailField: @Composable (
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultEmailField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val passwordField: @Composable (
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultPasswordField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val confirmPasswordField: @Composable (
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultPasswordField(
             value = value,
             onValueChange = onValueChange,
             error = error,
             enabled = enabled,
-            label = stringResource(Res.string.register_screen_confirm_password_label)
+            label = stringResource(Res.string.register_screen_confirm_password_label),
         )
     },
-    val termsCheckbox: @Composable (checked: Boolean, onCheckedChange: (Boolean) -> Unit) -> Unit = { checked, onCheckedChange ->
+    val termsCheckbox: @Composable (
+        checked: Boolean,
+        onCheckedChange: (Boolean) -> Unit,
+    ) -> Unit = { checked, onCheckedChange ->
         DefaultTermsCheckbox(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
         )
     },
     val submitButton: @Composable (
         onClick: () -> Unit,
         isLoading: Boolean,
         enabled: Boolean,
-        text: String
+        text: String,
     ) -> Unit = { onClick, isLoading, enabled, text ->
         DefaultSubmitButton(
             onClick = onClick,
             isLoading = isLoading,
             enabled = enabled,
-            text = text
+            text = text,
         )
     },
-    val socialProviders: (@Composable (providers: List<IdentityProvider>, loadingProvider: IdentityProvider?, onProviderClick: (IdentityProvider) -> Unit) -> Unit)? = { providers, loadingProvider, onProviderClick ->
-        IconSocialLoginButtonsSection(providers = providers, loadingProvider = loadingProvider, onProviderClick = onProviderClick)
+    val socialProviders: (
+        @Composable (
+            providers: List<IdentityProvider>,
+            loadingProvider: IdentityProvider?,
+            onProviderClick: (IdentityProvider) -> Unit,
+        ) -> Unit
+    )? = { providers, loadingProvider, onProviderClick ->
+        IconSocialLoginButtonsSection(
+            providers = providers,
+            loadingProvider = loadingProvider,
+            onProviderClick = onProviderClick,
+        )
     },
     val loginLink: @Composable (onClick: () -> Unit) -> Unit = { onClick -> DefaultLoginLink(onClick) },
     val logo: (@Composable () -> Unit)? = null,
-    val footer: (@Composable () -> Unit)? = null
+    val footer: (@Composable () -> Unit)? = null,
 )
 
 /**
@@ -195,29 +217,29 @@ data class ForgotPasswordScreenSlots(
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultEmailField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val submitButton: @Composable (
         onClick: () -> Unit,
         isLoading: Boolean,
         enabled: Boolean,
-        text: String
+        text: String,
     ) -> Unit = { onClick, isLoading, enabled, text ->
         DefaultSubmitButton(
             onClick = onClick,
             isLoading = isLoading,
             enabled = enabled,
-            text = text
+            text = text,
         )
     },
-    val successContent: @Composable () -> Unit = { DefaultSuccessContent() }
+    val successContent: @Composable () -> Unit = { DefaultSuccessContent() },
 )
 
 /**
@@ -232,48 +254,48 @@ data class ResetPasswordScreenSlots(
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultPasswordField(
             value = value,
             onValueChange = onValueChange,
             error = error,
             enabled = enabled,
-            label = stringResource(Res.string.reset_password_screen_new_password_label)
+            label = stringResource(Res.string.reset_password_screen_new_password_label),
         )
     },
     val confirmPasswordField: @Composable (
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultPasswordField(
             value = value,
             onValueChange = onValueChange,
             error = error,
             enabled = enabled,
-            label = stringResource(Res.string.reset_password_screen_confirm_new_password_label)
+            label = stringResource(Res.string.reset_password_screen_confirm_new_password_label),
         )
     },
     val submitButton: @Composable (
         onClick: () -> Unit,
         isLoading: Boolean,
         enabled: Boolean,
-        text: String
+        text: String,
     ) -> Unit = { onClick, isLoading, enabled, text ->
         DefaultSubmitButton(
             onClick = onClick,
             isLoading = isLoading,
             enabled = enabled,
-            text = text
+            text = text,
         )
     },
     val successContent: @Composable (onContinue: () -> Unit) -> Unit = { onContinue ->
         DefaultSuccessContent(
-            onContinue = onContinue
+            onContinue = onContinue,
         )
-    }
+    },
 )
 
 /**
@@ -305,13 +327,13 @@ data class PhoneAuthScreenSlots(
         onClick: () -> Unit,
         isLoading: Boolean,
         enabled: Boolean,
-        text: String
+        text: String,
     ) -> Unit = { onClick, isLoading, enabled, text ->
         DefaultSubmitButton(
             onClick = onClick,
             isLoading = isLoading,
             enabled = enabled,
-            text = text
+            text = text,
         )
     },
     val otpHeader: @Composable () -> Unit = { DefaultOtpHeader() },
@@ -322,26 +344,26 @@ data class PhoneAuthScreenSlots(
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultOtpField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val verifyButton: @Composable (
         onClick: () -> Unit,
         isLoading: Boolean,
         enabled: Boolean,
-        text: String
+        text: String,
     ) -> Unit = { onClick, isLoading, enabled, text ->
         DefaultSubmitButton(
             onClick = onClick,
             isLoading = isLoading,
             enabled = enabled,
-            text = text
+            text = text,
         )
     },
 )
@@ -356,26 +378,26 @@ data class MagicLinkScreenSlots(
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultEmailField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val submitButton: @Composable (
         onClick: () -> Unit,
         isLoading: Boolean,
         enabled: Boolean,
-        text: String
+        text: String,
     ) -> Unit = { onClick, isLoading, enabled, text ->
         DefaultSubmitButton(onClick = onClick, isLoading = isLoading, enabled = enabled, text = text)
     },
     val successContent: @Composable (email: String) -> Unit = { email ->
         DefaultMagicLinkSuccessContent(email = email)
-    }
+    },
 )
 
 /**
@@ -389,26 +411,26 @@ data class ReauthScreenSlots(
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultEmailField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val passwordField: @Composable (
         value: String,
         onValueChange: (String) -> Unit,
         error: String?,
-        enabled: Boolean
+        enabled: Boolean,
     ) -> Unit = { value, onValueChange, error, enabled ->
         DefaultPasswordField(
             value = value,
             onValueChange = onValueChange,
             error = error,
-            enabled = enabled
+            enabled = enabled,
         )
     },
     val errorMessage: @Composable (message: String) -> Unit = { message ->
@@ -418,24 +440,24 @@ data class ReauthScreenSlots(
         onClick: () -> Unit,
         isLoading: Boolean,
         enabled: Boolean,
-        text: String
+        text: String,
     ) -> Unit = { onClick, isLoading, enabled, text ->
         DefaultSubmitButton(
             onClick = onClick,
             isLoading = isLoading,
             enabled = enabled,
-            text = text
+            text = text,
         )
     },
     val socialSection: @Composable (
         providers: List<IdentityProvider>,
         loadingProvider: IdentityProvider?,
-        onProviderClick: (IdentityProvider) -> Unit
+        onProviderClick: (IdentityProvider) -> Unit,
     ) -> Unit = { providers, loadingProvider, onProviderClick ->
         IconSocialLoginButtonsSection(
             providers = providers,
             loadingProvider = loadingProvider,
-            onProviderClick = onProviderClick
+            onProviderClick = onProviderClick,
         )
     },
 )

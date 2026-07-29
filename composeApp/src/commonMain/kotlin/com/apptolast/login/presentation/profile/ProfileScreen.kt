@@ -53,9 +53,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(
-    viewModel: ProfileViewModel = koinViewModel(),
-) {
+fun ProfileScreen(viewModel: ProfileViewModel = koinViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -65,17 +63,17 @@ fun ProfileScreen(
                     Text(
                         text = "Profile",
                         style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 },
             )
-        }
+        },
     ) { paddingValues ->
         when {
             uiState.isLoading -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
                 }
@@ -85,7 +83,7 @@ fun ProfileScreen(
                 ProfileContent(
                     modifier = Modifier.padding(paddingValues),
                     userSession = uiState.userSession!!,
-                    onAction = viewModel::onAction
+                    onAction = viewModel::onAction,
                 )
             }
         }
@@ -102,7 +100,7 @@ private fun ProfileContent(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()).padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // --- HEADER: FOTO Y NOMBRE ---
         Box(contentAlignment = Alignment.BottomEnd) {
@@ -112,7 +110,7 @@ private fun ProfileContent(
                 modifier = Modifier.size(120.dp).clip(CircleShape).border(
                     width = 2.dp,
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    shape = CircleShape
+                    shape = CircleShape,
                 ),
                 contentScale = ContentScale.Crop,
             )
@@ -123,7 +121,7 @@ private fun ProfileContent(
             modifier = Modifier.size(32.dp),
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primary,
-            tonalElevation = 4.dp
+            tonalElevation = 4.dp,
         ) {
             Icon(
                 imageVector = Icons.Default.Edit,
@@ -135,12 +133,12 @@ private fun ProfileContent(
         Text(
             text = userSession.displayName ?: "Usuario",
             style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.ExtraBold
+            fontWeight = FontWeight.ExtraBold,
         )
         Text(
             text = userSession.email.orEmpty(),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(32.dp))
         // --- CARD: ESTADO DE VERIFICACIÓN ---
@@ -150,24 +148,28 @@ private fun ProfileContent(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            color = bgColor
+            color = bgColor,
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
-                    imageVector = if (userSession.isEmailVerified) Icons.Default.VerifiedUser else Icons.Default.Warning,
+                    imageVector = if (userSession.isEmailVerified) {
+                        Icons.Default.VerifiedUser
+                    } else {
+                        Icons.Default.Warning
+                    },
                     contentDescription = null,
-                    tint = statusColor
+                    tint = statusColor,
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text =
-                        if (userSession.isEmailVerified) "Cuenta verificada" else "Correo no verificado",
+                    if (userSession.isEmailVerified) "Cuenta verificada" else "Correo no verificado",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = statusColor
+                    color = statusColor,
                 )
             }
         }
@@ -177,30 +179,31 @@ private fun ProfileContent(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-            )
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            ),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 ProfileOptionItem(
                     icon = Icons.Default.Person,
                     title = "Detalles de cuenta",
-                    subtitle = "Gestiona tus datos"
+                    subtitle = "Gestiona tus datos",
                 )
                 HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
                 ProfileOptionItem(
                     icon =
-                        Icons.Default.Settings,
+                    Icons.Default.Settings,
                     title = "Ajustes",
-                    subtitle = "Privacidad y notificaciones"
+                    subtitle = "Privacidad y notificaciones",
                 )
                 HorizontalDivider(
                     modifier =
-                        Modifier.padding(vertical = 8.dp), thickness = 0.5.dp
+                    Modifier.padding(vertical = 8.dp),
+                    thickness = 0.5.dp,
                 )
                 ProfileOptionItem(
                     icon = Icons.Default.Security,
                     title = "Seguridad",
-                    subtitle = "Cambiar contraseña"
+                    subtitle = "Cambiar contraseña",
                 )
             }
         }
@@ -211,12 +214,12 @@ private fun ProfileContent(
             onClick = { onAction(ProfileAction.SignOutClicked) },
             modifier = Modifier.fillMaxWidth().height(56.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1A1A))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A1A1A)),
         ) {
             Text(
                 text = "Cerrar Sesión",
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
@@ -227,18 +230,18 @@ private fun ProfileContent(
 private fun ProfileOptionItem(icon: ImageVector, title: String, subtitle: String) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.surface,
-            modifier = Modifier.size(40.dp)
+            modifier = Modifier.size(40.dp),
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.padding(8.dp),
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
@@ -246,20 +249,20 @@ private fun ProfileOptionItem(icon: ImageVector, title: String, subtitle: String
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
         Spacer(modifier = Modifier.weight(1f))
         Icon(
             imageVector =
-                Icons.Default.ChevronRight,
+            Icons.Default.ChevronRight,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
         )
     }
 }

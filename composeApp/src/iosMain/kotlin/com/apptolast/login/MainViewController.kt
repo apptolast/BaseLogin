@@ -12,11 +12,13 @@ import com.apptolast.login.di.appModule
  * Creates the main iOS view controller.
  * Note: Firebase should be initialized in iOSApp.swift (AppDelegate) before this.
  */
+// Swift calls this entry point as MainViewControllerKt.MainViewController(), so it keeps PascalCase.
+@Suppress("ktlint:standard:function-naming")
 fun MainViewController() = ComposeUIViewController(
     configure = {
         // Initialize Koin once when the controller is configured
         initKoinIfNeeded()
-    }
+    },
 ) {
     App()
 }
@@ -29,7 +31,7 @@ private fun initKoinIfNeeded() {
         val loginConfig = LoginLibraryConfig(
             googleSignInConfig = GoogleSignInConfig(
                 webClientId = "495458702268-al98mksrlh27v607972b0oaa0g98pfru.apps.googleusercontent.com",
-                iosClientId = "495458702268-1ekoub6nmp7hmkhinuasdlup1rke9kg4.apps.googleusercontent.com"
+                iosClientId = "495458702268-1ekoub6nmp7hmkhinuasdlup1rke9kg4.apps.googleusercontent.com",
             ),
             appleSignInConfig = AppleSignInConfig(),
             githubEnabled = true,
@@ -38,8 +40,8 @@ private fun initKoinIfNeeded() {
             facebookEnabled = true,
             magicLinkConfig = MagicLinkConfig(
                 continueUrl = "https://apptolast.com/login",
-                iosBundleId = "com.apptolast.login"
-            )
+                iosBundleId = "com.apptolast.login",
+            ),
         )
 
         initLoginKoin(config = loginConfig) {

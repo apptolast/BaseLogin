@@ -1,8 +1,8 @@
 package com.apptolast.customlogin.provider
 
 import com.apptolast.customlogin.util.Logger
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * iOS implementation of Twitter/X Sign-In via Firebase's OAuthProvider web flow.
@@ -48,7 +48,7 @@ object TwitterSignInProviderIOS {
         if (handler == null) {
             Logger.w(
                 "TwitterSignIn",
-                "signInHandler not configured. Set TwitterSignInProviderIOS.signInHandler from Swift."
+                "signInHandler not configured. Set TwitterSignInProviderIOS.signInHandler from Swift.",
             )
             cont.resume(null)
             return@suspendCancellableCoroutine

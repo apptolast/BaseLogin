@@ -1,23 +1,15 @@
 package com.apptolast.customlogin.presentation.phone
 
+import com.apptolast.customlogin.di.LoginLibraryConfig
+import com.apptolast.customlogin.di.PhoneAuthConfig
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
-import com.apptolast.customlogin.di.LoginLibraryConfig
-import com.apptolast.customlogin.di.PhoneAuthConfig
 import com.apptolast.customlogin.presentation.screens.phone.PhoneAuthAction
 import com.apptolast.customlogin.presentation.screens.phone.PhoneAuthEffect
 import com.apptolast.customlogin.presentation.screens.phone.PhoneAuthViewModel
 import com.apptolast.customlogin.test.FakeAuthRepository
 import com.apptolast.customlogin.util.ValidationError
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -26,6 +18,14 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class PhoneAuthViewModelTest {
@@ -56,7 +56,7 @@ class PhoneAuthViewModelTest {
     fun `init uses configured default country code`() {
         val configuredViewModel = PhoneAuthViewModel(
             repo,
-            LoginLibraryConfig(phoneAuthConfig = PhoneAuthConfig(defaultCountryCode = "+34"))
+            LoginLibraryConfig(phoneAuthConfig = PhoneAuthConfig(defaultCountryCode = "+34")),
         )
 
         assertEquals("+34", configuredViewModel.uiState.value.countryCode)

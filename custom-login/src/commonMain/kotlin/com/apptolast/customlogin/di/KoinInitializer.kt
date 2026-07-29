@@ -36,14 +36,12 @@ fun loginConfigModule(config: LoginLibraryConfig = LoginLibraryConfig()): Module
  * @param config Login library configuration.
  * @param authProvider Optional custom auth provider. When null, the Firebase provider is registered.
  */
-fun loginModules(
-    config: LoginLibraryConfig = LoginLibraryConfig(),
-    authProvider: AuthProvider? = null,
-): List<Module> = listOf(
-    loginConfigModule(config),
-    loginDataModule(authProvider),
-    loginPresentationModule,
-)
+fun loginModules(config: LoginLibraryConfig = LoginLibraryConfig(), authProvider: AuthProvider? = null): List<Module> =
+    listOf(
+        loginConfigModule(config),
+        loginDataModule(authProvider),
+        loginPresentationModule,
+    )
 
 /**
  * Loads the login modules into an already started Koin application.

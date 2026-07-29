@@ -77,14 +77,17 @@ fun DefaultEmailField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = imeAction),
         keyboardActions = KeyboardActions(
             onNext = { focusManager.moveFocus(FocusDirection.Down) },
-            onDone = { onImeAction(); focusManager.clearFocus() },
+            onDone = {
+                onImeAction()
+                focusManager.clearFocus()
+            },
         ),
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it) } },
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
     )
 }
 
@@ -121,7 +124,7 @@ fun DefaultPasswordField(
             IconButton(onClick = { isVisible = !isVisible }) {
                 Icon(
                     imageVector = if (isVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                    contentDescription = if (isVisible) hidePasswordRes else showPasswordRes
+                    contentDescription = if (isVisible) hidePasswordRes else showPasswordRes,
                 )
             }
         },
@@ -129,14 +132,17 @@ fun DefaultPasswordField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = imeAction),
         keyboardActions = KeyboardActions(
             onNext = { focusManager.moveFocus(FocusDirection.Down) },
-            onDone = { onImeAction(); focusManager.clearFocus() },
+            onDone = {
+                onImeAction()
+                focusManager.clearFocus()
+            },
         ),
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it) } },
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
     )
 }
 
@@ -176,7 +182,7 @@ fun DefaultNameField(
         supportingText = error?.let { { Text(it) } },
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
     )
 }
 
@@ -198,7 +204,7 @@ fun DefaultPhoneField(
     enabled: Boolean,
     countryCode: String = "+1",
     onCountryCodeChange: (String) -> Unit = {},
-    label: String = stringResource(Res.string.phone_auth_screen_phone_label)
+    label: String = stringResource(Res.string.phone_auth_screen_phone_label),
 ) {
     var expanded by remember { mutableStateOf(false) }
     val countryCodeLabel = stringResource(Res.string.phone_auth_screen_country_code_label)
@@ -288,13 +294,16 @@ fun DefaultOtpField(
             imeAction = ImeAction.Done,
         ),
         keyboardActions = KeyboardActions(
-            onDone = { onDone(); focusManager.clearFocus() },
+            onDone = {
+                onDone()
+                focusManager.clearFocus()
+            },
         ),
         singleLine = true,
         isError = error != null,
         supportingText = error?.let { { Text(it) } },
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
     )
 }

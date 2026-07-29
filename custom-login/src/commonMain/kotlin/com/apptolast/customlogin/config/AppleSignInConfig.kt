@@ -10,6 +10,4 @@ package com.apptolast.customlogin.config
  * Sign in with Apple entitlement automatically. This class acts as a marker
  * to enable the provider in [com.apptolast.customlogin.di.LoginLibraryConfig].
  */
-data class AppleSignInConfig(
-    val scopes: List<String> = listOf("email", "name")
-)
+data class AppleSignInConfig(val scopes: List<String> = listOf("email", "name"))

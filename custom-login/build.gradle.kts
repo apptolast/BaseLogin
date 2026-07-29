@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     id("maven-publish")
+    alias(libs.plugins.ktlint.jlleitschuh)
 }
 
 group = "com.github.apptolast"
@@ -102,7 +103,9 @@ afterEvaluate {
             }
             pom {
                 name.set("BaseLogin")
-                description.set("Composable Kotlin Multiplatform authentication library with Firebase defaults and replaceable auth providers.")
+                description.set(
+                    "Composable Kotlin Multiplatform authentication library with Firebase defaults and replaceable auth providers.",
+                )
                 url.set("https://github.com/apptolast/BaseLogin")
                 licenses {
                     license {
@@ -124,4 +127,10 @@ afterEvaluate {
             }
         }
     }
+}
+
+ktlint {
+    android = false
+    ignoreFailures = false
+    outputToConsole = true
 }

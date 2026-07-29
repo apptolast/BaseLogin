@@ -14,10 +14,7 @@ const val DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS = 60L
  * @property rejectBlank If true, passwords containing only whitespace are rejected even when they
  * meet [minLength].
  */
-data class PasswordPolicyConfig(
-    val minLength: Int = DEFAULT_PASSWORD_MIN_LENGTH,
-    val rejectBlank: Boolean = true,
-)
+data class PasswordPolicyConfig(val minLength: Int = DEFAULT_PASSWORD_MIN_LENGTH, val rejectBlank: Boolean = true)
 
 /**
  * Phone authentication settings used by the default phone auth UI and Firebase provider.

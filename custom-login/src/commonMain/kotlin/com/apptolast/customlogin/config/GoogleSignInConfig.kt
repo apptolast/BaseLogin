@@ -8,7 +8,4 @@ package com.apptolast.customlogin.config
  * @property iosClientId The iOS Client ID from Firebase/Google Cloud Console.
  *                       Only required for iOS platform.
  */
-data class GoogleSignInConfig(
-    val webClientId: String,
-    val iosClientId: String? = null
-)
+data class GoogleSignInConfig(val webClientId: String, val iosClientId: String? = null)
