@@ -286,6 +286,18 @@ que ocurrir en `/test`** — en `/implement` un hook bloquea los ficheros de tes
 | **D-4** | **Versiones**: BaseLogin fija GitLive 2.4.0 y BOM 34.14.1; Fledge usa 2.5.0 y BOM 33.15.0. | No tocarlas en este ticket. Verificado en FLE-88 que Gradle eleva el transitivo a 2.5.0 sin conflicto y que compila y enlaza. Alinearlas es un ticket propio. |
 | **D-5** | El working tree tiene cambios sin commitear en `iosApp/`: `project.pbxproj` con `DEVELOPMENT_TEAM = 3NXH5U7C5A` sustituyendo al placeholder `${TEAM_ID}` y `CODE_SIGN_STYLE = Manual`, más un `iosApp.entitlements` nuevo con la capacidad Apple Sign-In. | **Decisión del usuario.** El `entitlements` parece legítimo y útil; el team id hardcodeado parece artefacto local que no debería commitearse. No se tocan en este ticket: están en la app de demo, no en `:custom-login`. |
 
+## Evidencia del smoke manual (29-07-2026)
+
+Ejecutado por el usuario sobre la app de demostración: **el login funciona correctamente**. Con eso
+quedan cubiertos los dos comportamientos que ningún test automático puede alcanzar, porque dependen
+de APIs de plataforma y de credenciales reales:
+
+- Android: Credential Manager y la reaparición del selector de cuenta tras `signOut()`.
+- iOS: `ASAuthorizationController` y la propagación del nombre de Apple al perfil.
+
+Es el complemento necesario a los 245 tests: el puerto prueba la lógica del provider, el smoke prueba
+que el adaptador habla de verdad con el SDK.
+
 ## Trazabilidad
 
 Suite completa del modulo: **245 tests, 0 fallos**. Los 18 nuevos estuvieron en rojo con
