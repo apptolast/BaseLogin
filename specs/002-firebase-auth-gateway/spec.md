@@ -288,20 +288,25 @@ que ocurrir en `/test`** — en `/implement` un hook bloquea los ficheros de tes
 
 ## Trazabilidad
 
+Suite completa del modulo: **245 tests, 0 fallos**. Los 18 nuevos estuvieron en rojo con
+`kotlin.NotImplementedError` en el commit `aa4915b` y pasaron a verde en `9273b0d`.
+
 | AC | Test(s) que lo cubren | ¿Rojo antes de implementar? |
 |----|-----------------------|------------------------------|
-| AC-01 | *(no unitario)* — grep de `dev.gitlive` sobre `commonTest` + inspección de la firma del puerto | n/a — verificable por inspección |
-| AC-02 | `LoginDataModuleTest` · `` `FLE-90 koin graph resolves auth provider without touching the sdk` `` | sí — pendiente de `/test` |
-| AC-03 | `FirebaseAuthProviderTest` · `` `FLE-90 email password sign in delegates to the gateway` `` | sí — pendiente de `/test` |
-| AC-04 | `FirebaseAuthProviderTest` · `` `FLE-90 sign up propagates the display name to the profile` `` | sí — pendiente de `/test` |
-| AC-05 | `FirebaseAuthProviderTest` · `` `FLE-90 google sign in forwards id token and access token` `` | sí — pendiente de `/test` |
-| AC-06 | `FirebaseAuthProviderTest` · `` `FLE-90 apple sign in forwards id token and raw nonce` `` | sí — pendiente de `/test` |
-| AC-07 | `FirebaseAuthProviderTest` · `` `FLE-90 apple sign in propagates the display name` `` | sí — pendiente de `/test` |
-| AC-08 | `FirebaseAuthProviderTest` · `` `FLE-90 legacy apple token format still signs in` `` | sí — pendiente de `/test` |
-| AC-09 | `FirebaseAuthProviderTest` · `` `FLE-90 sdk failures map to typed auth errors` `` | sí — pendiente de `/test` |
-| AC-10 | `FirebaseAuthProviderTest` · `` `FLE-90 sign out clears the platform social state` `` | sí — pendiente de `/test` |
-| AC-11 | `FirebaseAuthProviderTest` · `` `FLE-90 auth state stream mirrors the sdk` `` | sí — pendiente de `/test` |
-| AC-12 | *(no unitario)* — `ktlintCheck`, `:custom-login:testDebugUnitTest`, `:custom-login:linkDebugFrameworkIosSimulatorArm64`, `:composeApp:assembleDebug` | n/a — verificable por build |
+| AC-01 | *(no unitario)* — `grep -rn "dev.gitlive" custom-login/src/commonTest/` → **0**, y un solo fichero de `commonMain` lo importa: `GitLiveFirebaseAuthGateway.kt` | n/a — verificable por inspección |
+| AC-02 | *(no unitario)* — `loginDataModule` registra el gateway sin `createdAtStart`; el adaptador resuelve `Firebase.auth` en un getter | n/a — verificable por inspección |
+| AC-03 | `` `FLE-90 email password sign in delegates to the gateway` `` | **sí** — `NotImplementedError` |
+| AC-04 | `` `FLE-90 sign up propagates the display name to the profile` ``, `` `…without display name does not touch the profile` `` | **sí** |
+| AC-05 | `` `FLE-90 google sign in forwards id token and access token` `` | **sí** |
+| AC-06 | `` `FLE-90 apple sign in forwards id token and raw nonce` `` | **sí** |
+| AC-07 | `` `FLE-90 apple sign in propagates the display name` ``, `` `…keeps an existing display name` `` | **sí** |
+| AC-08 | `` `FLE-90 legacy apple token format still signs in` ``, `` `FLE-90 bare apple token without nonce still signs in` `` | **sí** |
+| AC-09 | `` `FLE-90 network failures map to NetworkError and not to Unknown` ``, `` `…wrong password maps to InvalidCredentials` ``, `` `…too many requests maps to TooManyRequests` ``, más los **43 tests existentes** de `DataMapperTest` | **sí** |
+| AC-10 | `` `FLE-90 sign out clears the platform social state` `` | **sí** |
+| AC-11 | `` `FLE-90 auth state stream starts with Loading` `` | **sí** |
+| AC-12 | *(no unitario)* — `ktlintCheck`, `:custom-login:testDebugUnitTest`, `:composeApp:linkDebugFrameworkIosSimulatorArm64`, `:composeApp:assembleDebug`, `xcodebuild` | n/a — verificable por build |
+| **extra** | `` `FLE-90 get current session reads the cache without requesting a token` `` — cubre el cuarto defecto encontrado en `/plan`: el contrato dice «MUST NOT perform network I/O» | **sí** |
+| **extra** | `` `FLE-90 cancelled social sign in never touches the gateway` ``, `` `FLE-90 password reset delegates the email to the gateway` `` | **sí** |
 
 > Nota para `/validate`: los ACs marcados «n/a» **no** deben bloquear el gate de trazabilidad por
 > falta de test rojo previo; se validan con el comando indicado en la misma fila.
