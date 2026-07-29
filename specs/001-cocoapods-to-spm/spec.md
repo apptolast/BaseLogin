@@ -237,9 +237,12 @@ que sí toca Kotlin; esta feature apenas toca `.kts`.
 > tiempo de ejecución, y que la build phase «Compile Kotlin Framework» produce un framework válido —
 > si fallara, la app no pintaría nada.
 >
-> **Lo que NO queda probado**: completar un login real con Google o con Apple. Requiere credenciales y
-> la interacción de una persona, así que sigue pendiente de ejecución manual. La UI muestra los
-> botones, pero eso no demuestra que el flujo termine en sesión.
+> **Login real, confirmado por el usuario (29-07-2026)**: se completó el inicio de sesión y la app
+> llega a la pantalla de perfil con la cuenta autenticada y marcada como *Cuenta verificada*. Con eso
+> AC-09 queda cerrado: los flujos de autenticación funcionan sobre la integración SPM, sin CocoaPods.
+>
+> Es el único punto del spec que no podía verificar el agente: requiere credenciales reales y la
+> interacción de una persona.
 
 ## Decisiones abiertas (🚦 Gate 1)
 
@@ -263,7 +266,7 @@ que sí toca Kotlin; esta feature apenas toca `.kts`.
 | AC-06 | *(no unitario)* — `xcodebuild` con DerivedData limpio | n/a — verificable por build |
 | AC-07 | *(no unitario)* — inspección de `project.pbxproj` y `git ls-files` del entitlements | n/a — verificable por build |
 | AC-08 | *(no unitario)* — `:composeApp:assembleDebug`, `:custom-login:testDebugUnitTest` | n/a — verificable por build |
-| AC-09 | *(no unitario)* — smoke manual en el simulador | n/a — **parcial**, ver evidencia abajo |
+| AC-09 | *(no unitario)* — smoke manual en el simulador | n/a — ✅ **completo**, ver evidencia abajo |
 
 > Nota para `/validate`: **ningún AC de este spec es verificable con un test unitario**, y no se
 > escriben tests de mentira para rellenar la tabla. Es una migración de configuración de build. El
