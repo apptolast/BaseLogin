@@ -90,3 +90,11 @@ actual suspend fun sendPhoneVerificationCode(phoneNumber: String, timeoutSeconds
  */
 actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): AuthResult =
     PhoneAuthProviderIOS.verifyCode(verificationId, otpCode)
+
+/**
+ * No-op on iOS: neither ASAuthorizationController nor GIDSignIn cache an account selection that
+ * survives sign-out the way Credential Manager does on Android.
+ */
+actual suspend fun clearSocialSignInState() {
+    // Intentionally empty.
+}

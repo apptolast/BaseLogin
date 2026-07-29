@@ -63,3 +63,12 @@ expect suspend fun sendPhoneVerificationCode(
  * @return [AuthResult.Success] on successful sign-in, or [AuthResult.Failure] on error.
  */
 expect suspend fun verifyPhoneCode(verificationId: String, otpCode: String): AuthResult
+
+/**
+ * Clears any social sign-in state cached by the platform, so the next sign-in starts clean.
+ *
+ * On Android, Credential Manager caches the chosen Google account: without this, after
+ * `signOut()` the account picker does not reappear and the user cannot switch accounts.
+ * On iOS this is a no-op — Apple does not cache the selection the same way.
+ */
+expect suspend fun clearSocialSignInState()

@@ -1,44 +1,29 @@
 package com.apptolast.customlogin.data
 
 import com.apptolast.customlogin.data.FirebaseAuthProvider.Companion.PROVIDER_ID
+import com.apptolast.customlogin.data.firebase.FirebaseAuthUser
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.UserSession
-import com.apptolast.customlogin.util.Logger
-import dev.gitlive.firebase.auth.FirebaseAuthException
-import dev.gitlive.firebase.auth.FirebaseUser
 
 /**
- * Maps a [FirebaseUser] to a domain [UserSession] object.
+ * Maps a [FirebaseAuthUser] to a domain [UserSession].
  *
- * [uid] is always available from the local Firebase cache without a network call.
- * [getIdToken] is a network operation that can throw if offline or if the token
- * has expired and cannot be refreshed. The token failure is isolated so that
- * callers that only need [UserSession.userId] (e.g. ConfirmParkingUseCase during
- * a background detection session) are not incorrectly treated as unauthenticated.
+ * [accessToken] is passed in by the caller rather than fetched here, because obtaining one is a
+ * potentially networked operation: `AuthProvider.getCurrentSession` documents that it MUST NOT
+ * perform network I/O, so it maps with a null token and callers that need one use
+ * `getIdToken(forceRefresh)`.
  */
-internal suspend fun FirebaseUser.toUserSession(accessToken: String? = null): UserSession {
-    val token = if (accessToken != null) {
-        accessToken
-    } else {
-        try {
-            getIdToken(false)
-        } catch (_: Exception) {
-            Logger.w("DataMapper", "getIdToken failed — session returned without accessToken")
-            null
-        }
-    }
-    return UserSession(
-        userId = uid,
-        email = email,
-        displayName = displayName,
-        photoUrl = photoURL,
-        isEmailVerified = isEmailVerified,
-        providerId = PROVIDER_ID,
-        accessToken = token,
-        refreshToken = null,
-        expiresAt = null,
-    )
-}
+internal fun FirebaseAuthUser.toUserSession(accessToken: String? = null): UserSession = UserSession(
+    userId = uid,
+    email = email,
+    displayName = displayName,
+    photoUrl = photoUrl,
+    isEmailVerified = isEmailVerified,
+    providerId = PROVIDER_ID,
+    accessToken = accessToken,
+    refreshToken = null,
+    expiresAt = null,
+)
 
 /**
  * Maps a Firebase error message string to a domain [AuthError].
@@ -130,13 +115,3 @@ internal fun mapFirebaseErrorMessage(errorMessage: String): AuthError = when {
 }
 
 private fun String.containsAny(vararg values: String): Boolean = values.any { this.contains(it, ignoreCase = true) }
-
-/**
- * Maps a [FirebaseAuthException] to a domain [AuthError] object.
- * Falls back to [cause] message if the primary message is missing.
- */
-internal fun FirebaseAuthException.toAuthError(): AuthError {
-    val message = (message?.trim()?.ifBlank { null } ?: cause?.message?.trim())
-        ?: "Authentication error"
-    return mapFirebaseErrorMessage(message)
-}

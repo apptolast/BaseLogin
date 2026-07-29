@@ -1,6 +1,8 @@
 package com.apptolast.customlogin
 
 import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
 import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.di.LoginLibraryConfig
@@ -212,3 +214,18 @@ actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): Aut
                 }
             }
     }
+
+/**
+ * Clears Credential Manager's cached credential state.
+ *
+ * Without this, after signing out of Firebase the Google account picker does not reappear, because
+ * Credential Manager keeps returning the previously chosen account, and the user cannot switch.
+ */
+actual suspend fun clearSocialSignInState() {
+    try {
+        CredentialManager.create(appContext).clearCredentialState(ClearCredentialStateRequest())
+    } catch (e: Exception) {
+        // Never fail sign-out because of this: the Firebase session is already gone.
+        Logger.w("Platform", "clearCredentialState failed: ${e.message}")
+    }
+}
