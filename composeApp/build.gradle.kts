@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.google.services) // Required for native Firebase SDK
-    alias(libs.plugins.kotlin.cocoapods)
     alias(libs.plugins.kotlinx.serialization) // Required for type-safe navigation in this module
 }
 
@@ -18,8 +17,18 @@ kotlin {
         }
     }
 
-    iosArm64()
-    iosSimulatorArm64()
+    // Native iOS dependencies come from SPM in iosApp.xcodeproj, not from CocoaPods.
+    // Xcode compiles this framework through the "Compile Kotlin Framework" build phase.
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64(),
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+            export(project(":custom-login"))
+        }
+    }
 
     sourceSets {
         val commonMain by getting {
@@ -71,32 +80,6 @@ kotlin {
         }
     }
 
-    cocoapods {
-        name = "ComposeApp"
-        version = "1.0.0"
-        summary = "Login con firebase"
-        homepage = "https://apptolast.com"
-        ios.deploymentTarget = "26.1"
-
-        framework {
-            baseName = "ComposeApp"
-            isStatic = true
-            export(project(":custom-login"))
-        }
-
-        pod("FirebaseCore") {            
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
-
-        pod("FirebaseAuth") {
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
-
-        pod("GoogleSignIn") {
-            version = "~> 9.0"
-            extraOpts += listOf("-compiler-option", "-fmodules")
-        }
-    }
 }
 
 android {

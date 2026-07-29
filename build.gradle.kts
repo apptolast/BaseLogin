@@ -7,5 +7,4 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.google.services) apply false
-    alias(libs.plugins.kotlin.cocoapods) apply false
 }
