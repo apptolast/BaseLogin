@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     id("maven-publish")
+    alias(libs.plugins.ktlint.jlleitschuh)
 }
 
 group = "com.github.apptolast"
@@ -124,4 +125,10 @@ afterEvaluate {
             }
         }
     }
+}
+
+ktlint {
+    android = false
+    ignoreFailures = false
+    outputToConsole = true
 }

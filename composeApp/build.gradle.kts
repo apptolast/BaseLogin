@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.google.services) // Required for native Firebase SDK
     alias(libs.plugins.kotlinx.serialization) // Required for type-safe navigation in this module
+    alias(libs.plugins.ktlint.jlleitschuh)
 }
 
 kotlin {
@@ -114,4 +115,10 @@ android {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+}
+
+ktlint {
+    android = false
+    ignoreFailures = false
+    outputToConsole = true
 }

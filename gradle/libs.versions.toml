@@ -26,6 +26,7 @@ kotlinStdlib = "2.4.0"
 runner = "1.7.0"
 core = "1.7.0"
 gitlive-firebase = "2.5.0"
+ktlintJlleitschuh = "14.0.1"
 firebase-bom = "34.14.1"
 firebase-appcheck-debug = "19.2.0"
 firebase-appcheck-playintegrity = "19.2.0"
@@ -87,3 +88,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 gitlive-firebase = { id = "dev.gitlive.firebase.plugin", version.ref = "gitlive-firebase" }
+ktlint-jlleitschuh = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintJlleitschuh" }
