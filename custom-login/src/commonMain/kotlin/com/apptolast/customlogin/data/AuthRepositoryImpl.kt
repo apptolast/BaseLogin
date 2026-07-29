@@ -19,10 +19,8 @@ import kotlinx.coroutines.flow.Flow
  * Implementation of AuthRepository that delegates to an AuthProvider.
  * This allows swapping between Firebase, Supabase, or custom backends.
  */
-class AuthRepositoryImpl(
-    private val authProvider: AuthProvider,
-    private val config: LoginLibraryConfig
-) : AuthRepository {
+class AuthRepositoryImpl(private val authProvider: AuthProvider, private val config: LoginLibraryConfig) :
+    AuthRepository {
 
     // ── Provider Identity ─────────────────────────────────────────────────────
 
@@ -33,83 +31,53 @@ class AuthRepositoryImpl(
     // ── Session Observation ───────────────────────────────────────────────────
 
     /** Continuous stream of auth state changes — used by the host app to react to sign-in/out. */
-    override fun observeAuthState(): Flow<AuthState> {
-        return authProvider.observeAuthState()
-    }
+    override fun observeAuthState(): Flow<AuthState> = authProvider.observeAuthState()
 
     /** Returns the active [UserSession] from the provider's local cache, or null if not signed in. */
-    override suspend fun getCurrentSession(): UserSession? {
-        return authProvider.getCurrentSession()
-    }
+    override suspend fun getCurrentSession(): UserSession? = authProvider.getCurrentSession()
 
     // ── Core Auth Flows ───────────────────────────────────────────────────────
     // Used by LoginViewModel, RegisterViewModel, ReauthViewModel, and the host app.
 
-    override suspend fun signIn(credentials: Credentials): AuthResult {
-        return authProvider.signIn(credentials)
-    }
+    override suspend fun signIn(credentials: Credentials): AuthResult = authProvider.signIn(credentials)
 
-    override suspend fun signUp(data: SignUpData): AuthResult {
-        return authProvider.signUp(data)
-    }
+    override suspend fun signUp(data: SignUpData): AuthResult = authProvider.signUp(data)
 
-    override suspend fun signOut(): Result<Unit> {
-        return authProvider.signOut()
-    }
+    override suspend fun signOut(): Result<Unit> = authProvider.signOut()
 
-    override suspend fun reauthenticate(credentials: Credentials): AuthResult {
-        return authProvider.reauthenticate(credentials)
-    }
+    override suspend fun reauthenticate(credentials: Credentials): AuthResult = authProvider.reauthenticate(credentials)
 
     // ── Password Reset ────────────────────────────────────────────────────────
     // Used by ForgotPasswordViewModel and ResetPasswordViewModel.
 
-    override suspend fun sendPasswordResetEmail(email: String): AuthResult {
-        return authProvider.sendPasswordResetEmail(email)
-    }
+    override suspend fun sendPasswordResetEmail(email: String): AuthResult = authProvider.sendPasswordResetEmail(email)
 
-    override suspend fun confirmPasswordReset(data: PasswordResetData): AuthResult {
-        return authProvider.confirmPasswordReset(data.code, data.newPassword)
-    }
+    override suspend fun confirmPasswordReset(data: PasswordResetData): AuthResult =
+        authProvider.confirmPasswordReset(data.code, data.newPassword)
 
     // ── Session / Token Management ────────────────────────────────────────────
     // Primarily used by the host app for backend verification and session checks.
 
-    override suspend fun refreshSession(): AuthResult {
-        return authProvider.refreshSession()
-    }
+    override suspend fun refreshSession(): AuthResult = authProvider.refreshSession()
 
-    override suspend fun isSignedIn(): Boolean {
-        return authProvider.isSignedIn()
-    }
+    override suspend fun isSignedIn(): Boolean = authProvider.isSignedIn()
 
     /** Returns a short-lived JWT for backend verification. Pass forceRefresh=true to bypass cache. */
-    override suspend fun getIdToken(forceRefresh: Boolean): String? {
-        return authProvider.getIdToken(forceRefresh)
-    }
+    override suspend fun getIdToken(forceRefresh: Boolean): String? = authProvider.getIdToken(forceRefresh)
 
     // ── Account Management ────────────────────────────────────────────────────
     // Consumer-facing API — not used internally by this library's own screens.
 
-    override suspend fun deleteAccount(): Result<Unit> {
-        return authProvider.deleteAccount()
-    }
+    override suspend fun deleteAccount(): Result<Unit> = authProvider.deleteAccount()
 
-    override suspend fun updateDisplayName(displayName: String): Result<Unit> {
-        return authProvider.updateDisplayName(displayName)
-    }
+    override suspend fun updateDisplayName(displayName: String): Result<Unit> =
+        authProvider.updateDisplayName(displayName)
 
-    override suspend fun updateEmail(newEmail: String): Result<Unit> {
-        return authProvider.updateEmail(newEmail)
-    }
+    override suspend fun updateEmail(newEmail: String): Result<Unit> = authProvider.updateEmail(newEmail)
 
-    override suspend fun updatePassword(newPassword: String): Result<Unit> {
-        return authProvider.updatePassword(newPassword)
-    }
+    override suspend fun updatePassword(newPassword: String): Result<Unit> = authProvider.updatePassword(newPassword)
 
-    override suspend fun sendEmailVerification(): Result<Unit> {
-        return authProvider.sendEmailVerification()
-    }
+    override suspend fun sendEmailVerification(): Result<Unit> = authProvider.sendEmailVerification()
 
     // ── Provider Discovery ────────────────────────────────────────────────────
 
@@ -117,44 +85,43 @@ class AuthRepositoryImpl(
      * Returns the list of identity providers enabled in [LoginLibraryConfig].
      * Used by LoginScreen and RegisterScreen to render the social button section.
      */
-    override fun getAvailableProviders(): List<IdentityProvider> {
-        return buildList {
-            if (config.googleSignInConfig != null) add(IdentityProvider.Google)
-            if (config.appleSignInConfig != null) add(IdentityProvider.Apple)
-            if (config.isGitHubAuthEnabled) add(IdentityProvider.GitHub)
-            if (config.isMicrosoftAuthEnabled) add(IdentityProvider.Microsoft)
-            if (config.magicLinkConfig != null) add(IdentityProvider.MagicLink)
-            if (config.isPhoneAuthEnabled) add(IdentityProvider.Phone)
-            if (config.isTwitterAuthEnabled) add(IdentityProvider.Twitter)
-            if (config.isFacebookAuthEnabled) add(IdentityProvider.Facebook)
-        }
+    override fun getAvailableProviders(): List<IdentityProvider> = buildList {
+        if (config.googleSignInConfig != null) add(IdentityProvider.Google)
+        if (config.appleSignInConfig != null) add(IdentityProvider.Apple)
+        if (config.isGitHubAuthEnabled) add(IdentityProvider.GitHub)
+        if (config.isMicrosoftAuthEnabled) add(IdentityProvider.Microsoft)
+        if (config.magicLinkConfig != null) add(IdentityProvider.MagicLink)
+        if (config.isPhoneAuthEnabled) add(IdentityProvider.Phone)
+        if (config.isTwitterAuthEnabled) add(IdentityProvider.Twitter)
+        if (config.isFacebookAuthEnabled) add(IdentityProvider.Facebook)
     }
 
     // ── Phone Auth ────────────────────────────────────────────────────────────
     // Used by PhoneAuthViewModel.
 
-    override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult {
-        return if (authProvider is PhoneAuthTimeoutProvider) {
+    override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult =
+        if (authProvider is PhoneAuthTimeoutProvider) {
             authProvider.sendPhoneOtp(phoneNumber, config.phoneAuthConfig.timeoutSeconds)
         } else {
             authProvider.sendPhoneOtp(phoneNumber)
         }
-    }
 
-    override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult {
-        return authProvider.verifyPhoneOtp(verificationId, otpCode)
-    }
+    override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult =
+        authProvider.verifyPhoneOtp(verificationId, otpCode)
 
     // ── Magic Link ────────────────────────────────────────────────────────────
     // Used by MagicLinkViewModel. Requires MagicLinkConfig to be set in LoginLibraryConfig.
 
     override suspend fun sendMagicLink(email: String): AuthResult {
         val mlConfig = config.magicLinkConfig
-            ?: return AuthResult.Failure(AuthError.OperationNotAllowed("Magic Link is not configured. Provide MagicLinkConfig in LoginLibraryConfig."))
+            ?: return AuthResult.Failure(
+                AuthError.OperationNotAllowed(
+                    "Magic Link is not configured. Provide MagicLinkConfig in LoginLibraryConfig.",
+                ),
+            )
         return authProvider.sendMagicLink(email, mlConfig.continueUrl, mlConfig.iosBundleId)
     }
 
-    override suspend fun signInWithMagicLink(email: String, link: String): AuthResult {
-        return authProvider.signInWithMagicLink(email, link)
-    }
+    override suspend fun signInWithMagicLink(email: String, link: String): AuthResult =
+        authProvider.signInWithMagicLink(email, link)
 }

@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * Minimal [AuthProvider] test double used in [AuthRepositoryImpl] unit tests.
  * Configure individual results before each test as needed.
  */
-class FakeAuthProvider : AuthProvider, PhoneAuthTimeoutProvider {
+class FakeAuthProvider :
+    AuthProvider,
+    PhoneAuthTimeoutProvider {
 
     override val id: String = "fake"
 
@@ -40,15 +42,16 @@ class FakeAuthProvider : AuthProvider, PhoneAuthTimeoutProvider {
     var sendMagicLinkResult: AuthResult = AuthResult.MagicLinkSent
     var signInWithMagicLinkResult: AuthResult = AuthResult.Success(fakeSession())
 
-    private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
+    private val authStateFlow = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
 
-    override fun observeAuthState(): Flow<AuthState> = _authState
+    override fun observeAuthState(): Flow<AuthState> = authStateFlow
 
     override suspend fun signIn(credentials: Credentials): AuthResult = signInResult
     override suspend fun signUp(data: SignUpData): AuthResult = signUpResult
     override suspend fun signOut(): Result<Unit> = signOutResult
     override suspend fun sendPasswordResetEmail(email: String): AuthResult = sendPasswordResetEmailResult
-    override suspend fun confirmPasswordReset(code: String, newPassword: String): AuthResult = confirmPasswordResetResult
+    override suspend fun confirmPasswordReset(code: String, newPassword: String): AuthResult =
+        confirmPasswordResetResult
     override suspend fun getCurrentSession(): UserSession? = getCurrentSessionResult
     override suspend fun refreshSession(): AuthResult = refreshSessionResult
     override suspend fun isSignedIn(): Boolean = isSignedInResult
@@ -72,14 +75,13 @@ class FakeAuthProvider : AuthProvider, PhoneAuthTimeoutProvider {
     override suspend fun signInWithMagicLink(email: String, link: String): AuthResult = signInWithMagicLinkResult
 
     companion object {
-        fun fakeSession(userId: String = "fake-user-id", email: String = "test@example.com") =
-            UserSession(
-                userId = userId,
-                email = email,
-                displayName = "Test User",
-                isEmailVerified = true,
-                providerId = "fake",
-                accessToken = "fake-token",
-            )
+        fun fakeSession(userId: String = "fake-user-id", email: String = "test@example.com") = UserSession(
+            userId = userId,
+            email = email,
+            displayName = "Test User",
+            isEmailVerified = true,
+            providerId = "fake",
+            accessToken = "fake-token",
+        )
     }
 }

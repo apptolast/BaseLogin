@@ -1,9 +1,9 @@
 package com.apptolast.customlogin
 
+import com.apptolast.customlogin.di.DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
-import com.apptolast.customlogin.di.DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS
 
 expect fun platform(): String
 
@@ -52,7 +52,7 @@ expect suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
  */
 expect suspend fun sendPhoneVerificationCode(
     phoneNumber: String,
-    timeoutSeconds: Long = DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS
+    timeoutSeconds: Long = DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS,
 ): PhoneAuthResult
 
 /**

@@ -21,10 +21,8 @@ import kotlinx.coroutines.launch
  * ViewModel for the Register screen using MVI pattern.
  * Handles business logic and exposes state and effects to the UI.
  */
-class RegisterViewModel(
-    private val authRepository: AuthRepository,
-    private val config: LoginLibraryConfig,
-) : ViewModel() {
+class RegisterViewModel(private val authRepository: AuthRepository, private val config: LoginLibraryConfig) :
+    ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState = _uiState.asStateFlow()
@@ -108,7 +106,7 @@ class RegisterViewModel(
                 fullNameError = validationErrors.fullNameError,
                 emailError = validationErrors.emailError,
                 passwordError = validationErrors.passwordError,
-                confirmPasswordError = validationErrors.confirmPasswordError
+                confirmPasswordError = validationErrors.confirmPasswordError,
             )
         }
 
@@ -151,7 +149,7 @@ class RegisterViewModel(
             !Validators.isValidPassword(
                 password = state.password,
                 minLength = config.passwordPolicy.minLength,
-                rejectBlank = config.passwordPolicy.rejectBlank
+                rejectBlank = config.passwordPolicy.rejectBlank,
             ) -> ValidationError.PasswordTooShort
             else -> null
         }
@@ -164,7 +162,7 @@ class RegisterViewModel(
             fullNameError = fullNameError,
             emailError = emailError,
             passwordError = passwordError,
-            confirmPasswordError = confirmPasswordError
+            confirmPasswordError = confirmPasswordError,
         )
     }
 
@@ -172,7 +170,7 @@ class RegisterViewModel(
         val fullNameError: ValidationError?,
         val emailError: ValidationError?,
         val passwordError: ValidationError?,
-        val confirmPasswordError: ValidationError?
+        val confirmPasswordError: ValidationError?,
     ) {
         val isValid: Boolean
             get() = fullNameError == null && emailError == null && passwordError == null && confirmPasswordError == null

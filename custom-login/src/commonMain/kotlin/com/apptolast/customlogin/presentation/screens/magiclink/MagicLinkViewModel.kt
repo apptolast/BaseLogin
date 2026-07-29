@@ -14,9 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class MagicLinkViewModel(
-    private val authRepository: AuthRepository,
-) : ViewModel() {
+class MagicLinkViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MagicLinkUiState())
     val uiState = _uiState.asStateFlow()

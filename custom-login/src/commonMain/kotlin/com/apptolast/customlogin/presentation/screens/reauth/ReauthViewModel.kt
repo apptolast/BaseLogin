@@ -20,9 +20,7 @@ import kotlinx.coroutines.launch
  * ViewModel for the Re-authentication screen using MVI pattern.
  * Used before sensitive account operations (delete account, update email/password, etc.).
  */
-class ReauthViewModel(
-    private val authRepository: AuthRepository
-) : ViewModel() {
+class ReauthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ReauthUiState())
     val uiState = _uiState.asStateFlow()
@@ -41,7 +39,9 @@ class ReauthViewModel(
     fun onAction(action: ReauthAction) {
         when (action) {
             is ReauthAction.EmailChanged -> _uiState.update { it.copy(email = action.email, emailError = null) }
-            is ReauthAction.PasswordChanged -> _uiState.update { it.copy(password = action.password, passwordError = null) }
+            is ReauthAction.PasswordChanged -> _uiState.update {
+                it.copy(password = action.password, passwordError = null)
+            }
             is ReauthAction.SubmitEmailPassword -> onSubmitEmailPassword()
             is ReauthAction.SubmitOAuth -> onSubmitOAuth(action.provider)
         }

@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.MagicLinkScreenSlots
-import kotlinx.coroutines.flow.collectLatest
 import com.apptolast.customlogin.presentation.util.toStringRes
 import com.apptolast.customlogin.util.toStringRes
+import kotlinx.coroutines.flow.collectLatest
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.magic_link_screen_send_button
@@ -55,7 +55,7 @@ fun MagicLinkScreen(
                     snackBarHostState.showSnackbar(
                         message = getString(effect.error.toStringRes()),
                         withDismissAction = true,
-                        duration = SnackbarDuration.Indefinite
+                        duration = SnackbarDuration.Indefinite,
                     )
                 }
             }
@@ -70,17 +70,17 @@ fun MagicLinkScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(Res.string.cd_navigate_back)
+                            contentDescription = stringResource(Res.string.cd_navigate_back),
                         )
                     }
-                }
+                },
             )
         },
         snackbarHost = {
             SnackbarHost(snackBarHostState) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
-                    onDismiss = { snackBarHostState.currentSnackbarData?.dismiss() }
+                    onDismiss = { snackBarHostState.currentSnackbarData?.dismiss() },
                 )
             }
         },
@@ -119,7 +119,7 @@ private fun MagicLinkContent(
                 state.email,
                 { onAction(MagicLinkAction.EmailChanged(it)) },
                 state.emailError?.let { stringResource(it.toStringRes()) },
-                !state.isLoading
+                !state.isLoading,
             )
 
             Spacer(Modifier.height(16.dp))
@@ -128,7 +128,7 @@ private fun MagicLinkContent(
                 { onAction(MagicLinkAction.SendLinkClicked) },
                 state.isLoading,
                 state.email.isNotBlank() && !state.isLoading,
-                stringResource(Res.string.magic_link_screen_send_button)
+                stringResource(Res.string.magic_link_screen_send_button),
             )
         }
     }

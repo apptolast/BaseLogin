@@ -1,21 +1,13 @@
 package com.apptolast.customlogin.presentation.resetpassword
 
+import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.domain.model.AuthError
 import com.apptolast.customlogin.domain.model.AuthResult
-import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordAction
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordEffect
 import com.apptolast.customlogin.presentation.screens.resetpassword.ResetPasswordViewModel
 import com.apptolast.customlogin.test.FakeAuthRepository
 import com.apptolast.customlogin.util.ValidationError
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -24,6 +16,14 @@ import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ResetPasswordViewModelTest {

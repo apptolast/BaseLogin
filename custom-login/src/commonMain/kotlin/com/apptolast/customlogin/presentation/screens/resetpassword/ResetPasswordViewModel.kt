@@ -19,10 +19,8 @@ import kotlinx.coroutines.launch
  * ViewModel for the Reset Password screen using MVI pattern.
  * Handles the business logic and exposes state and effects to the UI.
  */
-class ResetPasswordViewModel(
-    private val authRepository: AuthRepository,
-    private val config: LoginLibraryConfig,
-) : ViewModel() {
+class ResetPasswordViewModel(private val authRepository: AuthRepository, private val config: LoginLibraryConfig) :
+    ViewModel() {
 
     private val _uiState = MutableStateFlow(ResetPasswordUiState())
     val uiState = _uiState.asStateFlow()
@@ -64,7 +62,7 @@ class ResetPasswordViewModel(
         _uiState.update {
             it.copy(
                 passwordError = passwordError,
-                confirmPasswordError = confirmPasswordError
+                confirmPasswordError = confirmPasswordError,
             )
         }
 
@@ -95,7 +93,7 @@ class ResetPasswordViewModel(
             !Validators.isValidPassword(
                 password = state.newPassword,
                 minLength = config.passwordPolicy.minLength,
-                rejectBlank = config.passwordPolicy.rejectBlank
+                rejectBlank = config.passwordPolicy.rejectBlank,
             ) -> ValidationError.PasswordTooShort
             else -> null
         }

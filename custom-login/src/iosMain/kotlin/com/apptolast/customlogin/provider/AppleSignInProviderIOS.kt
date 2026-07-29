@@ -1,8 +1,8 @@
 package com.apptolast.customlogin.provider
 
 import com.apptolast.customlogin.util.Logger
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * iOS implementation of Apple Sign-In via AuthenticationServices.
@@ -85,7 +85,7 @@ object AppleSignInProviderIOS {
         if (handler == null) {
             Logger.w(
                 "AppleSignIn",
-                "signInHandler not configured. Set AppleSignInProviderIOS.signInHandler from Swift."
+                "signInHandler not configured. Set AppleSignInProviderIOS.signInHandler from Swift.",
             )
             cont.resume(null)
             return@suspendCancellableCoroutine

@@ -49,21 +49,20 @@ class FakeAuthRepository : AuthRepository {
 
     // ── Auth state ─────────────────────────────────────────────────────────
 
-    private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
+    private val authStateFlow = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
 
     /** Push a new [AuthState] to observers in tests. */
     fun emitAuthState(state: AuthState) {
-        _authState.value = state
+        authStateFlow.value = state
     }
 
     // ── AuthRepository ─────────────────────────────────────────────────────
 
     override val currentProviderId: String = "fake"
 
-    override fun observeAuthState(): Flow<AuthState> = _authState
+    override fun observeAuthState(): Flow<AuthState> = authStateFlow
 
-    override suspend fun getCurrentSession(): UserSession? =
-        (_authState.value as? AuthState.Authenticated)?.session
+    override suspend fun getCurrentSession(): UserSession? = (authStateFlow.value as? AuthState.Authenticated)?.session
 
     override suspend fun signIn(credentials: Credentials): AuthResult = signInResult
     override suspend fun signUp(data: SignUpData): AuthResult = signUpResult
@@ -86,10 +85,7 @@ class FakeAuthRepository : AuthRepository {
     override suspend fun signInWithMagicLink(email: String, link: String): AuthResult = signInWithMagicLinkResult
 
     companion object {
-        fun fakeSession(
-            userId: String = "fake-user-id",
-            email: String = "test@example.com",
-        ) = UserSession(
+        fun fakeSession(userId: String = "fake-user-id", email: String = "test@example.com") = UserSession(
             userId = userId,
             email = email,
             displayName = "Test User",

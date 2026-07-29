@@ -2,12 +2,12 @@ package com.apptolast.customlogin.provider
 
 import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.util.Logger
+import kotlin.coroutines.resume
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.UIKit.UIApplication
 import platform.UIKit.UIViewController
 import platform.UIKit.UIWindow
-import kotlin.coroutines.resume
 
 /**
  * iOS implementation of Google Sign-In.
@@ -20,9 +20,7 @@ import kotlin.coroutines.resume
  *
  * @property config The Google Sign-In configuration containing client IDs.
  */
-class GoogleSignInProviderIOS(
-    private val config: GoogleSignInConfig
-) {
+class GoogleSignInProviderIOS(private val config: GoogleSignInConfig) {
     companion object {
         /**
          * Callback to be set from Swift to perform the actual sign-in.

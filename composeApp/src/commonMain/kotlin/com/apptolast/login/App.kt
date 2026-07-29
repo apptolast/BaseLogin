@@ -25,11 +25,8 @@ import org.koin.compose.viewmodel.koinViewModel
  */
 @Composable
 fun App(splashViewModel: SplashViewModel = koinViewModel()) {
-
     SampleAppTheme {
-
         Surface(modifier = Modifier.fillMaxSize()) {
-
             val authState by splashViewModel.authState.collectAsStateWithLifecycle()
 
             // AnimatedContent provides smooth transitions when the authentication state changes.
@@ -39,7 +36,7 @@ fun App(splashViewModel: SplashViewModel = koinViewModel()) {
                     // Use the shared slide transitions for a consistent feel.
                     NavTransitions.enter togetherWith NavTransitions.exit
                 },
-                label = "RootNavigationAnimation"
+                label = "RootNavigationAnimation",
             ) { isAuthenticated ->
                 if (isAuthenticated) {
                     MainAppNavigation()

@@ -5,11 +5,11 @@ import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.test.FakeAuthRepository
-import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
+import kotlinx.coroutines.test.runTest
 
 /**
  * Integration-level tests for auth flows using [FakeAuthRepository].

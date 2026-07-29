@@ -61,7 +61,7 @@ fun ReauthScreen(
                 is ReauthEffect.ShowError -> snackBarHostState.showSnackbar(
                     message = getString(effect.error.toStringRes()),
                     withDismissAction = true,
-                    duration = SnackbarDuration.Indefinite
+                    duration = SnackbarDuration.Indefinite,
                 )
             }
         }
@@ -74,10 +74,10 @@ fun ReauthScreen(
             SnackbarHost(snackBarHostState) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
-                    onDismiss = { snackBarHostState.currentSnackbarData?.dismiss() }
+                    onDismiss = { snackBarHostState.currentSnackbarData?.dismiss() },
                 )
             }
-        }
+        },
     ) { paddingValues ->
         DefaultAuthContainer(modifier = modifier.padding(paddingValues).consumeWindowInsets(paddingValues)) {
             slots.header()

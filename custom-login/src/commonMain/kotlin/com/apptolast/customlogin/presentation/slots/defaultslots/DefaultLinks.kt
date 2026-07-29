@@ -24,15 +24,12 @@ import org.jetbrains.compose.resources.stringResource
  * @param onClick The callback to be invoked when this link is clicked.
  */
 @Composable
-fun DefaultTextLink(
-    text: String,
-    onClick: () -> Unit
-) {
+fun DefaultTextLink(text: String, onClick: () -> Unit) {
     TextButton(onClick = onClick) {
         Text(
             text = text,
             color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
         )
     }
 }
@@ -46,7 +43,7 @@ fun DefaultTextLink(
 fun DefaultForgotPasswordLink(onForgotPasswordClick: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterEnd
+        contentAlignment = Alignment.CenterEnd,
     ) {
         DefaultTextLink(
             text = stringResource(Res.string.login_screen_forgot_password_link),
@@ -65,7 +62,7 @@ fun DefaultRegisterLink(onRegisterClick: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = stringResource(Res.string.login_screen_no_account_text),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyMedium,
         )
         DefaultTextLink(
             text = stringResource(Res.string.login_screen_sign_up_link),
@@ -85,11 +82,11 @@ fun DefaultLoginLink(onLoginClick: () -> Unit) {
         Text(
             text = stringResource(Res.string.register_screen_already_have_account_text),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         DefaultTextLink(
             text = stringResource(Res.string.register_screen_sign_in_link),
-            onClick = onLoginClick
+            onClick = onLoginClick,
         )
     }
 }

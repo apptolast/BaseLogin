@@ -19,13 +19,10 @@ import kotlinx.coroutines.launch
  * ViewModel for the Phone Authentication screen using MVI pattern.
  * Manages the two-step phone auth flow: sending the OTP and verifying it.
  */
-class PhoneAuthViewModel(
-    private val authRepository: AuthRepository,
-    config: LoginLibraryConfig,
-) : ViewModel() {
+class PhoneAuthViewModel(private val authRepository: AuthRepository, config: LoginLibraryConfig) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
-        PhoneAuthUiState(countryCode = config.phoneAuthConfig.defaultCountryCode)
+        PhoneAuthUiState(countryCode = config.phoneAuthConfig.defaultCountryCode),
     )
     val uiState = _uiState.asStateFlow()
 

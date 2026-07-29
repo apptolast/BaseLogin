@@ -6,8 +6,8 @@ import com.apptolast.customlogin.util.Logger
 import com.google.firebase.Firebase
 import com.google.firebase.auth.OAuthProvider
 import com.google.firebase.auth.auth
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * Handles any Firebase OAuthProvider-based web sign-in flow on Android.
@@ -30,7 +30,7 @@ object WebOAuthProviderAndroid {
     suspend fun signIn(
         providerId: String,
         scopes: List<String> = emptyList(),
-        customParams: Map<String, String> = emptyMap()
+        customParams: Map<String, String> = emptyMap(),
     ): SocialTokenResult? {
         val activity = try {
             ActivityHolder.requireActivity()

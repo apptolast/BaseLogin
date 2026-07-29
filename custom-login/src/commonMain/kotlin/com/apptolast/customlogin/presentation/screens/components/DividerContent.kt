@@ -18,7 +18,7 @@ fun DividerContent() {
         Text(
             " OR ",
             modifier = Modifier.padding(horizontal = 8.dp),
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodySmall,
         )
         HorizontalDivider(modifier = Modifier.weight(1f))
     }

@@ -103,7 +103,9 @@ afterEvaluate {
             }
             pom {
                 name.set("BaseLogin")
-                description.set("Composable Kotlin Multiplatform authentication library with Firebase defaults and replaceable auth providers.")
+                description.set(
+                    "Composable Kotlin Multiplatform authentication library with Firebase defaults and replaceable auth providers.",
+                )
                 url.set("https://github.com/apptolast/BaseLogin")
                 licenses {
                     license {

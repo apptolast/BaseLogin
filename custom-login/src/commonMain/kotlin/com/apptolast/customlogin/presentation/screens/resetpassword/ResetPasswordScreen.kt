@@ -27,10 +27,10 @@ import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.ResetPasswordScreenSlots
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import com.apptolast.customlogin.presentation.util.toStringRes
 import com.apptolast.customlogin.util.toStringRes
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.reset_password_screen_reset_button
@@ -77,7 +77,7 @@ fun ResetPasswordScreen(
                 is ResetPasswordEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
                         message = getString(effect.error.toStringRes()),
-                        withDismissAction = true
+                        withDismissAction = true,
                     )
                 }
             }
@@ -92,17 +92,17 @@ fun ResetPasswordScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(Res.string.cd_navigate_back)
+                            contentDescription = stringResource(Res.string.cd_navigate_back),
                         )
                     }
-                }
+                },
             )
         },
         snackbarHost = {
             SnackbarHost(snackbarHostState) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
-                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }
+                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() },
                 )
             }
         },
@@ -139,7 +139,7 @@ private fun ResetPasswordContent(
 ) {
     AnimatedContent(
         targetState = state.isSuccess,
-        modifier = modifier
+        modifier = modifier,
     ) { passwordReset ->
         if (passwordReset) {
             slots.successContent(onNavigateBack)
@@ -159,7 +159,7 @@ private fun ResetPasswordContent(
                     state.newPassword,
                     { onAction(ResetPasswordAction.NewPasswordChanged(it)) },
                     state.passwordError?.let { stringResource(it.toStringRes()) },
-                    !state.isLoading
+                    !state.isLoading,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -168,21 +168,21 @@ private fun ResetPasswordContent(
                     state.confirmPassword,
                     { onAction(ResetPasswordAction.ConfirmPasswordChanged(it)) },
                     state.confirmPasswordError?.let { stringResource(it.toStringRes()) },
-                    !state.isLoading
+                    !state.isLoading,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 val isValid = state.newPassword.isNotBlank() &&
-                        state.confirmPassword.isNotBlank() &&
-                        state.passwordError == null &&
-                        state.confirmPasswordError == null
+                    state.confirmPassword.isNotBlank() &&
+                    state.passwordError == null &&
+                    state.confirmPasswordError == null
 
                 slots.submitButton(
                     { onAction(ResetPasswordAction.ResetPasswordClicked) },
                     state.isLoading,
                     isValid && !state.isLoading,
-                    stringResource(Res.string.reset_password_screen_reset_button)
+                    stringResource(Res.string.reset_password_screen_reset_button),
                 )
             }
         }

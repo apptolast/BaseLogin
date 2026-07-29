@@ -5,8 +5,8 @@ import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.util.Logger
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * iOS implementation of phone OTP sending.
@@ -47,43 +47,59 @@ object PhoneAuthProviderIOS {
      */
     var verifyCodeHandler: ((String, String, (String?) -> Unit) -> Unit)? = null
 
-    suspend fun sendCode(phoneNumber: String): PhoneAuthResult =
-        suspendCancellableCoroutine { cont ->
-            val handler = sendCodeHandler
-            if (handler == null) {
-                Logger.w("PhoneAuth", "sendCodeHandler not configured. Set PhoneAuthProviderIOS.sendCodeHandler from Swift.")
-                cont.resume(PhoneAuthResult.Failure(AuthError.Unknown("Phone auth handler not configured. Set PhoneAuthProviderIOS.sendCodeHandler from Swift.")))
-                return@suspendCancellableCoroutine
-            }
+    suspend fun sendCode(phoneNumber: String): PhoneAuthResult = suspendCancellableCoroutine { cont ->
+        val handler = sendCodeHandler
+        if (handler == null) {
+            Logger.w(
+                "PhoneAuth",
+                "sendCodeHandler not configured. Set PhoneAuthProviderIOS.sendCodeHandler from Swift.",
+            )
+            cont.resume(
+                PhoneAuthResult.Failure(
+                    AuthError.Unknown(
+                        "Phone auth handler not configured. Set PhoneAuthProviderIOS.sendCodeHandler from Swift.",
+                    ),
+                ),
+            )
+            return@suspendCancellableCoroutine
+        }
 
-            handler(phoneNumber) { verificationId ->
-                if (cont.isActive) {
-                    if (verificationId != null) {
-                        cont.resume(PhoneAuthResult.CodeSent(verificationId))
-                    } else {
-                        cont.resume(PhoneAuthResult.Failure(AuthError.Unknown("Failed to send verification code")))
-                    }
+        handler(phoneNumber) { verificationId ->
+            if (cont.isActive) {
+                if (verificationId != null) {
+                    cont.resume(PhoneAuthResult.CodeSent(verificationId))
+                } else {
+                    cont.resume(PhoneAuthResult.Failure(AuthError.Unknown("Failed to send verification code")))
                 }
             }
         }
+    }
 
-    suspend fun verifyCode(verificationId: String, otpCode: String): AuthResult =
-        suspendCancellableCoroutine { cont ->
-            val handler = verifyCodeHandler
-            if (handler == null) {
-                Logger.w("PhoneAuth", "verifyCodeHandler not configured. Set PhoneAuthProviderIOS.verifyCodeHandler from Swift.")
-                cont.resume(AuthResult.Failure(AuthError.Unknown("Phone verify handler not configured. Set PhoneAuthProviderIOS.verifyCodeHandler from Swift.")))
-                return@suspendCancellableCoroutine
-            }
+    suspend fun verifyCode(verificationId: String, otpCode: String): AuthResult = suspendCancellableCoroutine { cont ->
+        val handler = verifyCodeHandler
+        if (handler == null) {
+            Logger.w(
+                "PhoneAuth",
+                "verifyCodeHandler not configured. Set PhoneAuthProviderIOS.verifyCodeHandler from Swift.",
+            )
+            cont.resume(
+                AuthResult.Failure(
+                    AuthError.Unknown(
+                        "Phone verify handler not configured. Set PhoneAuthProviderIOS.verifyCodeHandler from Swift.",
+                    ),
+                ),
+            )
+            return@suspendCancellableCoroutine
+        }
 
-            handler(verificationId, otpCode) { userId ->
-                if (cont.isActive) {
-                    if (userId != null) {
-                        cont.resume(AuthResult.Success(UserSession(userId = userId, email = null)))
-                    } else {
-                        cont.resume(AuthResult.Failure(AuthError.Unknown("Phone OTP verification failed")))
-                    }
+        handler(verificationId, otpCode) { userId ->
+            if (cont.isActive) {
+                if (userId != null) {
+                    cont.resume(AuthResult.Success(UserSession(userId = userId, email = null)))
+                } else {
+                    cont.resume(AuthResult.Failure(AuthError.Unknown("Phone OTP verification failed")))
                 }
             }
         }
+    }
 }

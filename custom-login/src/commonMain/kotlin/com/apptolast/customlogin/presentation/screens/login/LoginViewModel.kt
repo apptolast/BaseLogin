@@ -20,9 +20,7 @@ import kotlinx.coroutines.launch
  * ViewModel for the Login screen using MVI pattern.
  * Handles business logic and exposes state and effects to the UI.
  */
-class LoginViewModel(
-    private val authRepository: AuthRepository
-) : ViewModel() {
+class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
@@ -93,7 +91,7 @@ class LoginViewModel(
         _uiState.update {
             it.copy(
                 emailError = emailError,
-                passwordError = passwordError
+                passwordError = passwordError,
             )
         }
 

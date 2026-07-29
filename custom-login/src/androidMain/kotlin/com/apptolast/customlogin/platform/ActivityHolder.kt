@@ -50,10 +50,8 @@ object ActivityHolder {
      * @return The current Activity.
      * @throws IllegalStateException if no activity is available.
      */
-    fun requireActivity(): Activity {
-        return getCurrentActivity()
-            ?: throw IllegalStateException(
-                "No Activity available. Make sure to call ActivityHolder.setActivity() in your Activity's onCreate()."
-            )
-    }
+    fun requireActivity(): Activity = getCurrentActivity()
+        ?: throw IllegalStateException(
+            "No Activity available. Make sure to call ActivityHolder.setActivity() in your Activity's onCreate().",
+        )
 }

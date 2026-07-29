@@ -27,10 +27,7 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
  * @property config The Google Sign-In configuration containing the web client ID.
  * @property context The Android application context.
  */
-class GoogleSignInProviderAndroid(
-    private val config: GoogleSignInConfig,
-    private val context: Context
-) {
+class GoogleSignInProviderAndroid(private val config: GoogleSignInConfig, private val context: Context) {
     private val credentialManager: CredentialManager by lazy {
         CredentialManager.create(context)
     }
@@ -54,58 +51,54 @@ class GoogleSignInProviderAndroid(
         return trySignInWithGoogleOption(activity)
     }
 
-    private suspend fun tryGetGoogleIdOption(activity: android.app.Activity): String? {
-        return try {
-            val option = GetGoogleIdOption.Builder()
-                .setServerClientId(config.webClientId)
-                .setFilterByAuthorizedAccounts(false)
-                .setAutoSelectEnabled(false)
-                .build()
+    private suspend fun tryGetGoogleIdOption(activity: android.app.Activity): String? = try {
+        val option = GetGoogleIdOption.Builder()
+            .setServerClientId(config.webClientId)
+            .setFilterByAuthorizedAccounts(false)
+            .setAutoSelectEnabled(false)
+            .build()
 
-            val request = GetCredentialRequest.Builder()
-                .addCredentialOption(option)
-                .build()
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(option)
+            .build()
 
-            val result: GetCredentialResponse = credentialManager.getCredential(
-                context = activity,
-                request = request,
-            )
-            handleSignInResult(result)
-        } catch (e: NoCredentialException) {
-            Logger.w("GoogleSignIn", "No credentials for GetGoogleIdOption, trying fallback: ${e.message}")
-            null
-        } catch (e: GetCredentialCancellationException) {
-            Logger.d("GoogleSignIn", "Sign-In cancelled by user")
-            null
-        } catch (e: GetCredentialException) {
-            Logger.w("GoogleSignIn", "GetGoogleIdOption failed, trying fallback: ${e.message}")
-            null
-        }
+        val result: GetCredentialResponse = credentialManager.getCredential(
+            context = activity,
+            request = request,
+        )
+        handleSignInResult(result)
+    } catch (e: NoCredentialException) {
+        Logger.w("GoogleSignIn", "No credentials for GetGoogleIdOption, trying fallback: ${e.message}")
+        null
+    } catch (e: GetCredentialCancellationException) {
+        Logger.d("GoogleSignIn", "Sign-In cancelled by user")
+        null
+    } catch (e: GetCredentialException) {
+        Logger.w("GoogleSignIn", "GetGoogleIdOption failed, trying fallback: ${e.message}")
+        null
     }
 
-    private suspend fun trySignInWithGoogleOption(activity: android.app.Activity): String? {
-        return try {
-            val option = GetSignInWithGoogleOption.Builder(config.webClientId).build()
+    private suspend fun trySignInWithGoogleOption(activity: android.app.Activity): String? = try {
+        val option = GetSignInWithGoogleOption.Builder(config.webClientId).build()
 
-            val request = GetCredentialRequest.Builder()
-                .addCredentialOption(option)
-                .build()
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(option)
+            .build()
 
-            val result: GetCredentialResponse = credentialManager.getCredential(
-                context = activity,
-                request = request,
-            )
-            handleSignInResult(result)
-        } catch (e: GetCredentialCancellationException) {
-            Logger.d("GoogleSignIn", "Sign-In cancelled by user")
-            null
-        } catch (e: GetCredentialException) {
-            Logger.e("GoogleSignIn", "Sign-In failed: ${e.message}", e)
-            null
-        } catch (e: IllegalStateException) {
-            Logger.e("GoogleSignIn", "Sign-In failed: ${e.message}", e)
-            null
-        }
+        val result: GetCredentialResponse = credentialManager.getCredential(
+            context = activity,
+            request = request,
+        )
+        handleSignInResult(result)
+    } catch (e: GetCredentialCancellationException) {
+        Logger.d("GoogleSignIn", "Sign-In cancelled by user")
+        null
+    } catch (e: GetCredentialException) {
+        Logger.e("GoogleSignIn", "Sign-In failed: ${e.message}", e)
+        null
+    } catch (e: IllegalStateException) {
+        Logger.e("GoogleSignIn", "Sign-In failed: ${e.message}", e)
+        null
     }
 
     private fun handleSignInResult(result: GetCredentialResponse): String? {

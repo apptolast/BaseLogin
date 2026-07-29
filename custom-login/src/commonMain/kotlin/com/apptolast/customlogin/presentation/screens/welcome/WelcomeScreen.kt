@@ -42,10 +42,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
-fun WelcomeScreen(
-    onNavigateToLogin: () -> Unit,
-    onNavigateToRegister: () -> Unit,
-) {
+fun WelcomeScreen(onNavigateToLogin: () -> Unit, onNavigateToRegister: () -> Unit) {
     var headerVisible by remember { mutableStateOf(false) }
     var buttonsVisible by remember { mutableStateOf(false) }
 
@@ -67,11 +64,11 @@ fun WelcomeScreen(
         AnimatedVisibility(
             visible = headerVisible,
             enter = fadeIn(
-                animationSpec = tween(durationMillis = 500) // Más rápido
+                animationSpec = tween(durationMillis = 500), // Más rápido
             ) + slideInHorizontally(
                 initialOffsetX = { it / 4 }, // Menos offset
-                animationSpec = tween(durationMillis = 500) // Más rápido
-            )
+                animationSpec = tween(durationMillis = 500), // Más rápido
+            ),
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -81,7 +78,7 @@ fun WelcomeScreen(
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
@@ -89,7 +86,7 @@ fun WelcomeScreen(
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Start,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }
@@ -100,14 +97,14 @@ fun WelcomeScreen(
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
             enter = fadeIn(
-                animationSpec = tween(durationMillis = 400) // Más rápido
+                animationSpec = tween(durationMillis = 400), // Más rápido
             ) + slideInHorizontally(
                 initialOffsetX = { it / 5 }, // Menos offset
                 animationSpec = spring(
                     dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMedium
-                )
-            )
+                    stiffness = Spring.StiffnessMedium,
+                ),
+            ),
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // Botón principal - Create Account
@@ -119,13 +116,13 @@ fun WelcomeScreen(
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
                 ) {
                     Text(
                         text = stringResource(Res.string.welcome_screen_create_account_button),
                         style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
 
@@ -139,13 +136,13 @@ fun WelcomeScreen(
                         .height(56.dp),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.primary
-                    )
+                        contentColor = MaterialTheme.colorScheme.primary,
+                    ),
                 ) {
                     Text(
                         text = stringResource(Res.string.welcome_screen_sign_in_button),
                         style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                 }
             }

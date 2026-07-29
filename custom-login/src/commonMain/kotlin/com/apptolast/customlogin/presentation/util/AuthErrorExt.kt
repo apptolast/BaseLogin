@@ -5,14 +5,14 @@ import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.auth_error_email_already_in_use
 import login.custom_login.generated.resources.auth_error_invalid_credentials
 import login.custom_login.generated.resources.auth_error_invalid_email
+import login.custom_login.generated.resources.auth_error_invalid_otp
 import login.custom_login.generated.resources.auth_error_invalid_reset_code
 import login.custom_login.generated.resources.auth_error_network_error
 import login.custom_login.generated.resources.auth_error_operation_not_allowed
-import login.custom_login.generated.resources.auth_error_invalid_otp
 import login.custom_login.generated.resources.auth_error_phone_invalid
+import login.custom_login.generated.resources.auth_error_requires_email_verification
 import login.custom_login.generated.resources.auth_error_session_expired
 import login.custom_login.generated.resources.auth_error_too_many_requests
-import login.custom_login.generated.resources.auth_error_requires_email_verification
 import login.custom_login.generated.resources.auth_error_unknown
 import login.custom_login.generated.resources.auth_error_user_disabled
 import login.custom_login.generated.resources.auth_error_user_not_found

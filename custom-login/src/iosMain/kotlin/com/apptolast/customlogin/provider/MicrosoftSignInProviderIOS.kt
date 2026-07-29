@@ -1,8 +1,8 @@
 package com.apptolast.customlogin.provider
 
 import com.apptolast.customlogin.util.Logger
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * iOS implementation of Microsoft Sign-In via Firebase's OAuthProvider web flow.
@@ -51,7 +51,7 @@ object MicrosoftSignInProviderIOS {
         if (handler == null) {
             Logger.w(
                 "MicrosoftSignIn",
-                "signInHandler not configured. Set MicrosoftSignInProviderIOS.signInHandler from Swift."
+                "signInHandler not configured. Set MicrosoftSignInProviderIOS.signInHandler from Swift.",
             )
             cont.resume(null)
             return@suspendCancellableCoroutine

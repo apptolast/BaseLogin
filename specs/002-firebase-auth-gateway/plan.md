@@ -71,7 +71,27 @@ cambio de firma en una función `internal`, así que no rompe a ningún consumid
 > siempre lleve `userId` aunque no haya red. Ese comportamiento tiene un comentario explicando el
 > caso real que lo motivó; **no se toca**.
 
-## Los tres defectos
+## Cuarto defecto, encontrado al leer el contrato en `/plan`
+
+`AuthProvider.getCurrentSession()` documenta, literalmente:
+
+> *Unlike `refreshSession`, this **MUST NOT perform network I/O** — it reads only from the provider's
+> local persistent state. This makes it safe to call offline and from latency-sensitive contexts.*
+
+Pero la implementación llama a `currentUser?.toUserSession()`, y `toUserSession()` hace
+`getIdToken(false)`. El SDK devuelve el token cacheado si sigue vigente, **pero sale a la red si ha
+caducado**. O sea: la implementación puede violar su propio contrato justo en el escenario que el
+comentario dice querer proteger — sin conexión o con latencia crítica.
+
+El código aísla el fallo para que `UserSession` conserve el `userId`, lo cual es correcto y hay que
+mantener, pero eso mitiga el síntoma, no la violación.
+
+**Arreglo**: `getCurrentSession()` mapea sin token (`accessToken = null`); quien lo necesite usa
+`getIdToken(forceRefresh)`, que es lo que el contrato indica. Se cubre con un test que asserta cero
+llamadas a `getIdToken` en el gateway falso — imposible de escribir hoy, y ese es justo el argumento
+del ticket.
+
+## Los tres defectos restantes
 
 ### 1. Errores de red mal mapeados
 

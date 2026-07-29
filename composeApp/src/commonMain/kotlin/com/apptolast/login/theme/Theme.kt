@@ -28,7 +28,7 @@ private val LightColorScheme = lightColorScheme(
     error = Color(0xFFB3261E),
     onError = Color.White,
     outline = Color(0xFF79747E),
-    outlineVariant = Color(0xFFCAC4D0)
+    outlineVariant = Color(0xFFCAC4D0),
 )
 
 private val DarkColorScheme = darkColorScheme(
@@ -47,21 +47,18 @@ private val DarkColorScheme = darkColorScheme(
     error = Color(0xFFF2B8B5),
     onError = Color(0xFF601410),
     outline = Color(0xFF938F99),
-    outlineVariant = Color(0xFF49454F)
+    outlineVariant = Color(0xFF49454F),
 )
 
 /**
  * Main theme composable for the sample app.
  */
 @Composable
-fun SampleAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
+fun SampleAppTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,
-        content = content
+        content = content,
     )
 }

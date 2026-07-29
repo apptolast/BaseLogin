@@ -23,19 +23,15 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 
 @Composable
-fun HeaderContent(
-    drawableResource: DrawableResource,
-    appName: String,
-    appSubtitle: String
-) {
+fun HeaderContent(drawableResource: DrawableResource, appName: String, appSubtitle: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Surface(
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(80.dp)
+            modifier = Modifier.size(80.dp),
         ) {
             Image(
                 painter = painterResource(drawableResource),
@@ -43,7 +39,7 @@ fun HeaderContent(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(14.dp)
+                    .padding(14.dp),
             )
         }
 
@@ -54,7 +50,7 @@ fun HeaderContent(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -63,7 +59,7 @@ fun HeaderContent(
             text = appSubtitle,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }

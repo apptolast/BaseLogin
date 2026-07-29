@@ -41,8 +41,6 @@ import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.atl_isotipo_basic
 import login.custom_login.generated.resources.common_continue_button
 import login.custom_login.generated.resources.forgot_password_screen_description
-import login.custom_login.generated.resources.reauth_screen_description
-import login.custom_login.generated.resources.reauth_screen_title
 import login.custom_login.generated.resources.forgot_password_screen_success_description
 import login.custom_login.generated.resources.forgot_password_screen_success_title
 import login.custom_login.generated.resources.forgot_password_screen_title
@@ -54,6 +52,8 @@ import login.custom_login.generated.resources.phone_auth_screen_otp_description
 import login.custom_login.generated.resources.phone_auth_screen_otp_header
 import login.custom_login.generated.resources.phone_auth_screen_phone_description
 import login.custom_login.generated.resources.phone_auth_screen_phone_header
+import login.custom_login.generated.resources.reauth_screen_description
+import login.custom_login.generated.resources.reauth_screen_title
 import login.custom_login.generated.resources.register_screen_privacy_policy
 import login.custom_login.generated.resources.register_screen_terms_and_conditions
 import login.custom_login.generated.resources.register_screen_terms_conjunction
@@ -78,14 +78,14 @@ private fun IconInCircle(
     Surface(
         shape = CircleShape,
         color = MaterialTheme.colorScheme.primaryContainer,
-        modifier = Modifier.size(size.dp)
+        modifier = Modifier.size(size.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 modifier = Modifier.size(iconSize.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
             )
         }
     }
@@ -120,17 +120,17 @@ fun DefaultDivider(text: String) {
     ) {
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.outlineVariant
+            color = MaterialTheme.colorScheme.outlineVariant,
         )
         Text(
             text = text,
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 12.dp)
+            modifier = Modifier.padding(horizontal = 12.dp),
         )
         HorizontalDivider(
             modifier = Modifier.weight(1f),
-            color = MaterialTheme.colorScheme.outlineVariant
+            color = MaterialTheme.colorScheme.outlineVariant,
         )
     }
 }
@@ -145,12 +145,12 @@ fun DefaultTermsCheckbox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     onTermsClick: () -> Unit = {},
-    onPrivacyClick: () -> Unit = {}
+    onPrivacyClick: () -> Unit = {},
 ) {
     val linkStyle = SpanStyle(
         color = MaterialTheme.colorScheme.primary,
         textDecoration = TextDecoration.Underline,
-        fontWeight = FontWeight.Medium
+        fontWeight = FontWeight.Medium,
     )
 
     val annotatedString = buildAnnotatedString {
@@ -177,13 +177,13 @@ fun DefaultTermsCheckbox(
     Row(verticalAlignment = Alignment.CenterVertically) {
         Checkbox(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
         )
         Spacer(Modifier.width(8.dp))
         Text(
             text = annotatedString,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
@@ -199,7 +199,7 @@ fun DefaultForgotPasswordHeader() {
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -209,7 +209,7 @@ fun DefaultForgotPasswordDescription() {
         text = stringResource(Res.string.forgot_password_screen_description),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -224,7 +224,7 @@ fun DefaultResetPasswordHeader() {
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -234,7 +234,7 @@ fun DefaultResetPasswordDescription() {
         text = stringResource(Res.string.reset_password_screen_description),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -249,7 +249,7 @@ fun DefaultMagicLinkHeader() {
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -259,7 +259,7 @@ fun DefaultMagicLinkDescription() {
         text = stringResource(Res.string.magic_link_screen_description),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -267,7 +267,7 @@ fun DefaultMagicLinkDescription() {
 fun DefaultMagicLinkSuccessContent(email: String) {
     DefaultSuccessContent(
         title = stringResource(Res.string.magic_link_screen_success_title),
-        description = stringResource(Res.string.magic_link_screen_success_description, email)
+        description = stringResource(Res.string.magic_link_screen_success_description, email),
     )
 }
 
@@ -282,7 +282,7 @@ fun DefaultPhoneAuthHeader() {
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -292,7 +292,7 @@ fun DefaultPhoneAuthDescription() {
         text = stringResource(Res.string.phone_auth_screen_phone_description),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -305,7 +305,7 @@ fun DefaultOtpHeader() {
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -315,7 +315,7 @@ fun DefaultOtpDescription(phoneNumber: String) {
         text = stringResource(Res.string.phone_auth_screen_otp_description, phoneNumber),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -330,7 +330,7 @@ fun DefaultReauthHeader() {
         style = MaterialTheme.typography.headlineMedium,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -340,7 +340,7 @@ fun DefaultReauthDescription() {
         text = stringResource(Res.string.reauth_screen_description),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
     )
 }
 
@@ -351,7 +351,7 @@ fun DefaultReauthErrorMessage(message: String) {
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.error,
         textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
     )
 }
 
@@ -369,27 +369,27 @@ fun DefaultReauthErrorMessage(message: String) {
 fun DefaultSuccessContent(
     title: String = stringResource(Res.string.forgot_password_screen_success_title),
     description: String = stringResource(Res.string.forgot_password_screen_success_description),
-    onContinue: (() -> Unit)? = null
+    onContinue: (() -> Unit)? = null,
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         // Icon in a circle container
         Surface(
             shape = CircleShape,
             color = MaterialTheme.colorScheme.primaryContainer,
-            modifier = Modifier.size(96.dp)
+            modifier = Modifier.size(96.dp),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = null, // decorative; title conveys the message
                     modifier = Modifier.size(52.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         }
@@ -401,7 +401,7 @@ fun DefaultSuccessContent(
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurface
+            color = MaterialTheme.colorScheme.onSurface,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -410,7 +410,7 @@ fun DefaultSuccessContent(
             text = description,
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         if (onContinue != null) {
@@ -420,12 +420,12 @@ fun DefaultSuccessContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
             ) {
                 Text(
                     text = stringResource(Res.string.common_continue_button),
                     style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
         }

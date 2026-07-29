@@ -1,6 +1,8 @@
 package com.apptolast.customlogin.presentation.screens.register
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -11,8 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -20,9 +20,9 @@ import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.RegisterScreenSlots
 import com.apptolast.customlogin.presentation.slots.defaultslots.DefaultDivider
-import kotlinx.coroutines.flow.collectLatest
 import com.apptolast.customlogin.presentation.util.toStringRes
 import com.apptolast.customlogin.util.toStringRes
+import kotlinx.coroutines.flow.collectLatest
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.divider_or
 import login.custom_login.generated.resources.register_screen_register_button
@@ -60,7 +60,7 @@ fun RegisterScreen(
                 is RegisterEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
                         message = getString(effect.error.toStringRes()),
-                        withDismissAction = true
+                        withDismissAction = true,
                     )
                 }
             }
@@ -74,17 +74,17 @@ fun RegisterScreen(
             SnackbarHost(snackbarHostState) { snackBarData ->
                 CustomSnackBar(
                     snackBarText = snackBarData.visuals.message,
-                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }
+                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() },
                 )
             }
-        }
+        },
     ) { paddingValues ->
         RegisterContent(
             slots = registerSlots,
             state = uiState,
             modifier = Modifier.padding(paddingValues).consumeWindowInsets(paddingValues),
             onAction = viewModel::onAction,
-            onNavigateToLogin = onNavigateToLogin
+            onNavigateToLogin = onNavigateToLogin,
         )
     }
 }
@@ -105,7 +105,7 @@ private fun RegisterContent(
     state: RegisterUiState,
     modifier: Modifier = Modifier,
     onAction: (RegisterAction) -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
 ) {
     DefaultAuthContainer(
         modifier = modifier,
@@ -119,7 +119,7 @@ private fun RegisterContent(
             state.fullName,
             { onAction(RegisterAction.FullNameChanged(it)) },
             state.fullNameError?.let { stringResource(it.toStringRes()) },
-            !state.isLoading
+            !state.isLoading,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -128,7 +128,7 @@ private fun RegisterContent(
             state.email,
             { onAction(RegisterAction.EmailChanged(it)) },
             state.emailError?.let { stringResource(it.toStringRes()) },
-            !state.isLoading
+            !state.isLoading,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -137,7 +137,7 @@ private fun RegisterContent(
             state.password,
             { onAction(RegisterAction.PasswordChanged(it)) },
             state.passwordError?.let { stringResource(it.toStringRes()) },
-            !state.isLoading
+            !state.isLoading,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -146,29 +146,29 @@ private fun RegisterContent(
             state.confirmPassword,
             { onAction(RegisterAction.ConfirmPasswordChanged(it)) },
             state.confirmPasswordError?.let { stringResource(it.toStringRes()) },
-            !state.isLoading
+            !state.isLoading,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         slots.termsCheckbox(
-            state.termsAccepted
+            state.termsAccepted,
         ) { onAction(RegisterAction.TermsAcceptedChanged(it)) }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         val isFormValid = state.fullName.isNotBlank() &&
-                state.email.isNotBlank() &&
-                state.password.isNotBlank() &&
-                state.confirmPassword.isNotBlank() &&
-                state.password == state.confirmPassword &&
-                state.termsAccepted
+            state.email.isNotBlank() &&
+            state.password.isNotBlank() &&
+            state.confirmPassword.isNotBlank() &&
+            state.password == state.confirmPassword &&
+            state.termsAccepted
 
         slots.submitButton(
             { onAction(RegisterAction.SignUpClicked) },
             state.isLoading,
             isFormValid && !state.isLoading,
-            stringResource(Res.string.register_screen_register_button)
+            stringResource(Res.string.register_screen_register_button),
         )
 
         if (slots.socialProviders != null && state.availableProviders.isNotEmpty()) {

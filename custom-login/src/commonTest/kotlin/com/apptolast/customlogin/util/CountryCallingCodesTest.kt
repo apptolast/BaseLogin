@@ -29,7 +29,7 @@ class CountryCallingCodesTest {
         COMMON_COUNTRIES.forEach { country ->
             assertTrue(
                 country.dialCode.startsWith("+"),
-                "dialCode '${country.dialCode}' for ${country.name} does not start with '+'"
+                "dialCode '${country.dialCode}' for ${country.name} does not start with '+'",
             )
         }
     }
@@ -41,7 +41,7 @@ class CountryCallingCodesTest {
             assertEquals(
                 expected,
                 country.displayLabel,
-                "displayLabel mismatch for ${country.name}"
+                "displayLabel mismatch for ${country.name}",
             )
         }
     }
@@ -51,8 +51,9 @@ class CountryCallingCodesTest {
         val names = COMMON_COUNTRIES.map { it.name }
         val unique = names.toSet()
         assertEquals(
-            unique.size, names.size,
-            "Duplicate country names found: ${names.groupBy { it }.filter { it.value.size > 1 }.keys}"
+            unique.size,
+            names.size,
+            "Duplicate country names found: ${names.groupBy { it }.filter { it.value.size > 1 }.keys}",
         )
     }
 
@@ -85,11 +86,11 @@ class CountryCallingCodesTest {
             val digitsOnly = country.dialCode.removePrefix("+")
             assertFalse(
                 digitsOnly.isBlank(),
-                "dialCode has only '+' and no digits for ${country.name}"
+                "dialCode has only '+' and no digits for ${country.name}",
             )
             assertTrue(
                 digitsOnly.all { it.isDigit() },
-                "dialCode '${country.dialCode}' for ${country.name} contains non-digit characters after '+'"
+                "dialCode '${country.dialCode}' for ${country.name} contains non-digit characters after '+'",
             )
         }
     }

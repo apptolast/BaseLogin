@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.dp
 import com.apptolast.customlogin.presentation.screens.components.CustomSnackBar
 import com.apptolast.customlogin.presentation.screens.components.DefaultAuthContainer
 import com.apptolast.customlogin.presentation.slots.PhoneAuthScreenSlots
-import kotlinx.coroutines.flow.collectLatest
 import com.apptolast.customlogin.presentation.util.toStringRes
 import com.apptolast.customlogin.util.toStringRes
+import kotlinx.coroutines.flow.collectLatest
 import login.custom_login.generated.resources.Res
 import login.custom_login.generated.resources.cd_navigate_back
 import login.custom_login.generated.resources.phone_auth_screen_send_button
@@ -67,7 +67,7 @@ fun PhoneAuthScreen(
                 is PhoneAuthEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
                         message = getString(effect.error.toStringRes()),
-                        withDismissAction = true
+                        withDismissAction = true,
                     )
                 }
             }
@@ -82,17 +82,17 @@ fun PhoneAuthScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(Res.string.cd_navigate_back)
+                            contentDescription = stringResource(Res.string.cd_navigate_back),
                         )
                     }
-                }
+                },
             )
         },
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
                 CustomSnackBar(
                     snackBarText = data.visuals.message,
-                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() }
+                    onDismiss = { snackbarHostState.currentSnackbarData?.dismiss() },
                 )
             }
         },
@@ -132,7 +132,7 @@ private fun PhoneAuthContent(
                         state.otpCode,
                         { onAction(PhoneAuthAction.OtpCodeChanged(it)) },
                         state.otpError?.let { stringResource(it.toStringRes()) },
-                        !state.isLoading
+                        !state.isLoading,
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -141,7 +141,7 @@ private fun PhoneAuthContent(
                         { onAction(PhoneAuthAction.VerifyCodeClicked) },
                         state.isLoading,
                         state.otpCode.isNotBlank() && !state.isLoading,
-                        stringResource(Res.string.phone_auth_screen_verify_button)
+                        stringResource(Res.string.phone_auth_screen_verify_button),
                     )
                 }
             } else {
@@ -170,7 +170,7 @@ private fun PhoneAuthContent(
                         { onAction(PhoneAuthAction.SendCodeClicked) },
                         state.isLoading,
                         state.phoneNumber.isNotBlank() && !state.isLoading,
-                        stringResource(Res.string.phone_auth_screen_send_button)
+                        stringResource(Res.string.phone_auth_screen_send_button),
                     )
                 }
             }
