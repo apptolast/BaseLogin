@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
     id("maven-publish")
-    alias(libs.plugins.ktlint.jlleitschuh)
 }
 
 group = "com.github.apptolast"
@@ -129,8 +128,10 @@ afterEvaluate {
     }
 }
 
-ktlint {
-    android = false
-    ignoreFailures = false
-    outputToConsole = true
+// No `ktlint { }` block on purpose: android=false, ignoreFailures=false and outputToConsole=true are
+// already the plugin defaults, and every style decision lives in .editorconfig. Referencing
+// KtlintExtension here would also break the JitPack build, because the Kotlin DSL compiles the whole
+// script and the type would be missing from the classpath even inside this `if`.
+if (rootProject.extra["ktlintEnabled"] as Boolean) {
+    apply(plugin = "org.jlleitschuh.gradle.ktlint")
 }
