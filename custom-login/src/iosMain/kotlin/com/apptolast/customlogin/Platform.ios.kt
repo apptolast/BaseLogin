@@ -3,6 +3,7 @@ package com.apptolast.customlogin
 import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.config.GoogleSignInConfig
 import com.apptolast.customlogin.data.PhoneAuthProviderIOS
+import com.apptolast.customlogin.di.LoginLibraryConfig
 import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
@@ -34,6 +35,15 @@ private object PlatformKoinHelper : KoinComponent {
             null
         }
     }
+
+    val loginConfig: LoginLibraryConfig by lazy {
+        try {
+            val config: LoginLibraryConfig by inject()
+            config
+        } catch (e: Exception) {
+            LoginLibraryConfig()
+        }
+    }
 }
 
 /**
@@ -58,7 +68,11 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
             val googleProvider = GoogleSignInProviderIOS(config = config)
             googleProvider.signIn()?.let { SocialTokenResult.Token(it) }
         }
-        is IdentityProvider.Apple -> AppleSignInProviderIOS.signIn()?.let { SocialTokenResult.Token(it) }
+        is IdentityProvider.Apple -> {
+            // Same source of truth as Android, which reads these scopes for its web OAuth flow.
+            val scopes = PlatformKoinHelper.loginConfig.appleSignInConfig?.scopes.orEmpty()
+            AppleSignInProviderIOS.signIn(scopes.joinToString(","))?.let { SocialTokenResult.Token(it) }
+        }
         is IdentityProvider.GitHub -> GitHubSignInProviderIOS.signIn()?.toSocialTokenResult()
         is IdentityProvider.Microsoft -> MicrosoftSignInProviderIOS.signIn()?.toSocialTokenResult()
         is IdentityProvider.Twitter -> TwitterSignInProviderIOS.signIn()?.toSocialTokenResult()

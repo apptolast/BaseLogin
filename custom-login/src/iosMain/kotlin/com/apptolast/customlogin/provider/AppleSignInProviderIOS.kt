@@ -73,12 +73,22 @@ object AppleSignInProviderIOS {
 
     /**
      * Set from Swift (as `AppleSignInProviderIOS.shared.signInHandler`) to perform the native
-     * Apple Sign-In. The first `String?` parameter is unused (reserved for future config).
+     * Apple Sign-In.
+     *
+     * The first parameter carries the **requested scopes**, comma-separated, straight from
+     * `AppleSignInConfig.scopes` — `"email,name"` by default. Map `email` to `.email` and `name` to
+     * `.fullName`; treat a blank string as "both", which is what a host that ignores this parameter
+     * effectively did before it carried anything.
+     *
      * Call the completion with the packed token string on success, or `null` on failure.
      */
     var signInHandler: ((String?, (String?) -> Unit) -> Unit)? = null
 
-    suspend fun signIn(): String? = suspendCancellableCoroutine { cont ->
+    /**
+     * @param scopes comma-separated scopes for the handler. Defaults to `null`, so a caller that
+     *   does not care keeps compiling — the library itself always passes what the host configured.
+     */
+    suspend fun signIn(scopes: String? = null): String? = suspendCancellableCoroutine { cont ->
         val handler = signInHandler
         if (handler == null) {
             Logger.w(
@@ -91,7 +101,7 @@ object AppleSignInProviderIOS {
 
         // A host that calls the completion more than once (cancel racing with error, say) must not
         // crash the app: the second call finds the continuation already resumed and is dropped.
-        handler(null) { tokenData ->
+        handler(scopes) { tokenData ->
             if (cont.isActive) {
                 cont.resume(tokenData)
             }

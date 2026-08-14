@@ -49,16 +49,16 @@ final class AppleSignInCoordinator: NSObject {
 
     /// Installs both handlers. Call once at startup, before the first Composable renders.
     func register() {
-        AppleSignInProviderIOS.shared.signInHandler = { [weak self] _, completion in
-            self?.start(.signIn(completion))
+        AppleSignInProviderIOS.shared.signInHandler = { [weak self] scopes, completion in
+            self?.start(.signIn(completion), scopes: Self.scopes(from: scopes))
         }
 
         AppleSignInProviderIOS.shared.revokeHandler = { [weak self] completion in
-            self?.start(.revoke(completion))
+            self?.start(.revoke(completion), scopes: Self.defaultScopes)
         }
     }
 
-    private func start(_ request: PendingRequest) {
+    private func start(_ request: PendingRequest, scopes: [ASAuthorization.Scope]) {
         // AuthenticationServices is main-thread only; the coroutine may resume anywhere.
         DispatchQueue.main.async { [weak self] in
             guard let self else {
@@ -78,7 +78,7 @@ final class AppleSignInCoordinator: NSObject {
             self.currentRawNonce = rawNonce
 
             let appleRequest = ASAuthorizationAppleIDProvider().createRequest()
-            appleRequest.requestedScopes = [.fullName, .email]
+            appleRequest.requestedScopes = scopes
             appleRequest.nonce = Self.sha256(rawNonce)
 
             let controller = ASAuthorizationController(authorizationRequests: [appleRequest])
@@ -215,6 +215,27 @@ extension AppleSignInCoordinator: ASAuthorizationControllerPresentationContextPr
 // MARK: - Nonce
 
 private extension AppleSignInCoordinator {
+
+    /// What Apple is asked for when the host configures nothing, and what every host asked for
+    /// before `AppleSignInConfig.scopes` reached this side.
+    static let defaultScopes: [ASAuthorization.Scope] = [.fullName, .email]
+
+    /// Translates the comma-separated scopes the library sends into Apple's own values.
+    ///
+    /// An empty or unrecognised list falls back to the default rather than requesting nothing:
+    /// asking for no scopes means Apple never returns the name, and losing it is permanent.
+    static func scopes(from packed: String?) -> [ASAuthorization.Scope] {
+        let mapped = (packed ?? "")
+            .split(separator: ",")
+            .compactMap { part -> ASAuthorization.Scope? in
+                switch part.trimmingCharacters(in: .whitespaces).lowercased() {
+                case "name", "fullname": return .fullName
+                case "email": return .email
+                default: return nil
+                }
+            }
+        return mapped.isEmpty ? defaultScopes : mapped
+    }
 
     /// Cryptographically secure nonce. Returns `nil` rather than falling back to a predictable
     /// value: a guessable nonce is worse than no sign-in.
