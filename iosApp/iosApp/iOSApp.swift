@@ -1,5 +1,6 @@
 import SwiftUI
 import FirebaseCore
+import FirebaseAuth
 import FirebaseAppCheck
 import GoogleSignIn
 import ComposeApp
@@ -16,15 +17,56 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Configure the sign-in handlers Kotlin calls into, before any Composable renders.
         configureGoogleSignIn()
         AppleSignInCoordinator.shared.register()
+        FirebaseOAuthCoordinator.shared.register()
+        PhoneAuthCoordinator.shared.register()
 
         return true
     }
 
-    // Handle URL callback for Google Sign-In
+    /// Routes an incoming URL to whoever is waiting for it: Firebase (the OAuth web flow of
+    /// GitHub/Microsoft/Twitter/Facebook, and the phone reCAPTCHA fallback) or Google Sign-In.
+    ///
+    /// Under the SwiftUI lifecycle this delegate method is **not** called — URLs arrive at the
+    /// scene — so the live entry point is `.onOpenURL` below. It is kept for hosts that still run
+    /// a UIKit app delegate without scenes.
+    static func handle(_ url: URL) -> Bool {
+        if Auth.auth().canHandle(url) {
+            return true
+        }
+        return GIDSignIn.sharedInstance.handle(url)
+    }
+
     func application(_ app: UIApplication,
                      open url: URL,
                      options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
-        return GIDSignIn.sharedInstance.handle(url)
+        return AppDelegate.handle(url)
+    }
+
+    // ── Phone auth: silent APNs verification ─────────────────────────────────
+    // Firebase proves the request comes from this app before sending any SMS. It asks for the APNs
+    // token itself; these two callbacks are what let it use the push instead of falling back to the
+    // reCAPTCHA page. They need the Push Notifications capability and an APNs key in the Firebase
+    // console — without them the fallback still works, it is just a browser detour for the user.
+
+    func application(_ application: UIApplication,
+                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Auth.auth().setAPNSToken(deviceToken, type: .unknown)
+    }
+
+    func application(_ application: UIApplication,
+                     didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        NSLog("%@", "[PhoneAuth] No APNs token, reCAPTCHA fallback will be used: \(error.localizedDescription)")
+    }
+
+    func application(_ application: UIApplication,
+                     didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                     fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+        if Auth.auth().canHandleNotification(userInfo) {
+            completionHandler(.noData)
+            return
+        }
+        // A host with its own push payloads branches here; the demo has none.
+        completionHandler(.noData)
     }
 
     private func configureGoogleSignIn() {
@@ -89,6 +131,10 @@ struct iOSApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                // Where OAuth and reCAPTCHA callbacks actually land under the SwiftUI lifecycle.
+                .onOpenURL { url in
+                    _ = AppDelegate.handle(url)
+                }
         }
     }
 }
