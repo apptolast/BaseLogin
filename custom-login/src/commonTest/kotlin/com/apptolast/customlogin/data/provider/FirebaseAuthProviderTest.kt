@@ -10,7 +10,9 @@ import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.SignUpData
+import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.test.FakeFirebaseAuthGateway
+import com.apptolast.customlogin.test.FakePhoneAuthPort
 import com.apptolast.customlogin.test.FakeSocialSignInStateCleaner
 import com.apptolast.customlogin.test.FakeSocialTokenProvider
 import com.apptolast.customlogin.test.FakeSocialTokenRevoker
@@ -35,6 +37,7 @@ class FirebaseAuthProviderTest {
     private val socialTokens = FakeSocialTokenProvider()
     private val socialCleaner = FakeSocialSignInStateCleaner()
     private val revoker = FakeSocialTokenRevoker()
+    private val phoneAuth = FakePhoneAuthPort()
 
     /**
      * Three arguments on purpose: this is also the proof that spec 005 did not break the constructor
@@ -43,6 +46,8 @@ class FirebaseAuthProviderTest {
     private fun provider() = FirebaseAuthProvider(gateway, socialTokens, socialCleaner)
 
     private fun providerWithRevoker() = FirebaseAuthProvider(gateway, socialTokens, socialCleaner, revoker)
+
+    private fun providerWithPhone() = FirebaseAuthProvider(gateway, socialTokens, socialCleaner, revoker, phoneAuth)
 
     // ── AC-03: email/password ────────────────────────────────────────────────
 
@@ -338,5 +343,57 @@ class FirebaseAuthProviderTest {
         val result = providerWithRevoker().deleteAccount()
 
         assertTrue(result.isFailure)
+    }
+
+    // ── 009: la sesion de telefono, igual que las demas ───────────────────────
+
+    @Test
+    fun `009 verifyPhoneOtp returns the full user, not the platform stub`() = runTest {
+        // Given: iOS only knows the uid its Swift handler sent back, while Android fills the session
+        // from the Firebase user. The gateway is the one that knows the whole user.
+        phoneAuth.verifyResult = AuthResult.Success(UserSession(userId = "p-1", email = null))
+        gateway.user = FirebaseAuthUser(
+            uid = "p-1",
+            email = "phone@test.com",
+            displayName = "Ana",
+            isEmailVerified = true,
+        )
+
+        // When
+        val result = providerWithPhone().verifyPhoneOtp("v-1", "123456")
+
+        // Then
+        assertIs<AuthResult.Success>(result)
+        assertEquals("p-1", result.session.userId)
+        assertEquals("phone@test.com", result.session.email)
+        assertEquals("Ana", result.session.displayName)
+        assertTrue(result.session.isEmailVerified)
+    }
+
+    @Test
+    fun `009 verifyPhoneOtp forwards the code to the platform`() = runTest {
+        gateway.user = FirebaseAuthUser(uid = "p-2")
+
+        providerWithPhone().verifyPhoneOtp("v-2", "654321")
+
+        assertEquals("v-2" to "654321", phoneAuth.verifiedCodes.single())
+    }
+
+    @Test
+    fun `009 a rejected otp is propagated untouched`() = runTest {
+        // Given: no session to read back, so the platform's failure has to survive
+        phoneAuth.verifyResult = AuthResult.Failure(AuthError.InvalidCredentials())
+
+        val result = providerWithPhone().verifyPhoneOtp("v-3", "000000")
+
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.InvalidCredentials>(result.error)
+    }
+
+    @Test
+    fun `009 sendPhoneOtp forwards the timeout to the platform`() = runTest {
+        providerWithPhone().sendPhoneOtp("+34600000000", timeoutSeconds = 90)
+
+        assertEquals("+34600000000" to 90L, phoneAuth.sentCodes.single())
     }
 }

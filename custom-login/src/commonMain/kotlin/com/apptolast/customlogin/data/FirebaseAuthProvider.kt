@@ -4,6 +4,8 @@ import com.apptolast.customlogin.SocialTokenResult
 import com.apptolast.customlogin.data.firebase.FirebaseAuthCredential
 import com.apptolast.customlogin.data.firebase.FirebaseAuthGateway
 import com.apptolast.customlogin.data.firebase.FirebaseAuthUser
+import com.apptolast.customlogin.data.firebase.PhoneAuthPort
+import com.apptolast.customlogin.data.firebase.PlatformPhoneAuthPort
 import com.apptolast.customlogin.data.firebase.PlatformSocialSignInStateCleaner
 import com.apptolast.customlogin.data.firebase.PlatformSocialTokenProvider
 import com.apptolast.customlogin.data.firebase.PlatformSocialTokenRevoker
@@ -21,9 +23,7 @@ import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.PhoneAuthResult
 import com.apptolast.customlogin.domain.model.SignUpData
 import com.apptolast.customlogin.domain.model.UserSession
-import com.apptolast.customlogin.sendPhoneVerificationCode
 import com.apptolast.customlogin.util.Logger
-import com.apptolast.customlogin.verifyPhoneCode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -36,17 +36,19 @@ import kotlinx.coroutines.flow.onStart
  * that type is a platform `expect` class which cannot be faked from `commonTest`, so taking it as a
  * constructor argument made this class untestable by construction.
  *
- * The two social ports have production defaults, so consumers building this by hand only need to
- * supply the gateway.
+ * Every port has a production default, so consumers building this by hand only need to supply the
+ * gateway.
  *
- * Phone authentication deliberately bypasses the gateway and calls the `expect` functions directly:
- * it needs an Activity on Android and APNS registration on iOS.
+ * Phone authentication still signs in through the platform — it needs an Activity on Android and
+ * APNs registration on iOS — but it goes through [PhoneAuthPort] so it can be faked, and the
+ * resulting session is read back from the gateway rather than trusted as each platform built it.
  */
 class FirebaseAuthProvider(
     private val gateway: FirebaseAuthGateway,
     private val socialTokens: SocialTokenProvider = PlatformSocialTokenProvider(),
     private val socialStateCleaner: SocialSignInStateCleaner = PlatformSocialSignInStateCleaner(),
     private val socialRevoker: SocialTokenRevoker = PlatformSocialTokenRevoker(),
+    private val phoneAuth: PhoneAuthPort = PlatformPhoneAuthPort(),
 ) : AuthProvider,
     PhoneAuthTimeoutProvider {
 
@@ -185,16 +187,27 @@ class FirebaseAuthProvider(
         (gateway.currentUser ?: return@runAuth AuthResult.Failure(AuthError.UserNotFound())).toSuccess()
     }
 
-    // ── Phone Auth (bypasses the gateway on purpose) ──────────────────────────
+    // ── Phone Auth (signs in through the platform, reads back through the gateway) ──
 
     override suspend fun sendPhoneOtp(phoneNumber: String): PhoneAuthResult =
         sendPhoneOtp(phoneNumber, DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS)
 
     override suspend fun sendPhoneOtp(phoneNumber: String, timeoutSeconds: Long): PhoneAuthResult =
-        sendPhoneVerificationCode(phoneNumber, timeoutSeconds)
+        phoneAuth.sendCode(phoneNumber, timeoutSeconds)
 
+    /**
+     * The session comes from the gateway, not from the platform.
+     *
+     * Both platforms sign in with their native SDK, but they hand back different amounts of user:
+     * Android fills the session from the Firebase user, iOS only knows the uid its Swift handler
+     * returned. Reading the user back here is what makes a phone session carry the same fields as
+     * every other flow — email, display name, verified flag — on both platforms.
+     */
     override suspend fun verifyPhoneOtp(verificationId: String, otpCode: String): AuthResult =
-        verifyPhoneCode(verificationId, otpCode)
+        when (val result = phoneAuth.verifyCode(verificationId, otpCode)) {
+            is AuthResult.Success -> runAuth { gateway.currentUser?.toSuccess() ?: result }
+            else -> result
+        }
 
     // ── Magic Link ────────────────────────────────────────────────────────────
 
