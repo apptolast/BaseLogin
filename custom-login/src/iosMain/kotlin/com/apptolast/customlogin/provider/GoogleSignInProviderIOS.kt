@@ -36,6 +36,11 @@ class GoogleSignInProviderIOS(private val config: GoogleSignInConfig) {
         /**
          * Called from Swift to provide the sign-in result.
          */
+        @Deprecated(
+            "Unused: the result travels in the completion block handed to signInHandler, which is " +
+                "what every integration does. Will be removed once no consumer references it.",
+            level = DeprecationLevel.WARNING,
+        )
         fun onSignInResult(idToken: String?) {
             pendingCallback?.invoke(idToken)
             pendingCallback = null
@@ -99,6 +104,12 @@ class GoogleSignInProviderIOS(private val config: GoogleSignInConfig) {
     /**
      * Gets the top-most view controller for presenting the sign-in UI.
      */
+    @Deprecated(
+        "Unused, and wrong on iOS 15+: UIApplication.windows is deprecated and ignores which scene " +
+            "is actually in the foreground. Swift hosts pick their own presenter — see " +
+            "iosApp/iosApp/AppleSignInCoordinator.swift for how. Will be removed.",
+        level = DeprecationLevel.WARNING,
+    )
     @OptIn(ExperimentalForeignApi::class)
     fun getTopViewController(): UIViewController? {
         val keyWindow = UIApplication.sharedApplication.windows

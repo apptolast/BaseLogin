@@ -87,11 +87,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             let config = GIDConfiguration(clientID: clientId)
             GIDSignIn.sharedInstance.configuration = config
 
-            // Get the presenting view controller
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                  let rootViewController = windowScene.windows.first?.rootViewController
-            else {
-                print("No root view controller found")
+            // The scene that is actually on screen, not whichever one comes first in the set.
+            let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+            let scene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+            guard let rootViewController = (scene?.keyWindow ?? scene?.windows.first)?.rootViewController else {
+                NSLog("%@", "[GoogleSignIn] No root view controller to present from.")
                 completion(nil)
                 return
             }
@@ -105,7 +105,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             // Perform sign-in
             GIDSignIn.sharedInstance.signIn(withPresenting: topController) { result, error in
                 if let error = error {
-                    print("Google Sign-In error: \(error.localizedDescription)")
+                    NSLog("%@", "[GoogleSignIn] Failed or cancelled: \(error.localizedDescription)")
                     completion(nil)
                     return
                 }
@@ -113,7 +113,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 guard let user = result?.user,
                       let idToken = user.idToken?.tokenString
                 else {
-                    print("No ID token received from Google Sign-In")
+                    NSLog("%@", "[GoogleSignIn] No ID token in the result.")
                     completion(nil)
                     return
                 }
