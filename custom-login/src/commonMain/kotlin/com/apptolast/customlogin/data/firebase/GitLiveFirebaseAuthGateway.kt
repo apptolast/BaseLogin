@@ -100,6 +100,7 @@ class GitLiveFirebaseAuthGateway : FirebaseAuthGateway {
         displayName = displayName,
         photoUrl = photoURL,
         isEmailVerified = isEmailVerified,
+        providerIds = providerData.map { it.providerId },
     )
 
     private fun FirebaseUser?.requireUser(message: String): FirebaseAuthUser =

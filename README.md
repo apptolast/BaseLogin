@@ -773,7 +773,7 @@ private extension AppleSignInCoordinator {
 - [ ] **Sign in with Apple** capability enabled on the App ID in the Apple Developer portal, and the entitlement in the app (`iosApp/iosApp/iosApp.entitlements`).
 - [ ] Apple provider enabled in the **Firebase console** for this project.
 - [ ] The app's bundle id matches the iOS app registered in Firebase.
-- [ ] If your app offers **account deletion**, App Review guideline 5.1.1(v) also requires revoking the Apple token — capture `credential.authorizationCode` at sign-in and pass it to `Auth.auth().revokeToken(withAuthorizationCode:)` before deleting the user. The library's `deleteAccount()` does not do this for you.
+- [ ] If your app offers **account deletion**, wire `AppleSignInProviderIOS.shared.revokeHandler` too. App Review guideline 5.1.1(v) requires revoking the Apple token, not just deleting the Firebase user, and `deleteAccount()` calls this handler before deleting — but only if you set it, so an app that already ships a deletion flow does not suddenly get an Apple sheet. See the `.revoke` branch of `AppleSignInCoordinator`: it asks Apple to authorise again, because `revokeToken(withAuthorizationCode:)` needs a code that is fresh and single-use. A failed revocation is logged and the account is deleted anyway.
 
 ---
 

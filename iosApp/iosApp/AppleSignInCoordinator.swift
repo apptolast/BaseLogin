@@ -1,13 +1,27 @@
 import AuthenticationServices
 import CryptoKit
+import FirebaseAuth
 import Security
 import UIKit
 import ComposeApp
 
-/// Native Sign in with Apple, wired to the Kotlin `AppleSignInProviderIOS` seam.
+/// Native Sign in with Apple, wired to the Kotlin `AppleSignInProviderIOS` seams.
 ///
 /// This is the reference integration: the library suspends its coroutine, this coordinator runs
-/// AuthenticationServices, and the packed token string travels back through the completion block.
+/// AuthenticationServices, and the result travels back through the completion block.
+///
+/// It serves two requests, both starting with the same authorization:
+///
+/// - **sign in** — packs the identity token, the nonce and, on the first authorisation only, the
+///   name, and hands the string to Kotlin.
+/// - **revoke** — takes the fresh `authorizationCode` and calls
+///   `Auth.auth().revokeToken(withAuthorizationCode:)`, which App Review guideline 5.1.1(v) requires
+///   before deleting an account. The code must be **fresh and single-use**, which is exactly why
+///   this asks Apple to authorise again instead of reusing the one from sign-in.
+///
+/// The two completions look identical and mean the opposite: for sign in, `nil` is failure; for
+/// revoke, `nil` is success and a string is the reason it failed. That is the shape of the Kotlin
+/// seams, so it is handled explicitly in `fail(_:)` rather than papered over.
 ///
 /// Requires the **Sign in with Apple** capability (see `iosApp.entitlements`) and the Apple provider
 /// enabled in the Firebase console for this bundle id.
@@ -15,12 +29,17 @@ final class AppleSignInCoordinator: NSObject {
 
     static let shared = AppleSignInCoordinator()
 
+    private enum PendingRequest {
+        case signIn((String?) -> Void)
+        case revoke((String?) -> Void)
+    }
+
+    /// Non-nil exactly while a request is in flight.
+    private var pending: PendingRequest?
+
     /// Raw (unhashed) nonce of the request in flight. Apple receives its SHA-256; Firebase receives
     /// this one and checks that both match, which is what makes a stolen identity token unusable.
     private var currentRawNonce: String?
-
-    /// Completion handed over by Kotlin. Non-nil exactly while a request is in flight.
-    private var completion: ((String?) -> Void)?
 
     /// `ASAuthorizationController` is not retained by the system: without this reference it is
     /// deallocated before the delegate fires and the sheet never appears.
@@ -28,39 +47,41 @@ final class AppleSignInCoordinator: NSObject {
 
     private override init() {}
 
-    /// Installs the handler. Call once at startup, before the first Composable renders.
+    /// Installs both handlers. Call once at startup, before the first Composable renders.
     func register() {
         AppleSignInProviderIOS.shared.signInHandler = { [weak self] _, completion in
-            self?.start(completion: completion)
+            self?.start(.signIn(completion))
+        }
+
+        AppleSignInProviderIOS.shared.revokeHandler = { [weak self] completion in
+            self?.start(.revoke(completion))
         }
     }
 
-    private func start(completion: @escaping (String?) -> Void) {
+    private func start(_ request: PendingRequest) {
         // AuthenticationServices is main-thread only; the coroutine may resume anywhere.
         DispatchQueue.main.async { [weak self] in
             guard let self else {
-                completion(nil)
+                Self.reject(request, reason: "The coordinator is gone.")
                 return
             }
-            guard self.completion == nil else {
-                NSLog("%@", "[AppleSignIn] A request is already in flight; rejecting this one.")
-                completion(nil)
+            guard self.pending == nil else {
+                Self.reject(request, reason: "An Apple request is already in flight.")
                 return
             }
             guard let rawNonce = Self.randomNonceString() else {
-                NSLog("%@", "[AppleSignIn] Could not generate a secure nonce; aborting sign-in.")
-                completion(nil)
+                Self.reject(request, reason: "Could not generate a secure nonce.")
                 return
             }
 
-            self.completion = completion
+            self.pending = request
             self.currentRawNonce = rawNonce
 
-            let request = ASAuthorizationAppleIDProvider().createRequest()
-            request.requestedScopes = [.fullName, .email]
-            request.nonce = Self.sha256(rawNonce)
+            let appleRequest = ASAuthorizationAppleIDProvider().createRequest()
+            appleRequest.requestedScopes = [.fullName, .email]
+            appleRequest.nonce = Self.sha256(rawNonce)
 
-            let controller = ASAuthorizationController(authorizationRequests: [request])
+            let controller = ASAuthorizationController(authorizationRequests: [appleRequest])
             controller.delegate = self
             controller.presentationContextProvider = self
             self.controller = controller
@@ -68,13 +89,49 @@ final class AppleSignInCoordinator: NSObject {
         }
     }
 
-    /// Single exit point: the Kotlin completion is called exactly once and the state is cleared.
-    private func finish(_ token: String?) {
-        let completion = self.completion
-        self.completion = nil
-        self.currentRawNonce = nil
-        self.controller = nil
-        completion?(token)
+    /// Turns down a request that never started, in the shape that request expects.
+    private static func reject(_ request: PendingRequest, reason: String) {
+        NSLog("%@", "[AppleSignIn] \(reason)")
+        switch request {
+        case .signIn(let completion): completion(nil)
+        case .revoke(let completion): completion(reason)
+        }
+    }
+
+    private func clearState() {
+        pending = nil
+        currentRawNonce = nil
+        controller = nil
+    }
+
+    /// Sign-in exit point: `nil` means cancelled or failed.
+    private func finishSignIn(_ token: String?) {
+        guard case .signIn(let completion)? = pending else {
+            clearState()
+            return
+        }
+        clearState()
+        completion(token)
+    }
+
+    /// Revocation exit point: `nil` means the token **was** revoked.
+    private func finishRevoke(errorMessage: String?) {
+        guard case .revoke(let completion)? = pending else {
+            clearState()
+            return
+        }
+        clearState()
+        completion(errorMessage)
+    }
+
+    /// Fails whatever is in flight, in the shape that request expects.
+    private func fail(_ reason: String) {
+        NSLog("%@", "[AppleSignIn] \(reason)")
+        switch pending {
+        case .signIn: finishSignIn(nil)
+        case .revoke: finishRevoke(errorMessage: reason)
+        case .none: clearState()
+        }
     }
 }
 
@@ -84,18 +141,28 @@ extension AppleSignInCoordinator: ASAuthorizationControllerDelegate {
 
     func authorizationController(controller: ASAuthorizationController,
                                  didCompleteWithAuthorization authorization: ASAuthorization) {
-        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
-              let tokenData = credential.identityToken,
+        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else {
+            fail("Authorisation returned an unexpected credential type.")
+            return
+        }
+
+        switch pending {
+        case .signIn: completeSignIn(with: credential)
+        case .revoke: completeRevoke(with: credential)
+        case .none: clearState()
+        }
+    }
+
+    private func completeSignIn(with credential: ASAuthorizationAppleIDCredential) {
+        guard let tokenData = credential.identityToken,
               let idToken = String(data: tokenData, encoding: .utf8)
         else {
-            NSLog("%@", "[AppleSignIn] Authorisation returned no usable identity token.")
-            finish(nil)
+            fail("Authorisation returned no usable identity token.")
             return
         }
         guard let rawNonce = currentRawNonce else {
             // Signing in without the nonce would drop replay protection: refuse instead.
-            NSLog("%@", "[AppleSignIn] No raw nonce for this request; refusing the token.")
-            finish(nil)
+            fail("No raw nonce for this request; refusing the token.")
             return
         }
 
@@ -105,16 +172,32 @@ extension AppleSignInCoordinator: ASAuthorizationControllerDelegate {
         if let displayName = Self.displayName(from: credential.fullName) {
             packed += "|||displayName|||\(displayName)"
         }
-        finish(packed)
+        finishSignIn(packed)
+    }
+
+    private func completeRevoke(with credential: ASAuthorizationAppleIDCredential) {
+        guard let codeData = credential.authorizationCode,
+              let code = String(data: codeData, encoding: .utf8)
+        else {
+            fail("Authorisation returned no authorization code; cannot revoke.")
+            return
+        }
+
+        Auth.auth().revokeToken(withAuthorizationCode: code) { [weak self] error in
+            if let error {
+                self?.fail("Revocation rejected by Firebase: \(error.localizedDescription)")
+                return
+            }
+            self?.finishRevoke(errorMessage: nil)
+        }
     }
 
     func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
         if let authError = error as? ASAuthorizationError, authError.code == .canceled {
-            NSLog("%@", "[AppleSignIn] Cancelled by the user.")
+            fail("Cancelled by the user.")
         } else {
-            NSLog("%@", "[AppleSignIn] Failed: \(error.localizedDescription)")
+            fail("Failed: \(error.localizedDescription)")
         }
-        finish(nil)
     }
 }
 

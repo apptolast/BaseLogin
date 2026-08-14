@@ -6,8 +6,10 @@ import com.apptolast.customlogin.data.firebase.FirebaseAuthGateway
 import com.apptolast.customlogin.data.firebase.FirebaseAuthUser
 import com.apptolast.customlogin.data.firebase.PlatformSocialSignInStateCleaner
 import com.apptolast.customlogin.data.firebase.PlatformSocialTokenProvider
+import com.apptolast.customlogin.data.firebase.PlatformSocialTokenRevoker
 import com.apptolast.customlogin.data.firebase.SocialSignInStateCleaner
 import com.apptolast.customlogin.data.firebase.SocialTokenProvider
+import com.apptolast.customlogin.data.firebase.SocialTokenRevoker
 import com.apptolast.customlogin.di.DEFAULT_PHONE_AUTH_TIMEOUT_SECONDS
 import com.apptolast.customlogin.domain.AuthProvider
 import com.apptolast.customlogin.domain.PhoneAuthTimeoutProvider
@@ -44,6 +46,7 @@ class FirebaseAuthProvider(
     private val gateway: FirebaseAuthGateway,
     private val socialTokens: SocialTokenProvider = PlatformSocialTokenProvider(),
     private val socialStateCleaner: SocialSignInStateCleaner = PlatformSocialSignInStateCleaner(),
+    private val socialRevoker: SocialTokenRevoker = PlatformSocialTokenRevoker(),
 ) : AuthProvider,
     PhoneAuthTimeoutProvider {
 
@@ -121,7 +124,36 @@ class FirebaseAuthProvider(
 
     // ── Account Management ────────────────────────────────────────────────────
 
-    override suspend fun deleteAccount(): Result<Unit> = runCatching { gateway.deleteCurrentUser() }
+    override suspend fun deleteAccount(): Result<Unit> = runCatching {
+        revokeTokensOf(gateway.currentUser)
+        gateway.deleteCurrentUser()
+    }
+
+    /**
+     * Revokes what the user signed in with, before the account goes away.
+     *
+     * Apple asks for this in App Review guideline 5.1.1(v): deleting the Firebase user is not
+     * enough, the app keeps appearing under *Settings → Apple Account → Sign in with Apple*.
+     *
+     * **Best effort, and deliberately so.** A revocation that fails — expired authorization code,
+     * network down, the user dismissing the sheet — must not leave the account undeletable. The
+     * opposite outcome (account alive, token revoked) is worse for the user than the reverse.
+     *
+     * Which providers to revoke comes from the user, never from the app's configuration: an
+     * email-only user in an app that also offers Apple must not be shown an Apple sheet on the way
+     * out.
+     */
+    private suspend fun revokeTokensOf(user: FirebaseAuthUser?) {
+        user?.providerIds.orEmpty()
+            .mapNotNull { IdentityProvider.fromId(it) }
+            .forEach { provider ->
+                try {
+                    socialRevoker.revoke(provider)
+                } catch (e: Exception) {
+                    Logger.w("FirebaseAuthProvider", "Could not revoke the ${provider.id} token: ${e.message}")
+                }
+            }
+    }
 
     override suspend fun updateDisplayName(displayName: String): Result<Unit> =
         runCatching { gateway.updateDisplayName(displayName) }

@@ -71,6 +71,14 @@ data class FirebaseAuthUser(
     val displayName: String? = null,
     val photoUrl: String? = null,
     val isEmailVerified: Boolean = false,
+    /**
+     * Provider ids Firebase has linked to this user (`apple.com`, `password`, `google.com`…).
+     *
+     * Deleting an account has to revoke the token of some of them, and which ones is a property of
+     * the user, not of the app's configuration: an email-only user in an app that offers Apple
+     * Sign-In must not be shown an Apple sheet on the way out.
+     */
+    val providerIds: List<String> = emptyList(),
 )
 
 /** A credential the gateway can sign in with, expressed without SDK types. */

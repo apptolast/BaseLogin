@@ -97,4 +97,37 @@ object AppleSignInProviderIOS {
             }
         }
     }
+
+    /**
+     * Set from Swift (as `AppleSignInProviderIOS.shared.revokeHandler`) to revoke the Apple token
+     * before the account is deleted, which App Review guideline 5.1.1(v) requires.
+     *
+     * `Auth.auth().revokeToken(withAuthorizationCode:)` needs an authorization code that is **fresh
+     * (under five minutes) and single-use**, so the handler has to ask Apple to authorise again and
+     * use the code from that pass — which also satisfies the recent-login requirement Firebase puts
+     * on deleting a user. See `iosApp/iosApp/AppleSignInCoordinator.swift`.
+     *
+     * Call the completion with `null` when the token was revoked, or with a message describing the
+     * failure. **Failing is allowed**: the account is deleted either way, because a user who asked
+     * to delete it must not be stuck behind a server that will not answer.
+     *
+     * Leaving this unset is a supported choice: revocation is then skipped with a warning, and hosts
+     * that already ship an account-deletion flow do not get an Apple sheet they never asked for.
+     */
+    var revokeHandler: (((String?) -> Unit) -> Unit)? = null
+
+    /** @return `null` if the token was revoked, or a message describing the failure. */
+    suspend fun revoke(): String? = suspendCancellableCoroutine { cont ->
+        val handler = revokeHandler
+        if (handler == null) {
+            cont.resume("revokeHandler not configured. Set AppleSignInProviderIOS.shared.revokeHandler from Swift.")
+            return@suspendCancellableCoroutine
+        }
+
+        handler { error ->
+            if (cont.isActive) {
+                cont.resume(error)
+            }
+        }
+    }
 }

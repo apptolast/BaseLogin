@@ -98,3 +98,19 @@ actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): Aut
 actual suspend fun clearSocialSignInState() {
     // Intentionally empty.
 }
+
+/**
+ * Revokes the Apple token before the account is deleted, as App Review guideline 5.1.1(v) requires.
+ *
+ * **Opt-in**: with no `revokeHandler` set this logs a warning and does nothing, so a host that
+ * updates its pin does not suddenly get an Apple sheet in the middle of an already shipped
+ * account-deletion flow. Nothing to do for the other providers — none of them requires revocation
+ * and none exposes an equivalent API.
+ */
+actual suspend fun revokeSocialToken(provider: IdentityProvider) {
+    if (provider !is IdentityProvider.Apple) return
+    AppleSignInProviderIOS.revoke()?.let { error ->
+        // Reported, never rethrown: deletion goes ahead regardless.
+        Logger.w("Platform", "Apple token revocation failed: $error")
+    }
+}

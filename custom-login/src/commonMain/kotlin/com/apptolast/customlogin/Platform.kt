@@ -72,3 +72,15 @@ expect suspend fun verifyPhoneCode(verificationId: String, otpCode: String): Aut
  * On iOS this is a no-op — Apple does not cache the selection the same way.
  */
 expect suspend fun clearSocialSignInState()
+
+/**
+ * Revokes the token [provider] issued for the current user, before the account is deleted.
+ *
+ * Only Apple on iOS does anything: App Review guideline 5.1.1(v) requires revocation, and
+ * `revokeToken(withAuthorizationCode:)` needs a **fresh** authorization code, so the host's handler
+ * has to ask Apple to authorise again. On Android this is a declared no-op — Apple there is the web
+ * OAuth flow and the guideline applies to the iOS app.
+ *
+ * Implementations are **best effort**: they may throw, and the caller deletes the account anyway.
+ */
+expect suspend fun revokeSocialToken(provider: IdentityProvider)
