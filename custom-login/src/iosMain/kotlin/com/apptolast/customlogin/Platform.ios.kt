@@ -92,11 +92,31 @@ actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): Aut
     PhoneAuthProviderIOS.verifyCode(verificationId, otpCode)
 
 /**
- * No-op on iOS: neither ASAuthorizationController nor GIDSignIn cache an account selection that
- * survives sign-out the way Credential Manager does on Android.
+ * Clears GoogleSignIn's own session, which Firebase's `signOut()` leaves untouched.
+ *
+ * `GIDSignIn.sharedInstance.currentUser` lives in the keychain and survives signing out of Firebase:
+ * without this the next Google sign-in reuses the previous account and the user has no way to switch
+ * accounts from inside the app. It is the same failure Credential Manager causes on Android.
+ *
+ * Apple needs nothing here — `ASAuthorizationController` caches no account selection — and the four
+ * web OAuth providers keep their session in the browser, which asks again on the next flow.
  */
 actual suspend fun clearSocialSignInState() {
-    // Intentionally empty.
+    val handler = GoogleSignInProviderIOS.signOutHandler
+    if (handler == null) {
+        Logger.w(
+            "Platform",
+            "signOutHandler not configured. Set GoogleSignInProviderIOS.Companion.shared.signOutHandler " +
+                "from Swift, or the Google account stays signed in after sign-out.",
+        )
+        return
+    }
+    try {
+        handler()
+    } catch (e: Exception) {
+        // Never fail sign-out because of this: the Firebase session is already gone.
+        Logger.w("Platform", "Google sign-out failed: ${e.message}")
+    }
 }
 
 /**

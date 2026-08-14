@@ -40,6 +40,24 @@ class GoogleSignInProviderIOS(private val config: GoogleSignInConfig) {
             pendingCallback?.invoke(idToken)
             pendingCallback = null
         }
+
+        /**
+         * Set from Swift to clear GoogleSignIn's own session when the user signs out:
+         *
+         * ```swift
+         * GoogleSignInProviderIOS.Companion.shared.signOutHandler = {
+         *     GIDSignIn.sharedInstance.signOut()
+         * }
+         * ```
+         *
+         * Firebase's `signOut()` does not touch it. `GIDSignIn.sharedInstance.currentUser` lives in
+         * the keychain and survives, so without this the next Google sign-in silently reuses the
+         * previous account and **the user cannot switch accounts from inside the app** — the same
+         * failure `clearSocialSignInState` fixes on Android for Credential Manager.
+         *
+         * Leaving it unset keeps today's behaviour: a warning, and nothing else.
+         */
+        var signOutHandler: (() -> Unit)? = null
     }
 
     /**

@@ -628,7 +628,14 @@ GoogleSignInProviderIOS.companion.signInHandler = { clientId, completion in
         completion("\(idToken)|||accessToken|||\(accessToken)")
     }
 }
+
+// Wire this too, or the user can never switch accounts
+GoogleSignInProviderIOS.Companion.shared.signOutHandler = {
+    GIDSignIn.sharedInstance.signOut()
+}
 ```
+
+> `signOut()` in Firebase does not touch GoogleSignIn. `GIDSignIn.sharedInstance.currentUser` lives in the keychain and survives, so without the handler above the next sign-in silently reuses the previous account. It is the iOS half of what `clearSocialSignInState()` already does for Credential Manager on Android.
 
 ---
 
