@@ -562,3 +562,6 @@ iosApp/iosApp/GoogleService-Info.plist
 # Claude Code / SDD harness state (local, not shared)
 .claude/.sdd-state.json
 .claude/settings.local.json
+
+# git worktrees created by Claude Code
+.claude/worktrees/
