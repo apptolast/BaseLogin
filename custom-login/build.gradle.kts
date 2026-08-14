@@ -21,7 +21,7 @@ kotlin {
         }
     }
 
-    // iOS targets - framework is exported through composeApp's CocoaPods
+    // iOS targets - framework is exported through composeApp's binary framework (SPM in iosApp.xcodeproj)
     iosArm64()
     iosSimulatorArm64()
 

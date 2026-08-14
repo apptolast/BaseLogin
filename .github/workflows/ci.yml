@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  library:
+    name: ktlint + tests + Android artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      # compileSdk 37 is newer than the runner image ships with; this accepts the
+      # licences so AGP can pull the missing platform itself.
+      - uses: android-actions/setup-android@v3
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: ktlint
+        run: ./gradlew ktlintCheck
+
+      - name: Unit tests
+        run: ./gradlew :custom-login:testDebugUnitTest
+
+      - name: Assemble library
+        run: ./gradlew :custom-login:assembleRelease
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-reports
+          path: custom-login/build/reports/tests/
+          retention-days: 14
+
+  apple:
+    name: iOS framework + JitPack publication
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Link iOS framework
+        run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+
+      # Reproduces exactly what the JitPack builder runs (jitpack.yml: osx + JDK 17
+      # + publishToMavenLocal). JITPACK=true is what disables ktlint in the root
+      # build — publishing broke once because the linter was in that path, and this
+      # job is here so it cannot break silently again.
+      - name: Publication (as JitPack runs it)
+        env:
+          JITPACK: 'true'
+        run: ./gradlew :custom-login:publishToMavenLocal
