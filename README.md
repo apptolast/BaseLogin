@@ -219,7 +219,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.apptolast:baselogin:1.1.0")
+            implementation("com.github.apptolast.BaseLogin:baselogin:1.1.0")
         }
     }
 }
@@ -228,11 +228,20 @@ kotlin {
 Android-only host:
 ```kotlin
 dependencies {
-    implementation("com.github.apptolast:baselogin:1.1.0")
+    implementation("com.github.apptolast.BaseLogin:baselogin:1.1.0")
 }
 ```
 
-The artifact id is **`baselogin`, not `custom-login`**: the root Kotlin Multiplatform publication is renamed in `custom-login/build.gradle.kts`. Gradle module metadata resolves the per-target artifacts (`custom-login-android`, `custom-login-iosarm64`, `custom-login-iossimulatorarm64`) from it automatically — never depend on those directly.
+**Get the group exactly right — it is the single most common way to break this.**
+
+| Coordinate | What Gradle gets |
+|---|---|
+| `com.github.apptolast.BaseLogin:baselogin` | ✅ the real `.module` file, with variant metadata for every target |
+| `com.github.apptolast:baselogin` | ❌ resolves, but only to JitPack's aggregate POM — no variant metadata, and the KMP metadata jar it serves is empty |
+
+The group must carry the **repository** name (`BaseLogin`, capitalised) after the user name, even though `custom-login/build.gradle.kts` declares `group = "com.github.apptolast"` — JitPack republishes multi-module builds under `com.github.<user>.<repo>`. The two-segment form still answers with a POM, so the failure is not a 404: it surfaces later as unresolved symbols or an empty metadata jar.
+
+The artifact id is **`baselogin`, not `custom-login`**: the root Kotlin Multiplatform publication is renamed in `custom-login/build.gradle.kts`. From it Gradle resolves the per-target artifacts (`custom-login-android`, `custom-login-iosarm64`, `custom-login-iossimulatorarm64`) automatically — never depend on those directly.
 
 `dev.gitlive:firebase-auth` resolves transitively from Maven Central, so no extra repository is required.
 
@@ -240,8 +249,27 @@ The artifact id is **`baselogin`, not `custom-login`**: the root Kotlin Multipla
 
 Any commit on `develop` is a valid version, which is how you consume a fix before it is tagged:
 ```kotlin
-implementation("com.github.apptolast:baselogin:35a5e15")
+implementation("com.github.apptolast.BaseLogin:baselogin:35a5e15")
 ```
+
+#### If the Android classpath fails on iOS sub-modules
+
+Gradle reads every `available-at` variant from the root `.module` and may validate the iOS
+sub-modules while resolving an Android configuration. If that bites, exclude them from the leaf
+resolution configurations only — excluding them higher up propagates and silently drops
+`custom-login-android` from the Android compile classpath:
+
+```kotlin
+afterEvaluate {
+    configurations
+        .filter { it.name.endsWith("CompileClasspath") || it.name.endsWith("RuntimeClasspath") }
+        .forEach { it.exclude(group = "com.github.apptolast.BaseLogin", module = "custom-login-iosarm64") }
+}
+```
+
+A second historical workaround excluded the group from `*CInterop` configurations, because the
+consumer's CocoaPods plugin looked for cinterop variants this library never published. That one is
+obsolete for hosts that have moved to SPM.
 
 #### Publishing a new version
 
