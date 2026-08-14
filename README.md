@@ -45,14 +45,14 @@ It is designed to be the **standard authentication baseline** for any new KMP pr
 | Technology | Version | Role |
 |-----------|---------|------|
 | [Firebase Authentication](https://firebase.google.com/docs/auth) | BOM 34.14.1 | Auth backend |
-| [GitLive Firebase SDK](https://github.com/GitLiveApp/firebase-kotlin-sdk) | 2.4.0 | KMP wrapper for Firebase |
+| [GitLive Firebase SDK](https://github.com/GitLiveApp/firebase-kotlin-sdk) | 2.5.0 | KMP wrapper for Firebase |
 | [Google Sign-In (Android)](https://developer.android.com/identity/sign-in/credential-manager) | Credential Manager 1.6.0 | Native Google sign-in on Android |
 
 ### Architecture & DI
 
 | Technology | Version | Role |
 |-----------|---------|------|
-| [Koin](https://insert-koin.io/) | 4.2.1 | Dependency injection |
+| [Koin](https://insert-koin.io/) | 4.2.2 | Dependency injection |
 | [Navigation Compose](https://developer.android.com/jetpack/compose/navigation) | 2.9.2 | In-app navigation |
 | [Lifecycle ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel) | 2.10.0 | MVI ViewModels |
 
@@ -199,6 +199,62 @@ Each screen follows the same MVI pattern:
 
 ## Project Setup
 
+There are two ways to consume the library. Host apps use **JitPack**; the local module is for working on the library itself.
+
+### Option A — JitPack (host apps)
+
+**`settings.gradle.kts`** — add the JitPack repository:
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven("https://jitpack.io")
+    }
+}
+```
+
+**`build.gradle.kts`** — KMP host, declare it in `commonMain`:
+```kotlin
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("com.github.apptolast:baselogin:1.1.0")
+        }
+    }
+}
+```
+
+Android-only host:
+```kotlin
+dependencies {
+    implementation("com.github.apptolast:baselogin:1.1.0")
+}
+```
+
+The artifact id is **`baselogin`, not `custom-login`**: the root Kotlin Multiplatform publication is renamed in `custom-login/build.gradle.kts`. Gradle module metadata resolves the per-target artifacts (`custom-login-android`, `custom-login-iosarm64`, `custom-login-iossimulatorarm64`) from it automatically — never depend on those directly.
+
+`dev.gitlive:firebase-auth` resolves transitively from Maven Central, so no extra repository is required.
+
+#### Pinning a commit instead of a tag
+
+Any commit on `develop` is a valid version, which is how you consume a fix before it is tagged:
+```kotlin
+implementation("com.github.apptolast:baselogin:35a5e15")
+```
+
+#### Publishing a new version
+
+1. Set `version` in `custom-login/build.gradle.kts`.
+2. Merge into `develop` and tag with **exactly that same string** — `git tag 1.2.0 && git push origin 1.2.0`. If the tag and `version` disagree, the JitPack build succeeds but serves nothing under that tag.
+3. JitPack builds **on demand**: the first request for a version triggers it. Per `jitpack.yml` it runs on macOS with JDK 17 and executes `:custom-login:publishToMavenLocal`, which takes a few minutes. A 404 immediately after tagging usually means "not built yet", not "broken".
+
+Build status for every version: <https://jitpack.io/#apptolast/BaseLogin>
+
+> **Check that page before pinning.** Not every tag here has been published — a tag existing in git does not mean JitPack ever served it.
+
+### Option B — local module (working on the library)
+
 **`settings.gradle.kts`** — include the module:
 ```kotlin
 include(":custom-login")
@@ -211,9 +267,9 @@ dependencies {
 }
 ```
 
-The library's own dependencies (Firebase, Koin, Compose, etc.) are defined in `custom-login/build.gradle.kts` and are transitively available.
+This is what `composeApp/` does in this repository.
 
-> AGP note: the project currently remains on Android Gradle Plugin `8.13.2`. AGP 9 migration is intentionally deferred until Android Studio's AGP Upgrade Assistant is run, because the official migration recipe requires that assisted step before manual DSL changes.
+The library's own dependencies (Firebase, Koin, Compose, etc.) are defined in `custom-login/build.gradle.kts` and are transitively available.
 
 ---
 
@@ -550,88 +606,146 @@ GoogleSignInProviderIOS.companion.signInHandler = { clientId, completion in
 
 ### Apple (iOS)
 
-Apple Sign-In requires a cryptographic nonce to prevent replay attacks.
+The reference implementation is in the demo app: **[`iosApp/iosApp/AppleSignInCoordinator.swift`](iosApp/iosApp/AppleSignInCoordinator.swift)**. Copy that file into your app and call `AppleSignInCoordinator.shared.register()` from `application(_:didFinishLaunchingWithOptions:)`. What follows is what it does and why.
+
+**Token format** — call the completion with exactly one of:
+
+| Value | Meaning |
+|---|---|
+| `idToken` + `\|\|\|rawNonce\|\|\|` + `rawNonce` | signed in, with replay protection |
+| the same, plus `\|\|\|displayName\|\|\|` + `name` | signed in, and the library persists the name |
+| `idToken` alone | no nonce — accepted for compatibility, **not** fit for production |
+| `nil` | cancelled or failed |
 
 ```swift
 import AuthenticationServices
 import CryptoKit
 
-class AppleSignInDelegate: NSObject, ASAuthorizationControllerDelegate,
-                            ASAuthorizationControllerPresentationContextProviding {
+final class AppleSignInCoordinator: NSObject {
+
+    static let shared = AppleSignInCoordinator()
 
     private var currentRawNonce: String?
     private var completion: ((String?) -> Void)?
+    private var controller: ASAuthorizationController?   // the system does not retain it
 
-    func setup() {
-        AppleSignInProviderIOS.companion.signInHandler = { [weak self] _, completion in
-            self?.completion = completion
-            self?.startSignIn()
+    func register() {
+        AppleSignInProviderIOS.shared.signInHandler = { [weak self] _, completion in
+            self?.start(completion: completion)
         }
     }
 
-    private func startSignIn() {
-        let rawNonce = randomNonceString()
-        currentRawNonce = rawNonce
+    private func start(completion: @escaping (String?) -> Void) {
+        DispatchQueue.main.async { [weak self] in            // AuthenticationServices is main-thread only
+            guard let self, self.completion == nil, let rawNonce = Self.randomNonceString() else {
+                completion(nil)
+                return
+            }
+            self.completion = completion
+            self.currentRawNonce = rawNonce
 
-        let request = ASAuthorizationAppleIDProvider().createRequest()
-        request.requestedScopes = [.fullName, .email]
-        request.nonce = sha256(rawNonce)
+            let request = ASAuthorizationAppleIDProvider().createRequest()
+            request.requestedScopes = [.fullName, .email]
+            request.nonce = Self.sha256(rawNonce)           // Apple gets the hash, Firebase the raw one
 
-        let controller = ASAuthorizationController(authorizationRequests: [request])
-        controller.delegate = self
-        controller.presentationContextProvider = self
-        controller.performRequests()
+            let controller = ASAuthorizationController(authorizationRequests: [request])
+            controller.delegate = self
+            controller.presentationContextProvider = self
+            self.controller = controller
+            controller.performRequests()
+        }
     }
 
+    private func finish(_ token: String?) {                  // single exit point, called exactly once
+        let completion = self.completion
+        self.completion = nil
+        self.currentRawNonce = nil
+        self.controller = nil
+        completion?(token)
+    }
+}
+
+extension AppleSignInCoordinator: ASAuthorizationControllerDelegate {
+
     func authorizationController(controller: ASAuthorizationController,
-                                  didCompleteWithAuthorization authorization: ASAuthorization) {
+                                 didCompleteWithAuthorization authorization: ASAuthorization) {
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
               let tokenData = credential.identityToken,
-              let idToken = String(data: tokenData, encoding: .utf8) else {
-            completion?(nil); return
+              let idToken = String(data: tokenData, encoding: .utf8),
+              let rawNonce = currentRawNonce
+        else {
+            finish(nil)
+            return
         }
-        let rawNonce = currentRawNonce ?? ""
-        // Pass token with the "|||rawNonce|||" separator
-        let combined = rawNonce.isEmpty ? idToken : "\(idToken)|||rawNonce|||\(rawNonce)"
-        completion?(combined)
-        completion = nil
+
+        // Apple sends fullName only on the FIRST authorisation ever. Send it now or it is lost.
+        var packed = "\(idToken)|||rawNonce|||\(rawNonce)"
+        if let name = Self.displayName(from: credential.fullName) {
+            packed += "|||displayName|||\(name)"
+        }
+        finish(packed)
     }
 
-    func authorizationController(controller: ASAuthorizationController,
-                                  didCompleteWithError error: Error) {
-        completion?(nil)
-        completion = nil
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        finish(nil)   // includes ASAuthorizationError.canceled
     }
+}
+
+extension AppleSignInCoordinator: ASAuthorizationControllerPresentationContextProviding {
 
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        UIApplication.shared.connectedScenes
-            .compactMap { ($0 as? UIWindowScene)?.keyWindow }
-            .first!
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let scene = scenes.first { $0.activationState == .foregroundActive } ?? scenes.first
+        return scene?.keyWindow ?? scene?.windows.first ?? UIWindow()
     }
+}
 
-    // Nonce helpers
-    private func randomNonceString(length: Int = 32) -> String {
+private extension AppleSignInCoordinator {
+
+    /// Returns nil rather than falling back to a predictable value: a guessable nonce is worse
+    /// than no sign-in.
+    static func randomNonceString(length: Int = 32) -> String? {
         let charset = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
         var result = ""
-        var remainingLength = length
-        while remainingLength > 0 {
+        while result.count < length {
             var randoms = [UInt8](repeating: 0, count: 16)
-            SecRandomCopyBytes(kSecRandomDefault, randoms.count, &randoms)
-            randoms.forEach { random in
-                if remainingLength == 0 { return }
-                if random < charset.count { result.append(charset[Int(random)]); remainingLength -= 1 }
+            guard SecRandomCopyBytes(kSecRandomDefault, randoms.count, &randoms) == errSecSuccess else {
+                return nil
+            }
+            for random in randoms where result.count < length && random < charset.count {
+                result.append(charset[Int(random)])
             }
         }
         return result
     }
 
-    private func sha256(_ input: String) -> String {
-        let data = Data(input.utf8)
-        let hash = SHA256.hash(data: data)
-        return hash.compactMap { String(format: "%02x", $0) }.joined()
+    static func sha256(_ input: String) -> String {
+        SHA256.hash(data: Data(input.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+
+    static func displayName(from components: PersonNameComponents?) -> String? {
+        guard let components else { return nil }
+        let formatter = PersonNameComponentsFormatter()
+        formatter.style = .long
+        let name = formatter.string(from: components).trimmingCharacters(in: .whitespacesAndNewlines)
+        return name.isEmpty ? nil : name
     }
 }
 ```
+
+**Four failure modes that only show up at runtime:**
+
+1. **Not retaining the `ASAuthorizationController`** — it is deallocated before the delegate fires and the sheet never appears.
+2. **Not calling the completion on some path** (typically cancellation) — the Kotlin coroutine never resumes and the button spins forever.
+3. **Reusing or dropping the nonce** — Firebase rejects the token, or worse, accepts a replayed one. Generate it per attempt with `SecRandomCopyBytes`; never `arc4random` or a UUID.
+4. **Not sending the name** — Apple returns `fullName` only on the very first authorisation of each user. After that it is gone for good, and the user has to revoke the app under *Settings → Apple Account → Sign in with Apple* to get it back.
+
+**Production checklist**
+
+- [ ] **Sign in with Apple** capability enabled on the App ID in the Apple Developer portal, and the entitlement in the app (`iosApp/iosApp/iosApp.entitlements`).
+- [ ] Apple provider enabled in the **Firebase console** for this project.
+- [ ] The app's bundle id matches the iOS app registered in Firebase.
+- [ ] If your app offers **account deletion**, App Review guideline 5.1.1(v) also requires revoking the Apple token — capture `credential.authorizationCode` at sign-in and pass it to `Auth.auth().revokeToken(withAuthorizationCode:)` before deleting the user. The library's `deleteAccount()` does not do this for you.
 
 ---
 
@@ -645,7 +759,7 @@ Replace `"github.com"` with `"microsoft.com"`, `"twitter.com"`, or `"facebook.co
 import FirebaseAuth
 
 // GitHub example — call this at app startup
-GitHubSignInProviderIOS.companion.signInHandler = { _, completion in
+GitHubSignInProviderIOS.shared.signInHandler = { _, completion in
     let provider = OAuthProvider(providerID: "github.com")
     provider.scopes = ["user:email"]
 
@@ -661,7 +775,7 @@ GitHubSignInProviderIOS.companion.signInHandler = { _, completion in
 }
 
 // Microsoft
-MicrosoftSignInProviderIOS.companion.signInHandler = { _, completion in
+MicrosoftSignInProviderIOS.shared.signInHandler = { _, completion in
     let provider = OAuthProvider(providerID: "microsoft.com")
     provider.scopes = ["email", "profile"]
     // Optional: provider.customParameters = ["tenant": "your-tenant-id"]
@@ -674,7 +788,7 @@ MicrosoftSignInProviderIOS.companion.signInHandler = { _, completion in
 }
 
 // Twitter
-TwitterSignInProviderIOS.companion.signInHandler = { _, completion in
+TwitterSignInProviderIOS.shared.signInHandler = { _, completion in
     let provider = OAuthProvider(providerID: "twitter.com")
     provider.getCredentialWith(nil) { credential, error in
         guard let credential = credential, error == nil else { completion(nil); return }
@@ -685,7 +799,7 @@ TwitterSignInProviderIOS.companion.signInHandler = { _, completion in
 }
 
 // Facebook
-FacebookSignInProviderIOS.companion.signInHandler = { _, completion in
+FacebookSignInProviderIOS.shared.signInHandler = { _, completion in
     let provider = OAuthProvider(providerID: "facebook.com")
     provider.scopes = ["email", "public_profile"]
     provider.getCredentialWith(nil) { credential, error in
@@ -709,14 +823,14 @@ Phone auth requires two handlers — one for sending the code and one for verify
 import FirebaseAuth
 
 // Handler 1: send the OTP
-PhoneAuthProviderIOS.companion.sendCodeHandler = { phoneNumber, completion in
+PhoneAuthProviderIOS.shared.sendCodeHandler = { phoneNumber, completion in
     PhoneAuthProvider.provider().verifyPhoneNumber(phoneNumber, uiDelegate: nil) { verificationId, error in
         completion(verificationId)  // nil on failure
     }
 }
 
 // Handler 2: verify the OTP and sign in
-PhoneAuthProviderIOS.companion.verifyCodeHandler = { verificationId, smsCode, completion in
+PhoneAuthProviderIOS.shared.verifyCodeHandler = { verificationId, smsCode, completion in
     let credential = PhoneAuthProvider.provider()
         .credential(withVerificationID: verificationId, verificationCode: smsCode)
     Auth.auth().signIn(with: credential) { result, error in
