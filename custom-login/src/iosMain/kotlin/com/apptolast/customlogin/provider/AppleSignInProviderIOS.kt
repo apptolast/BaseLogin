@@ -7,76 +7,74 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 /**
  * iOS implementation of Apple Sign-In via AuthenticationServices.
  *
- * Uses a callback mechanism to integrate with Swift. The hosting app must set
- * [signInHandler] from Swift before Apple Sign-In is triggered.
+ * Uses a callback mechanism to integrate with Swift. The hosting app must set [signInHandler] from
+ * Swift, at startup and before the first Composable renders, or Apple Sign-In resolves to `null`
+ * and the user sees a generic "cancelled or failed" error.
  *
- * ## Swift setup example
- *
- * ```swift
- * import AuthenticationServices
- * import CryptoKit
- *
- * // 1. Generate a secure nonce (call once per sign-in attempt)
- * private func randomNonceString(length: Int = 32) -> String { ... }
- * private func sha256(_ input: String) -> String {
- *     let inputData = Data(input.utf8)
- *     let hash = SHA256.hash(data: inputData)
- *     return hash.compactMap { String(format: "%02x", $0) }.joined()
- * }
- *
- * // 2. Configure the handler (do this at app startup, e.g. in AppDelegate)
- * AppleSignInProviderIOS.companion.signInHandler = { _, completion in
- *     let rawNonce = self.randomNonceString()
- *     let hashedNonce = self.sha256(rawNonce)
- *     self.currentRawNonce = rawNonce   // store for delegate callback
- *
- *     let provider = ASAuthorizationAppleIDProvider()
- *     let request = provider.createRequest()
- *     request.requestedScopes = [.fullName, .email]
- *     request.nonce = hashedNonce
- *
- *     // Store the completion to call from delegate
- *     self.appleSignInCompletion = completion
- *
- *     let controller = ASAuthorizationController(authorizationRequests: [request])
- *     controller.delegate = self
- *     controller.presentationContextProvider = self
- *     controller.performRequests()
- * }
- *
- * // 3. In your ASAuthorizationControllerDelegate:
- * func authorizationController(controller:, didCompleteWithAuthorization authorization:) {
- *     if let appleCredential = authorization.credential as? ASAuthorizationAppleIDCredential,
- *        let tokenData = appleCredential.identityToken,
- *        let idToken = String(data: tokenData, encoding: .utf8) {
- *         let rawNonce = self.currentRawNonce ?? ""
- *         // Encode idToken and rawNonce for Kotlin using the "|||rawNonce|||" separator
- *         let combined = rawNonce.isEmpty ? idToken : "\(idToken)|||rawNonce|||\(rawNonce)"
- *         self.appleSignInCompletion?(combined)
- *     } else {
- *         self.appleSignInCompletion?(nil)
- *     }
- *     self.appleSignInCompletion = nil
- * }
- *
- * func authorizationController(controller:, didCompleteWithError error:) {
- *     self.appleSignInCompletion?(nil)
- *     self.appleSignInCompletion = nil
- * }
- * ```
+ * This is a Kotlin `object`, so from Swift it is reached through **`.shared`** —
+ * `AppleSignInProviderIOS.shared.signInHandler = …`. (`.companion` exists only for the companion
+ * object of a class, such as `GoogleSignInProviderIOS`.)
  *
  * ## Token format
- * The completion callback must be called with one of:
- * - `"<idToken>|||rawNonce|||<rawNonce>"` — recommended (includes nonce for replay protection)
- * - `"<idToken>"` — without nonce (less secure)
- * - `null` — cancelled or failed
+ *
+ * Call the completion with one of these, and nothing else:
+ *
+ * - `"<idToken>|||rawNonce|||<rawNonce>"` — signed in, with replay protection.
+ * - `"<idToken>|||rawNonce|||<rawNonce>|||displayName|||<name>"` — same, plus the name Apple sent.
+ * - `"<idToken>"` — no nonce. Accepted for backwards compatibility, **not** fit for production.
+ * - `null` — cancelled or failed.
+ *
+ * The `displayName` segment is optional and **appended**, never a replacement: hosts already wired
+ * against the two-segment form keep working untouched.
+ *
+ * ### Why the nonce is not optional in practice
+ *
+ * Apple receives the SHA-256 of the nonce in the request; Firebase receives the raw one here and
+ * checks that both match. Without it, an identity token intercepted from another app can be
+ * replayed against your Firebase project. Generate it with a CSPRNG per attempt and never reuse it.
+ *
+ * ### Why the name has to travel with the token
+ *
+ * Apple returns `fullName` **only on the very first authorisation** of each user; every later
+ * sign-in comes back with it empty. If it is not sent here, the library cannot persist it into the
+ * Firebase profile and it is lost for good — re-installing the app does not bring it back, the user
+ * has to revoke the app in *Settings → Apple Account → Sign in with Apple*.
+ *
+ * ## Swift setup
+ *
+ * The reference implementation lives in the demo app, in `iosApp/iosApp/AppleSignInCoordinator.swift`;
+ * copy it as-is. In short:
+ *
+ * ```swift
+ * // AppDelegate.application(_:didFinishLaunchingWithOptions:)
+ * AppleSignInProviderIOS.shared.signInHandler = { [weak self] _, completion in
+ *     self?.startAppleSignIn(completion: completion)   // runs ASAuthorizationController
+ * }
+ *
+ * // ASAuthorizationControllerDelegate, on success:
+ * var packed = "\(idToken)|||rawNonce|||\(rawNonce)"
+ * if let name = displayName(from: credential.fullName) {
+ *     packed += "|||displayName|||\(name)"
+ * }
+ * completion(packed)
+ * ```
+ *
+ * Three things that are easy to get wrong and only fail at runtime:
+ * - keep a strong reference to the `ASAuthorizationController`, or it is deallocated before the
+ *   delegate fires and no sheet ever appears;
+ * - call `performRequests()` on the main thread;
+ * - call the completion exactly once on every path, including cancellation — otherwise the
+ *   coroutine below never resumes and the button stays spinning forever.
+ *
+ * Requires the **Sign in with Apple** capability in the app's entitlements and the Apple provider
+ * enabled in the Firebase console.
  */
 object AppleSignInProviderIOS {
 
     /**
-     * Set from Swift to perform the native Apple Sign-In.
-     * The first `String?` parameter is unused (reserved for future config).
-     * Call the completion with the encoded token string on success, or `null` on failure.
+     * Set from Swift (as `AppleSignInProviderIOS.shared.signInHandler`) to perform the native
+     * Apple Sign-In. The first `String?` parameter is unused (reserved for future config).
+     * Call the completion with the packed token string on success, or `null` on failure.
      */
     var signInHandler: ((String?, (String?) -> Unit) -> Unit)? = null
 
@@ -85,12 +83,14 @@ object AppleSignInProviderIOS {
         if (handler == null) {
             Logger.w(
                 "AppleSignIn",
-                "signInHandler not configured. Set AppleSignInProviderIOS.signInHandler from Swift.",
+                "signInHandler not configured. Set AppleSignInProviderIOS.shared.signInHandler from Swift.",
             )
             cont.resume(null)
             return@suspendCancellableCoroutine
         }
 
+        // A host that calls the completion more than once (cancel racing with error, say) must not
+        // crash the app: the second call finds the continuation already resumed and is dropped.
         handler(null) { tokenData ->
             if (cont.isActive) {
                 cont.resume(tokenData)

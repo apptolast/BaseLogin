@@ -16,7 +16,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *
  * Swift setup example:
  * ```swift
- * PhoneAuthProviderIOS.companion.sendCodeHandler = { phoneNumber, completion in
+ * PhoneAuthProviderIOS.shared.sendCodeHandler = { phoneNumber, completion in
  *     PhoneAuthProvider.provider().verifyPhoneNumber(phoneNumber, uiDelegate: nil) { verificationId, error in
  *         completion(verificationId)
  *     }
@@ -37,8 +37,9 @@ object PhoneAuthProviderIOS {
      *
      * Swift setup example:
      * ```swift
-     * PhoneAuthProviderIOS.companion.verifyCodeHandler = { verificationId, smsCode, completion in
-     *     let credential = PhoneAuthProvider.provider().credential(withVerificationID: verificationId, verificationCode: smsCode)
+     * PhoneAuthProviderIOS.shared.verifyCodeHandler = { verificationId, smsCode, completion in
+     *     let credential = PhoneAuthProvider.provider()
+     *         .credential(withVerificationID: verificationId, verificationCode: smsCode)
      *     Auth.auth().signIn(with: credential) { authResult, error in
      *         completion(authResult?.user.uid)
      *     }

@@ -13,8 +13,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         FirebaseApp.configure()
 
-        // Configure Google Sign-In handler for Kotlin
+        // Configure the sign-in handlers Kotlin calls into, before any Composable renders.
         configureGoogleSignIn()
+        AppleSignInCoordinator.shared.register()
 
         return true
     }

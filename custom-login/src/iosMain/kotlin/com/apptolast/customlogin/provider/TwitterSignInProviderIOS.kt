@@ -15,7 +15,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  * ```swift
  * import FirebaseAuth
  *
- * TwitterSignInProviderIOS.companion.signInHandler = { _, completion in
+ * TwitterSignInProviderIOS.shared.signInHandler = { _, completion in
  *     let provider = OAuthProvider(providerID: "twitter.com")
  *
  *     provider.getCredentialWith(nil) { credential, error in
@@ -24,7 +24,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *         }
  *         Auth.auth().signIn(with: credential) { result, error in
  *             if result?.user != nil {
- *                 completion(TwitterSignInProviderIOS.companion.PLATFORM_AUTH_HANDLED)
+ *                 completion(TwitterSignInProviderIOS.shared.PLATFORM_AUTH_HANDLED)
  *             } else {
  *                 completion(nil)
  *             }

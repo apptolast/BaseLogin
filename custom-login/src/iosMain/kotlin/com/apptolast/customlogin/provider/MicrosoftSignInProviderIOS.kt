@@ -15,7 +15,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  * ```swift
  * import FirebaseAuth
  *
- * MicrosoftSignInProviderIOS.companion.signInHandler = { _, completion in
+ * MicrosoftSignInProviderIOS.shared.signInHandler = { _, completion in
  *     let provider = OAuthProvider(providerID: "microsoft.com")
  *     provider.scopes = ["email", "profile"]
  *     // Optional: force a specific tenant
@@ -27,7 +27,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *         }
  *         Auth.auth().signIn(with: credential) { result, error in
  *             if result?.user != nil {
- *                 completion(MicrosoftSignInProviderIOS.companion.PLATFORM_AUTH_HANDLED)
+ *                 completion(MicrosoftSignInProviderIOS.shared.PLATFORM_AUTH_HANDLED)
  *             } else {
  *                 completion(nil)
  *             }
