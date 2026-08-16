@@ -606,7 +606,7 @@ Set up all handlers **before** the first Composable renders, typically in `AppDe
 import GoogleSignIn
 
 // In AppDelegate.application(_:didFinishLaunchingWithOptions:) or equivalent:
-GoogleSignInProviderIOS.companion.signInHandler = { clientId, completion in
+GoogleSignInProviderIOS.Companion.shared.signInHandler = { clientId, completion in
     guard let clientId = clientId,
           let rootVC = UIApplication.shared.connectedScenes
               .compactMap({ ($0 as? UIWindowScene)?.keyWindow?.rootViewController })
