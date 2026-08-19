@@ -112,9 +112,10 @@ All providers are **opt-in** via `LoginLibraryConfig`. Disabled providers are no
 2. [Architecture Overview](#architecture-overview)
 3. [Prerequisites](#prerequisites)
 4. [Project Setup](#project-setup)
-5. [Initialization](#initialization)
-6. [Integrating the Navigation Flow](#integrating-the-navigation-flow)
-7. [Provider Configuration](#provider-configuration)
+5. [Migrating to 2.0.0](#migrating-to-200)
+6. [Initialization](#initialization)
+7. [Integrating the Navigation Flow](#integrating-the-navigation-flow)
+8. [Provider Configuration](#provider-configuration)
    - [Google Sign-In](#google-sign-in)
    - [Apple Sign-In](#apple-sign-in)
    - [GitHub](#github)
@@ -123,17 +124,17 @@ All providers are **opt-in** via `LoginLibraryConfig`. Disabled providers are no
    - [Facebook](#facebook)
    - [Phone OTP](#phone-otp)
    - [Magic Link](#magic-link)
-8. [iOS Platform Setup](#ios-platform-setup)
+9. [iOS Platform Setup](#ios-platform-setup)
    - [Google (iOS)](#google-ios)
    - [Apple (iOS)](#apple-ios)
    - [GitHub / Microsoft / Twitter / Facebook (iOS)](#github--microsoft--twitter--facebook-ios)
    - [Phone OTP (iOS)](#phone-otp-ios)
-9. [Customizing the UI — Slots System](#customizing-the-ui--slots-system)
-10. [Re-authentication Screen](#re-authentication-screen)
-11. [AuthRepository Public API](#authrepository-public-api)
-12. [Error Handling](#error-handling)
-13. [Localization](#localization)
-14. [Module Structure](#module-structure)
+10. [Customizing the UI — Slots System](#customizing-the-ui--slots-system)
+11. [Re-authentication Screen](#re-authentication-screen)
+12. [AuthRepository Public API](#authrepository-public-api)
+13. [Error Handling](#error-handling)
+14. [Localization](#localization)
+15. [Module Structure](#module-structure)
 
 ---
 
@@ -300,6 +301,27 @@ This is what `composeApp/` does in this repository.
 The library's own dependencies (Firebase, Koin, Compose, etc.) are defined in `custom-login/build.gradle.kts` and are transitively available.
 
 ---
+
+## Migrating to 2.0.0
+
+2.0.0 is a **breaking release**. Everything in it fails at compile time, never at runtime — you find
+out when you bump the pin, not a month later with a dead button.
+
+### iOS providers: one way to reach them from Swift
+
+`GoogleSignInProviderIOS` was the only provider shaped as a `class` with a `companion object`,
+because it took `GoogleSignInConfig` in its constructor. Kotlin/Native exported that companion
+separately, so the same seam had two spellings in Swift — and this README shipped sign-in examples
+using the wrong one. It is now an `object` like the other five, and the config travels in `signIn`.
+
+| | 1.x | 2.0.0 |
+|---|---|---|
+| Swift | `GoogleSignInProviderIOS.Companion.shared.signInHandler = …` | `GoogleSignInProviderIOS.shared.signInHandler = …` |
+| Swift | `GoogleSignInProviderIOS.Companion.shared.signOutHandler = …` | `GoogleSignInProviderIOS.shared.signOutHandler = …` |
+| Kotlin | `GoogleSignInProviderIOS(config).signIn()` | `GoogleSignInProviderIOS.signIn(config)` |
+
+`getClientId()` is gone: anyone who could call it already holds the `GoogleSignInConfig` it read
+from. All six providers now answer to `X.shared.…`, and nothing else.
 
 ## Initialization
 
@@ -606,7 +628,7 @@ Set up all handlers **before** the first Composable renders, typically in `AppDe
 import GoogleSignIn
 
 // In AppDelegate.application(_:didFinishLaunchingWithOptions:) or equivalent:
-GoogleSignInProviderIOS.Companion.shared.signInHandler = { clientId, completion in
+GoogleSignInProviderIOS.shared.signInHandler = { clientId, completion in
     guard let clientId = clientId,
           let rootVC = UIApplication.shared.connectedScenes
               .compactMap({ ($0 as? UIWindowScene)?.keyWindow?.rootViewController })
@@ -630,7 +652,7 @@ GoogleSignInProviderIOS.Companion.shared.signInHandler = { clientId, completion 
 }
 
 // Wire this too, or the user can never switch accounts
-GoogleSignInProviderIOS.Companion.shared.signOutHandler = {
+GoogleSignInProviderIOS.shared.signOutHandler = {
     GIDSignIn.sharedInstance.signOut()
 }
 ```

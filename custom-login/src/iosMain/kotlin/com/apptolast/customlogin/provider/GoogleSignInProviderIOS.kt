@@ -12,66 +12,71 @@ import platform.UIKit.UIWindow
 /**
  * iOS implementation of Google Sign-In.
  *
- * This provider uses a callback mechanism to integrate with Swift.
- * The hosting app should:
+ * This provider uses a callback mechanism to integrate with Swift. The hosting app should:
  * 1. Configure GoogleSignIn in Swift AppDelegate
- * 2. Call [signInFromSwift] to trigger the sign-in flow
- * 3. The result will be passed back via the callback
+ * 2. Set [signInHandler] to trigger the sign-in flow
+ * 3. The result travels back through the completion block handed to that handler
  *
- * @property config The Google Sign-In configuration containing client IDs.
+ * An `object`, like the other five iOS providers, so there is a single way to reach any of them from
+ * Swift: `GoogleSignInProviderIOS.shared.…`. It used to be a `class` taking [GoogleSignInConfig] in
+ * its constructor, which Kotlin/Native exported through the companion instead and made this the odd
+ * one out — the reason the published examples drifted into two contradictory forms. The config now
+ * travels in [signIn], mirroring `AppleSignInProviderIOS.signIn(scopes)`.
+ *
+ * Making it an `object` does not globalise anything that was not global already: [signInHandler],
+ * [signOutHandler] and the pending callback lived in the companion, so there was ever only one of
+ * each per process. The old shape merely suggested otherwise.
  */
-class GoogleSignInProviderIOS(private val config: GoogleSignInConfig) {
-    companion object {
-        /**
-         * Callback to be set from Swift to perform the actual sign-in.
-         * Swift should set this and call GIDSignIn.sharedInstance.signIn().
-         */
-        var signInHandler: ((String?, (String?) -> Unit) -> Unit)? = null
+object GoogleSignInProviderIOS {
 
-        /**
-         * Called from Swift to complete the sign-in with the ID token.
-         */
-        private var pendingCallback: ((String?) -> Unit)? = null
+    /**
+     * Callback to be set from Swift to perform the actual sign-in.
+     * Swift should set this and call GIDSignIn.sharedInstance.signIn().
+     */
+    var signInHandler: ((String?, (String?) -> Unit) -> Unit)? = null
 
-        /**
-         * Called from Swift to provide the sign-in result.
-         */
-        @Deprecated(
-            "Unused: the result travels in the completion block handed to signInHandler, which is " +
-                "what every integration does. Will be removed once no consumer references it.",
-            level = DeprecationLevel.WARNING,
-        )
-        fun onSignInResult(idToken: String?) {
-            pendingCallback?.invoke(idToken)
-            pendingCallback = null
-        }
+    /**
+     * Set from Swift to clear GoogleSignIn's own session when the user signs out:
+     *
+     * ```swift
+     * GoogleSignInProviderIOS.shared.signOutHandler = {
+     *     GIDSignIn.sharedInstance.signOut()
+     * }
+     * ```
+     *
+     * Firebase's `signOut()` does not touch it. `GIDSignIn.sharedInstance.currentUser` lives in
+     * the keychain and survives, so without this the next Google sign-in silently reuses the
+     * previous account and **the user cannot switch accounts from inside the app** — the same
+     * failure `clearSocialSignInState` fixes on Android for Credential Manager.
+     *
+     * Leaving it unset keeps today's behaviour: a warning, and nothing else.
+     */
+    var signOutHandler: (() -> Unit)? = null
 
-        /**
-         * Set from Swift to clear GoogleSignIn's own session when the user signs out:
-         *
-         * ```swift
-         * GoogleSignInProviderIOS.Companion.shared.signOutHandler = {
-         *     GIDSignIn.sharedInstance.signOut()
-         * }
-         * ```
-         *
-         * Firebase's `signOut()` does not touch it. `GIDSignIn.sharedInstance.currentUser` lives in
-         * the keychain and survives, so without this the next Google sign-in silently reuses the
-         * previous account and **the user cannot switch accounts from inside the app** — the same
-         * failure `clearSocialSignInState` fixes on Android for Credential Manager.
-         *
-         * Leaving it unset keeps today's behaviour: a warning, and nothing else.
-         */
-        var signOutHandler: (() -> Unit)? = null
+    private var pendingCallback: ((String?) -> Unit)? = null
+
+    /**
+     * Called from Swift to provide the sign-in result.
+     */
+    @Deprecated(
+        "Unused: the result travels in the completion block handed to signInHandler, which is " +
+            "what every integration does. Will be removed once no consumer references it.",
+        level = DeprecationLevel.WARNING,
+    )
+    fun onSignInResult(idToken: String?) {
+        pendingCallback?.invoke(idToken)
+        pendingCallback = null
     }
 
     /**
      * Initiates the Google Sign-In flow and returns the ID token.
      *
+     * @param config the client ids to hand to Swift; [GoogleSignInConfig.iosClientId] wins over
+     *   [GoogleSignInConfig.webClientId] when both are set.
      * @return The Google ID token on success, or null if cancelled/failed.
      */
     @OptIn(ExperimentalForeignApi::class)
-    suspend fun signIn(): String? = suspendCancellableCoroutine { continuation ->
+    suspend fun signIn(config: GoogleSignInConfig): String? = suspendCancellableCoroutine { continuation ->
         val handler = signInHandler
         if (handler == null) {
             Logger.w("GoogleSignIn", "Handler not configured. Set GoogleSignInProviderIOS.signInHandler from Swift.")
@@ -122,9 +127,4 @@ class GoogleSignInProviderIOS(private val config: GoogleSignInConfig) {
         }
         return topController
     }
-
-    /**
-     * Returns the iOS client ID for configuration.
-     */
-    fun getClientId(): String? = config.iosClientId ?: config.webClientId
 }
