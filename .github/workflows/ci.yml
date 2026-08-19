@@ -1,8 +1,11 @@
 name: CI
 
 on:
+  # `feature/**` is here because the SDD harness stacks branches: a ticket's PR
+  # targets the previous ticket's branch, not develop. Without it, only the first
+  # PR of a stack is ever checked and the rest reach review unvalidated.
   pull_request:
-    branches: [develop, main]
+    branches: [develop, main, 'feature/**']
   push:
     branches: [develop, main]
   workflow_dispatch:
