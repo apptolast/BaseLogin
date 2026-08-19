@@ -5,9 +5,14 @@ import com.apptolast.customlogin.data.firebase.FirebaseAuthCredential
 import com.apptolast.customlogin.data.firebase.FirebaseAuthFailure
 import com.apptolast.customlogin.data.firebase.FirebaseAuthGateway
 import com.apptolast.customlogin.data.firebase.FirebaseAuthUser
+import com.apptolast.customlogin.data.firebase.PhoneAuthPort
 import com.apptolast.customlogin.data.firebase.SocialSignInStateCleaner
 import com.apptolast.customlogin.data.firebase.SocialTokenProvider
+import com.apptolast.customlogin.data.firebase.SocialTokenRevoker
+import com.apptolast.customlogin.domain.model.AuthResult
 import com.apptolast.customlogin.domain.model.IdentityProvider
+import com.apptolast.customlogin.domain.model.PhoneAuthResult
+import com.apptolast.customlogin.domain.model.UserSession
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -123,6 +128,51 @@ class FakeFirebaseAuthGateway : FirebaseAuthGateway {
     override suspend fun reauthenticate(credential: FirebaseAuthCredential) {
         record()
         credentials += credential
+    }
+}
+
+/**
+ * [SocialTokenRevoker] double.
+ *
+ * [onRevoke] is the hook that makes ordering assertable: a test can look at the gateway from inside
+ * the revocation and prove it ran *before* the user was deleted.
+ */
+class FakeSocialTokenRevoker : SocialTokenRevoker {
+    val revoked = mutableListOf<IdentityProvider>()
+
+    /** When set, revocation throws it — the port's contract allows failing. */
+    var failWith: Exception? = null
+
+    var onRevoke: (() -> Unit)? = null
+
+    override suspend fun revoke(provider: IdentityProvider) {
+        revoked += provider
+        onRevoke?.invoke()
+        failWith?.let { throw it }
+    }
+}
+
+/**
+ * [PhoneAuthPort] double.
+ *
+ * [verifyResult] defaults to the stub iOS produces — a session with nothing but the uid — because
+ * that asymmetry with Android is what spec 009 is about.
+ */
+class FakePhoneAuthPort : PhoneAuthPort {
+    var sendResult: PhoneAuthResult = PhoneAuthResult.CodeSent("verification-id")
+    var verifyResult: AuthResult = AuthResult.Success(UserSession(userId = "phone-uid", email = null))
+
+    val sentCodes = mutableListOf<Pair<String, Long>>()
+    val verifiedCodes = mutableListOf<Pair<String, String>>()
+
+    override suspend fun sendCode(phoneNumber: String, timeoutSeconds: Long): PhoneAuthResult {
+        sentCodes += phoneNumber to timeoutSeconds
+        return sendResult
+    }
+
+    override suspend fun verifyCode(verificationId: String, otpCode: String): AuthResult {
+        verifiedCodes += verificationId to otpCode
+        return verifyResult
     }
 }
 

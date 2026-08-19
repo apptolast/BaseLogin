@@ -36,10 +36,33 @@ class GoogleSignInProviderIOS(private val config: GoogleSignInConfig) {
         /**
          * Called from Swift to provide the sign-in result.
          */
+        @Deprecated(
+            "Unused: the result travels in the completion block handed to signInHandler, which is " +
+                "what every integration does. Will be removed once no consumer references it.",
+            level = DeprecationLevel.WARNING,
+        )
         fun onSignInResult(idToken: String?) {
             pendingCallback?.invoke(idToken)
             pendingCallback = null
         }
+
+        /**
+         * Set from Swift to clear GoogleSignIn's own session when the user signs out:
+         *
+         * ```swift
+         * GoogleSignInProviderIOS.Companion.shared.signOutHandler = {
+         *     GIDSignIn.sharedInstance.signOut()
+         * }
+         * ```
+         *
+         * Firebase's `signOut()` does not touch it. `GIDSignIn.sharedInstance.currentUser` lives in
+         * the keychain and survives, so without this the next Google sign-in silently reuses the
+         * previous account and **the user cannot switch accounts from inside the app** — the same
+         * failure `clearSocialSignInState` fixes on Android for Credential Manager.
+         *
+         * Leaving it unset keeps today's behaviour: a warning, and nothing else.
+         */
+        var signOutHandler: (() -> Unit)? = null
     }
 
     /**
@@ -81,6 +104,12 @@ class GoogleSignInProviderIOS(private val config: GoogleSignInConfig) {
     /**
      * Gets the top-most view controller for presenting the sign-in UI.
      */
+    @Deprecated(
+        "Unused, and wrong on iOS 15+: UIApplication.windows is deprecated and ignores which scene " +
+            "is actually in the foreground. Swift hosts pick their own presenter — see " +
+            "iosApp/iosApp/AppleSignInCoordinator.swift for how. Will be removed.",
+        level = DeprecationLevel.WARNING,
+    )
     @OptIn(ExperimentalForeignApi::class)
     fun getTopViewController(): UIViewController? {
         val keyWindow = UIApplication.sharedApplication.windows

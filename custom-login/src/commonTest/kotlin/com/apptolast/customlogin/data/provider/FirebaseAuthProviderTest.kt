@@ -10,12 +10,16 @@ import com.apptolast.customlogin.domain.model.AuthState
 import com.apptolast.customlogin.domain.model.Credentials
 import com.apptolast.customlogin.domain.model.IdentityProvider
 import com.apptolast.customlogin.domain.model.SignUpData
+import com.apptolast.customlogin.domain.model.UserSession
 import com.apptolast.customlogin.test.FakeFirebaseAuthGateway
+import com.apptolast.customlogin.test.FakePhoneAuthPort
 import com.apptolast.customlogin.test.FakeSocialSignInStateCleaner
 import com.apptolast.customlogin.test.FakeSocialTokenProvider
+import com.apptolast.customlogin.test.FakeSocialTokenRevoker
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -32,8 +36,18 @@ class FirebaseAuthProviderTest {
     private val gateway = FakeFirebaseAuthGateway()
     private val socialTokens = FakeSocialTokenProvider()
     private val socialCleaner = FakeSocialSignInStateCleaner()
+    private val revoker = FakeSocialTokenRevoker()
+    private val phoneAuth = FakePhoneAuthPort()
 
+    /**
+     * Three arguments on purpose: this is also the proof that spec 005 did not break the constructor
+     * every consumer already builds by hand.
+     */
     private fun provider() = FirebaseAuthProvider(gateway, socialTokens, socialCleaner)
+
+    private fun providerWithRevoker() = FirebaseAuthProvider(gateway, socialTokens, socialCleaner, revoker)
+
+    private fun providerWithPhone() = FirebaseAuthProvider(gateway, socialTokens, socialCleaner, revoker, phoneAuth)
 
     // ── AC-03: email/password ────────────────────────────────────────────────
 
@@ -271,5 +285,115 @@ class FirebaseAuthProviderTest {
 
         assertIs<AuthResult.PasswordResetSent>(result)
         assertEquals(listOf("user@test.com"), gateway.passwordResetEmails)
+    }
+
+    // ── 005 AC-01…AC-04: revocacion al borrar la cuenta ──────────────────────
+
+    @Test
+    fun `005 deleteAccount revokes the apple token before deleting the user`() = runTest {
+        // Given: Apple requires the token to be revoked, not just the account removed (5.1.1(v)).
+        gateway.user = FirebaseAuthUser(uid = "u-12", providerIds = listOf("apple.com"))
+        var userStillAliveWhenRevoked: Boolean? = null
+        revoker.onRevoke = { userStillAliveWhenRevoked = gateway.user != null }
+
+        // When
+        val result = providerWithRevoker().deleteAccount()
+
+        // Then
+        assertTrue(result.isSuccess)
+        assertEquals(IdentityProvider.Apple, revoker.revoked.single())
+        assertEquals(true, userStillAliveWhenRevoked, "revocation must happen before the deletion")
+        assertNull(gateway.user)
+    }
+
+    @Test
+    fun `005 deleteAccount does not revoke for an email only user`() = runTest {
+        // Given: an email user in an app that also offers Apple must not be shown an Apple sheet.
+        gateway.user = FirebaseAuthUser(uid = "u-13", providerIds = listOf("password"))
+
+        // When
+        val result = providerWithRevoker().deleteAccount()
+
+        // Then
+        assertTrue(result.isSuccess)
+        assertTrue(revoker.revoked.isEmpty())
+        assertNull(gateway.user)
+    }
+
+    @Test
+    fun `005 a failing revocation still deletes the account`() = runTest {
+        // Given: a user who asked to delete their account cannot be stuck behind Apple's servers.
+        gateway.user = FirebaseAuthUser(uid = "u-14", providerIds = listOf("apple.com"))
+        revoker.failWith = IllegalStateException("apple is down")
+
+        // When
+        val result = providerWithRevoker().deleteAccount()
+
+        // Then
+        assertTrue(result.isSuccess)
+        assertEquals(IdentityProvider.Apple, revoker.revoked.single())
+        assertNull(gateway.user)
+    }
+
+    @Test
+    fun `005 a failing deletion is reported as a failure`() = runTest {
+        gateway.user = FirebaseAuthUser(uid = "u-15", providerIds = listOf("apple.com"))
+        gateway.failWith = FirebaseAuthFailure("requires-recent-login")
+
+        val result = providerWithRevoker().deleteAccount()
+
+        assertTrue(result.isFailure)
+    }
+
+    // ── 009: la sesion de telefono, igual que las demas ───────────────────────
+
+    @Test
+    fun `009 verifyPhoneOtp returns the full user, not the platform stub`() = runTest {
+        // Given: iOS only knows the uid its Swift handler sent back, while Android fills the session
+        // from the Firebase user. The gateway is the one that knows the whole user.
+        phoneAuth.verifyResult = AuthResult.Success(UserSession(userId = "p-1", email = null))
+        gateway.user = FirebaseAuthUser(
+            uid = "p-1",
+            email = "phone@test.com",
+            displayName = "Ana",
+            isEmailVerified = true,
+        )
+
+        // When
+        val result = providerWithPhone().verifyPhoneOtp("v-1", "123456")
+
+        // Then
+        assertIs<AuthResult.Success>(result)
+        assertEquals("p-1", result.session.userId)
+        assertEquals("phone@test.com", result.session.email)
+        assertEquals("Ana", result.session.displayName)
+        assertTrue(result.session.isEmailVerified)
+    }
+
+    @Test
+    fun `009 verifyPhoneOtp forwards the code to the platform`() = runTest {
+        gateway.user = FirebaseAuthUser(uid = "p-2")
+
+        providerWithPhone().verifyPhoneOtp("v-2", "654321")
+
+        assertEquals("v-2" to "654321", phoneAuth.verifiedCodes.single())
+    }
+
+    @Test
+    fun `009 a rejected otp is propagated untouched`() = runTest {
+        // Given: no session to read back, so the platform's failure has to survive
+        phoneAuth.verifyResult = AuthResult.Failure(AuthError.InvalidCredentials())
+
+        val result = providerWithPhone().verifyPhoneOtp("v-3", "000000")
+
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.InvalidCredentials>(result.error)
+    }
+
+    @Test
+    fun `009 sendPhoneOtp forwards the timeout to the platform`() = runTest {
+        providerWithPhone().sendPhoneOtp("+34600000000", timeoutSeconds = 90)
+
+        assertEquals("+34600000000" to 90L, phoneAuth.sentCodes.single())
     }
 }

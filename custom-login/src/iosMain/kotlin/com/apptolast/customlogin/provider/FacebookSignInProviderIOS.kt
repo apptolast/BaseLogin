@@ -15,7 +15,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  * ```swift
  * import FirebaseAuth
  *
- * FacebookSignInProviderIOS.companion.signInHandler = { _, completion in
+ * FacebookSignInProviderIOS.shared.signInHandler = { _, completion in
  *     let provider = OAuthProvider(providerID: "facebook.com")
  *     provider.scopes = ["email", "public_profile"]
  *
@@ -25,7 +25,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *         }
  *         Auth.auth().signIn(with: credential) { result, error in
  *             if result?.user != nil {
- *                 completion(FacebookSignInProviderIOS.companion.PLATFORM_AUTH_HANDLED)
+ *                 completion(FacebookSignInProviderIOS.shared.PLATFORM_AUTH_HANDLED)
  *             } else {
  *                 completion(nil)
  *             }

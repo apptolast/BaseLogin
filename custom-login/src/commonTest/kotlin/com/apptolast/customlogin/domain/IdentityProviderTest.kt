@@ -4,6 +4,7 @@ import com.apptolast.customlogin.domain.model.IdentityProvider
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
+import kotlin.test.assertNull
 
 /**
  * Verifies that each [IdentityProvider] carries the exact provider ID expected by Firebase.
@@ -82,5 +83,18 @@ class IdentityProviderTest {
     @Test
     fun `two Custom providers with different customIds are not equal`() {
         assertNotEquals(IdentityProvider.Custom("foo"), IdentityProvider.Custom("bar"))
+    }
+
+    @Test
+    fun `005 fromId maps the firebase provider id to the domain type`() {
+        // Given / When / Then: the ids Firebase puts in the user's providerData
+        assertEquals(IdentityProvider.Apple, IdentityProvider.fromId("apple.com"))
+        assertEquals(IdentityProvider.Google, IdentityProvider.fromId("google.com"))
+        assertEquals(IdentityProvider.Phone, IdentityProvider.fromId("phone"))
+
+        // and anything this library does not model stays null instead of becoming a made-up Custom,
+        // because callers use the answer to decide whether a provider needs special treatment.
+        assertNull(IdentityProvider.fromId("password"))
+        assertNull(IdentityProvider.fromId("whatever.com"))
     }
 }

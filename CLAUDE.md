@@ -56,6 +56,27 @@ diagnose.
 Signing reads `DEVELOPMENT_TEAM` from `${TEAM_ID}`, defined in `iosApp/Configuration/Config.xcconfig`.
 Set it locally; **never hardcode a team id into `project.pbxproj`**.
 
+The bundle id is fixed at `com.apptolast.login.Login` — deliberately **without** the `$(TEAM_ID)`
+suffix the KMP template ships. It has to match three things at once: the iOS app registered in
+Firebase, the iOS OAuth client behind the reversed client id in `Info.plist`, and
+`MagicLinkConfig.iosBundleId` in `MainViewController.kt`. With the suffix, setting `TEAM_ID` locally
+silently changed the app's identity and broke all three.
+
+## Files the demo needs and the repository does not have
+
+Both Firebase config files are in `.gitignore`, and **neither is in the tree**. Until you add them:
+
+| File | Where | Without it |
+|---|---|---|
+| `composeApp/google-services.json` | `composeApp/` | `:composeApp:assembleDebug` **fails** at `processDebugGoogleServices` |
+| `GoogleService-Info.plist` | `iosApp/iosApp/` | the app builds and **crashes at launch** in `FirebaseApp.configure()` |
+
+Download both from the Firebase console for this project. The iOS one must be registered for the
+bundle id above. `iosApp/iosApp/` is a `fileSystemSynchronizedGroup`, so dropping the plist in the
+folder is enough — no `project.pbxproj` edit.
+
+This is why `:custom-login` tasks are the ones to run for a quick check: they need neither file.
+
 ## Module Structure
 
 ```

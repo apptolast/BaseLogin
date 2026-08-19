@@ -628,7 +628,14 @@ GoogleSignInProviderIOS.companion.signInHandler = { clientId, completion in
         completion("\(idToken)|||accessToken|||\(accessToken)")
     }
 }
+
+// Wire this too, or the user can never switch accounts
+GoogleSignInProviderIOS.Companion.shared.signOutHandler = {
+    GIDSignIn.sharedInstance.signOut()
+}
 ```
+
+> `signOut()` in Firebase does not touch GoogleSignIn. `GIDSignIn.sharedInstance.currentUser` lives in the keychain and survives, so without the handler above the next sign-in silently reuses the previous account. It is the iOS half of what `clearSocialSignInState()` already does for Credential Manager on Android.
 
 ---
 
@@ -773,13 +780,20 @@ private extension AppleSignInCoordinator {
 - [ ] **Sign in with Apple** capability enabled on the App ID in the Apple Developer portal, and the entitlement in the app (`iosApp/iosApp/iosApp.entitlements`).
 - [ ] Apple provider enabled in the **Firebase console** for this project.
 - [ ] The app's bundle id matches the iOS app registered in Firebase.
-- [ ] If your app offers **account deletion**, App Review guideline 5.1.1(v) also requires revoking the Apple token — capture `credential.authorizationCode` at sign-in and pass it to `Auth.auth().revokeToken(withAuthorizationCode:)` before deleting the user. The library's `deleteAccount()` does not do this for you.
+- [ ] If your app offers **account deletion**, wire `AppleSignInProviderIOS.shared.revokeHandler` too. App Review guideline 5.1.1(v) requires revoking the Apple token, not just deleting the Firebase user, and `deleteAccount()` calls this handler before deleting — but only if you set it, so an app that already ships a deletion flow does not suddenly get an Apple sheet. See the `.revoke` branch of `AppleSignInCoordinator`: it asks Apple to authorise again, because `revokeToken(withAuthorizationCode:)` needs a code that is fresh and single-use. A failed revocation is logged and the account is deleted anyway.
 
 ---
 
 ### GitHub / Microsoft / Twitter / Facebook (iOS)
 
+Reference implementation: **[`iosApp/iosApp/FirebaseOAuthCoordinator.swift`](iosApp/iosApp/FirebaseOAuthCoordinator.swift)**, registered from the `AppDelegate`.
+
 These four providers share the same pattern. Firebase handles the full OAuth flow from Swift. The Kotlin library only needs to know when it is complete.
+
+Two things this flow needs that the sign-in code cannot do for you:
+
+- **Retain the `OAuthProvider`** while the web flow runs. The SDK does not, and a provider held in a local variable is deallocated before the credential callback fires — the browser opens and nothing ever comes back.
+- **Route the callback URL.** Register your app's `REVERSED_CLIENT_ID` (from `GoogleService-Info.plist`) as a URL scheme in `Info.plist`, and forward incoming URLs to `Auth.auth().canHandle(url)`. Under the SwiftUI lifecycle that means `.onOpenURL` on your scene — `application(_:open:options:)` is **not** called when scenes are in use, which is the most common reason these four providers hang.
 
 Replace `"github.com"` with `"microsoft.com"`, `"twitter.com"`, or `"facebook.com"` as needed.
 
@@ -845,7 +859,11 @@ FacebookSignInProviderIOS.shared.signInHandler = { _, completion in
 
 ### Phone OTP (iOS)
 
+Reference implementation: **[`iosApp/iosApp/PhoneAuthCoordinator.swift`](iosApp/iosApp/PhoneAuthCoordinator.swift)**, registered from the `AppDelegate`.
+
 Phone auth requires two handlers — one for sending the code and one for verifying it.
+
+Before any SMS goes out, Firebase verifies that the request comes from your app: silently through an APNs push, and failing that through a reCAPTCHA page in the browser. So the `AppDelegate` also needs `setAPNSToken(_:type:)` in `didRegisterForRemoteNotificationsWithDeviceToken`, `canHandleNotification(_:)` in `didReceiveRemoteNotification`, and the same URL routing as the OAuth providers above for the reCAPTCHA callback. For the silent path you need the **Push Notifications** capability and an **APNs key uploaded to the Firebase console**; without it the flow still works, it just detours through the browser.
 
 ```swift
 import FirebaseAuth

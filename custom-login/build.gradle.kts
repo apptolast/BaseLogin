@@ -92,6 +92,15 @@ android {
             withSourcesJar()
         }
     }
+
+    testOptions {
+        unitTests {
+            // `android.util.Log` is a stub in host tests and throws "not mocked" on every call.
+            // The suite runs on the JVM and the library logs from its error paths, so without this
+            // any test that walks a catch block fails on the logging rather than on the behaviour.
+            isReturnDefaultValues = true
+        }
+    }
 }
 
 afterEvaluate {

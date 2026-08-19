@@ -229,3 +229,14 @@ actual suspend fun clearSocialSignInState() {
         Logger.w("Platform", "clearCredentialState failed: ${e.message}")
     }
 }
+
+/**
+ * Declared no-op.
+ *
+ * App Review guideline 5.1.1(v) applies to the iOS app, and Apple Sign-In on Android is Firebase's
+ * web OAuth flow, which issues no token this side can revoke. Deleting the Firebase user is all
+ * there is to do here.
+ */
+actual suspend fun revokeSocialToken(provider: IdentityProvider) {
+    Logger.d("Platform", "Nothing to revoke on Android for ${provider.id}.")
+}

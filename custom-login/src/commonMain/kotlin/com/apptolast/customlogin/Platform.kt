@@ -67,8 +67,23 @@ expect suspend fun verifyPhoneCode(verificationId: String, otpCode: String): Aut
 /**
  * Clears any social sign-in state cached by the platform, so the next sign-in starts clean.
  *
- * On Android, Credential Manager caches the chosen Google account: without this, after
- * `signOut()` the account picker does not reappear and the user cannot switch accounts.
- * On iOS this is a no-op — Apple does not cache the selection the same way.
+ * Both platforms have the same problem and a different owner for it. On Android it is Credential
+ * Manager, which caches the chosen Google account. On iOS it is `GIDSignIn`, whose `currentUser`
+ * lives in the keychain and survives Firebase's `signOut()`. Either way, without this the account
+ * picker does not reappear and the user cannot switch accounts.
+ *
+ * Apple is the exception and needs nothing: `ASAuthorizationController` caches no selection.
  */
 expect suspend fun clearSocialSignInState()
+
+/**
+ * Revokes the token [provider] issued for the current user, before the account is deleted.
+ *
+ * Only Apple on iOS does anything: App Review guideline 5.1.1(v) requires revocation, and
+ * `revokeToken(withAuthorizationCode:)` needs a **fresh** authorization code, so the host's handler
+ * has to ask Apple to authorise again. On Android this is a declared no-op — Apple there is the web
+ * OAuth flow and the guideline applies to the iOS app.
+ *
+ * Implementations are **best effort**: they may throw, and the caller deletes the account anyway.
+ */
+expect suspend fun revokeSocialToken(provider: IdentityProvider)

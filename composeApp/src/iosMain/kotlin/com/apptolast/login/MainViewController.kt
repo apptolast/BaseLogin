@@ -39,8 +39,10 @@ private fun initKoinIfNeeded() {
             twitterEnabled = true,
             facebookEnabled = true,
             magicLinkConfig = MagicLinkConfig(
+                // Must be the app's real bundle id, or the link never reopens the app.
+                // See iosApp/Configuration/Config.xcconfig.
                 continueUrl = "https://apptolast.com/login",
-                iosBundleId = "com.apptolast.login",
+                iosBundleId = "com.apptolast.login.Login",
             ),
         )
 

@@ -15,7 +15,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  * ```swift
  * import FirebaseAuth
  *
- * GitHubSignInProviderIOS.companion.signInHandler = { _, completion in
+ * GitHubSignInProviderIOS.shared.signInHandler = { _, completion in
  *     let provider = OAuthProvider(providerID: "github.com")
  *     provider.scopes = ["user:email"]
  *
@@ -25,7 +25,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  *         }
  *         Auth.auth().signIn(with: credential) { result, error in
  *             if result?.user != nil {
- *                 completion(GitHubSignInProviderIOS.companion.PLATFORM_AUTH_HANDLED)
+ *                 completion(GitHubSignInProviderIOS.shared.PLATFORM_AUTH_HANDLED)
  *             } else {
  *                 completion(nil)
  *             }
