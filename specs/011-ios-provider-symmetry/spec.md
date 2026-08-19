@@ -1,10 +1,10 @@
 # Spec 011: Simetría de los providers de iOS — `GoogleSignInProviderIOS` como `object`
 
-> Rama: `feature/011-ios-provider-symmetry` · Proyecto: `BaseLogin` (`:custom-login` + demo + README)
+> Rama: `feature/011-ios-provider-symmetry` · Proyecto: `BaseLogin` (`:baselogin` + demo + README)
 > Estado: **implementado**. Sale de `feature/010-ios-build-hygiene`.
 > Sin ticket FLE: cierra la causa de un hallazgo del spec 003.
 > ⚠️ **Rompe a los hosts Swift ya integrados. Va en 2.0.0**, junto con el renombrado
-> `custom-login` → `baselogin`, para que los consumidores migren una sola vez en vez de dos.
+> `baselogin` → `baselogin`, para que los consumidores migren una sola vez en vez de dos.
 
 ## Contexto y objetivo
 
@@ -177,9 +177,9 @@ Scenario [AC-06]: El break está declarado, no descubierto
 
 | AC | Test(s) | ¿Rojo antes? |
 |----|---------|--------------|
-| AC-01 | *(no unitario)* — `grep -rn "\.companion\.\|\.Companion\.shared" custom-login/src/iosMain iosApp README.md CLAUDE.md` debe salir vacío | n/a — el grep sale con 4 hits hoy |
-| AC-02 | *(no unitario)* — `:custom-login:linkDebugFrameworkIosSimulatorArm64` + inspección de `Platform.ios.kt` | n/a en iosMain |
-| AC-03 | `:custom-login:testDebugUnitTest` en verde sin tocar tests + smoke manual en Mac | n/a — el parseo vive en commonMain y no cambia |
+| AC-01 | *(no unitario)* — `grep -rn "\.companion\.\|\.Companion\.shared" baselogin/src/iosMain iosApp README.md CLAUDE.md` debe salir vacío | n/a — el grep sale con 4 hits hoy |
+| AC-02 | *(no unitario)* — `:baselogin:linkDebugFrameworkIosSimulatorArm64` + inspección de `Platform.ios.kt` | n/a en iosMain |
+| AC-03 | `:baselogin:testDebugUnitTest` en verde sin tocar tests + smoke manual en Mac | n/a — el parseo vive en commonMain y no cambia |
 | AC-04 | *(no unitario)* — smoke manual: login → logout → login y comprobar que aparece el selector | n/a |
 | AC-05 | *(no unitario)* — diff manual de los dos snippets | n/a |
 | AC-06 | *(no unitario)* — compilar el demo, que **es** el host de referencia | n/a |

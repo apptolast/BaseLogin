@@ -1,12 +1,12 @@
 package com.apptolast.login
 
 import android.app.Application
-import com.apptolast.customlogin.CustomLoginAndroid
-import com.apptolast.customlogin.config.AppleSignInConfig
-import com.apptolast.customlogin.config.GoogleSignInConfig
-import com.apptolast.customlogin.config.MagicLinkConfig
-import com.apptolast.customlogin.di.LoginLibraryConfig
-import com.apptolast.customlogin.di.initLoginKoin
+import com.apptolast.baselogin.BaseLoginAndroid
+import com.apptolast.baselogin.config.AppleSignInConfig
+import com.apptolast.baselogin.config.GoogleSignInConfig
+import com.apptolast.baselogin.config.MagicLinkConfig
+import com.apptolast.baselogin.di.LoginLibraryConfig
+import com.apptolast.baselogin.di.initLoginKoin
 import com.apptolast.login.di.appModule
 import com.google.firebase.Firebase
 import com.google.firebase.appcheck.appCheck
@@ -18,7 +18,7 @@ class LoginApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        CustomLoginAndroid.initialize(this)
+        BaseLoginAndroid.initialize(this)
 
         Firebase.initialize(this)
 

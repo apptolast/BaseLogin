@@ -1,6 +1,6 @@
 # Spec 007: Que `AppleSignInConfig.scopes` signifique algo en iOS
 
-> Rama: `feature/007-apple-scopes-ios` · Proyecto: `BaseLogin` (`:custom-login` + demo)
+> Rama: `feature/007-apple-scopes-ios` · Proyecto: `BaseLogin` (`:baselogin` + demo)
 > Estado: implementado · Sale de `feature/006-ios-social-signout`.
 > Sin ticket FLE: sale de la auditoría de iOS.
 

@@ -12,7 +12,7 @@ Cuatro cosas pequeñas, ninguna urgente, todas de las que hacen perder una tarde
    `GoogleService-Info.plist` están en `.gitignore` y **no están en el árbol**. El primero rompe
    `:composeApp:assembleDebug` con un error claro; el segundo deja compilar y la app **casca al
    arrancar** en `FirebaseApp.configure()`. Nada lo documenta. (Se descubrió al ejecutar
-   `assembleDebug` en el spec 008: hasta entonces solo se habían corrido tareas de `:custom-login`,
+   `assembleDebug` en el spec 008: hasta entonces solo se habían corrido tareas de `:baselogin`,
    que no necesitan ninguno de los dos.)
 2. **Código muerto en la API pública.** `GoogleSignInProviderIOS.onSignInResult` no lo llama nadie —
    el resultado viaja en el completion del `signInHandler` — y `getTopViewController()` además usa

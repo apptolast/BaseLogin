@@ -1,6 +1,6 @@
 # Spec 006: Cerrar también la sesión de Google en iOS
 
-> Rama: `feature/006-ios-social-signout` · Proyecto: `BaseLogin` (`:custom-login` + demo)
+> Rama: `feature/006-ios-social-signout` · Proyecto: `BaseLogin` (`:baselogin` + demo)
 > Estado: implementado · Sale de `feature/005-apple-token-revocation`.
 > Sin ticket FLE: sale de la auditoría de iOS.
 
@@ -34,14 +34,14 @@ Android, en la plataforma que se dio por buena sin comprobarlo.
   de cuenta que sobreviva al cierre de sesión, y no hay nada que limpiar.
 - Los cuatro de OAuth web: la sesión vive en el navegador, no en la app, y el propio flujo vuelve a
   pedir consentimiento.
-- Meter una dependencia de GoogleSignIn en `:custom-login`. La librería no la tiene ni la va a tener:
+- Meter una dependencia de GoogleSignIn en `:baselogin`. La librería no la tiene ni la va a tener:
   por eso esto es un seam y no una llamada directa.
 
 ## Diseño
 
 ### Por qué un seam y no una llamada
 
-`:custom-login` no depende del SDK de GoogleSignIn — el host lo trae por SPM y le pasa los tokens.
+`:baselogin` no depende del SDK de GoogleSignIn — el host lo trae por SPM y le pasa los tokens.
 Igual que `signInHandler` y `revokeHandler`, la librería declara el hueco y el host lo rellena:
 
 ```kotlin

@@ -1,4 +1,4 @@
-# BaseLogin — custom-login KMP Library
+# BaseLogin — KMP Authentication Library
 
 <p align="center">
   <img src="https://img.shields.io/badge/Kotlin-2.4.0-7F52FF?logo=kotlin&logoColor=white" />
@@ -14,7 +14,7 @@
 
 ## What is this?
 
-**custom-login** is a **Kotlin Multiplatform library** that provides a complete, production-ready authentication module for Android and iOS apps. It ships with all screens, navigation, ViewModels, validation, and error handling already built — you configure the providers you need and optionally replace any UI component with your own.
+**baselogin** is a **Kotlin Multiplatform library** that provides a complete, production-ready authentication module for Android and iOS apps. It ships with all screens, navigation, ViewModels, validation, and error handling already built — you configure the providers you need and optionally replace any UI component with your own.
 
 It is designed to be the **standard authentication baseline** for any new KMP project: drop it in, wire up Firebase, and have a fully working login system in minutes.
 
@@ -156,7 +156,7 @@ All providers are **opt-in** via `LoginLibraryConfig`. Disabled providers are no
 ## Architecture Overview
 
 ```
-custom-login/
+baselogin/
 ├── domain/
 │   ├── AuthProvider.kt          ← Interface for auth backends (Firebase, Supabase, etc.)
 │   ├── AuthRepository.kt        ← Public API consumed by the host app and ViewModels
@@ -240,9 +240,11 @@ dependencies {
 | `com.github.apptolast.BaseLogin:baselogin` | ✅ the real `.module` file, with variant metadata for every target |
 | `com.github.apptolast:baselogin` | ❌ resolves, but only to JitPack's aggregate POM — no variant metadata, and the KMP metadata jar it serves is empty |
 
-The group must carry the **repository** name (`BaseLogin`, capitalised) after the user name, even though `custom-login/build.gradle.kts` declares `group = "com.github.apptolast"` — JitPack republishes multi-module builds under `com.github.<user>.<repo>`. The two-segment form still answers with a POM, so the failure is not a 404: it surfaces later as unresolved symbols or an empty metadata jar.
+The group must carry the **repository** name (`BaseLogin`, capitalised) after the user name, even though `baselogin/build.gradle.kts` declares `group = "com.github.apptolast"` — JitPack republishes multi-module builds under `com.github.<user>.<repo>`. The two-segment form still answers with a POM, so the failure is not a 404: it surfaces later as unresolved symbols or an empty metadata jar.
 
-The artifact id is **`baselogin`, not `custom-login`**: the root Kotlin Multiplatform publication is renamed in `custom-login/build.gradle.kts`. From it Gradle resolves the per-target artifacts (`custom-login-android`, `custom-login-iosarm64`, `custom-login-iossimulatorarm64`) automatically — never depend on those directly.
+The artifact id is **`baselogin`**, matching the Gradle module. From the root publication Gradle resolves the per-target artifacts (`baselogin-android`, `baselogin-iosarm64`, `baselogin-iossimulatorarm64`) automatically — never depend on those directly.
+
+> **Before 2.0.0 the module was called `custom-login`**, so those per-target artifacts were published as `custom-login-android`, `custom-login-iosarm64` and `custom-login-iossimulatorarm64`. Only the root id was ever `baselogin`. If you carry the exclude workaround below, or pin a version older than 2.0.0, use the names that match your pin.
 
 `dev.gitlive:firebase-auth` resolves transitively from Maven Central, so no extra repository is required.
 
@@ -258,13 +260,13 @@ implementation("com.github.apptolast.BaseLogin:baselogin:35a5e15")
 Gradle reads every `available-at` variant from the root `.module` and may validate the iOS
 sub-modules while resolving an Android configuration. If that bites, exclude them from the leaf
 resolution configurations only — excluding them higher up propagates and silently drops
-`custom-login-android` from the Android compile classpath:
+`baselogin-android` from the Android compile classpath:
 
 ```kotlin
 afterEvaluate {
     configurations
         .filter { it.name.endsWith("CompileClasspath") || it.name.endsWith("RuntimeClasspath") }
-        .forEach { it.exclude(group = "com.github.apptolast.BaseLogin", module = "custom-login-iosarm64") }
+        .forEach { it.exclude(group = "com.github.apptolast.BaseLogin", module = "baselogin-iosarm64") }
 }
 ```
 
@@ -274,9 +276,9 @@ obsolete for hosts that have moved to SPM.
 
 #### Publishing a new version
 
-1. Set `version` in `custom-login/build.gradle.kts`.
+1. Set `version` in `baselogin/build.gradle.kts`.
 2. Merge into `develop` and tag with **exactly that same string** — `git tag 1.2.0 && git push origin 1.2.0`. If the tag and `version` disagree, the JitPack build succeeds but serves nothing under that tag.
-3. JitPack builds **on demand**: the first request for a version triggers it. Per `jitpack.yml` it runs on macOS with JDK 17 and executes `:custom-login:publishToMavenLocal`, which takes a few minutes. A 404 immediately after tagging usually means "not built yet", not "broken".
+3. JitPack builds **on demand**: the first request for a version triggers it. Per `jitpack.yml` it runs on macOS with JDK 17 and executes `:baselogin:publishToMavenLocal`, which takes a few minutes. A 404 immediately after tagging usually means "not built yet", not "broken".
 
 Build status for every version: <https://jitpack.io/#apptolast/BaseLogin>
 
@@ -286,19 +288,19 @@ Build status for every version: <https://jitpack.io/#apptolast/BaseLogin>
 
 **`settings.gradle.kts`** — include the module:
 ```kotlin
-include(":custom-login")
+include(":baselogin")
 ```
 
 **`build.gradle.kts`** (app / composeApp module):
 ```kotlin
 dependencies {
-    implementation(project(":custom-login"))
+    implementation(project(":baselogin"))
 }
 ```
 
 This is what `composeApp/` does in this repository.
 
-The library's own dependencies (Firebase, Koin, Compose, etc.) are defined in `custom-login/build.gradle.kts` and are transitively available.
+The library's own dependencies (Firebase, Koin, Compose, etc.) are defined in `baselogin/build.gradle.kts` and are transitively available.
 
 ---
 
@@ -306,6 +308,41 @@ The library's own dependencies (Firebase, Koin, Compose, etc.) are defined in `c
 
 2.0.0 is a **breaking release**. Everything in it fails at compile time, never at runtime — you find
 out when you bump the pin, not a month later with a dead button.
+
+The Maven coordinate does **not** change: it is still
+`com.github.apptolast.BaseLogin:baselogin`. Only the pin moves.
+
+### The name: `custom-login` is now `baselogin`
+
+The repository has always been **BaseLogin** and the published artifact has always been
+`baselogin`, but everything inside said `custom-login` — the Gradle module, the Kotlin package, the
+Android namespace, the resource package. One name now runs through all of it.
+
+| | 1.x | 2.0.0 |
+|---|---|---|
+| Kotlin package | `com.apptolast.customlogin.*` | `com.apptolast.baselogin.*` |
+| Android entry point | `CustomLoginAndroid` | `BaseLoginAndroid` |
+| Gradle module (local dep) | `:custom-login` | `:baselogin` |
+| Per-target artifacts | `custom-login-android`, `custom-login-iosarm64`, … | `baselogin-android`, `baselogin-iosarm64`, … |
+| Root artifact | `baselogin` | `baselogin` — unchanged |
+
+For a consumer this is a find-and-replace over imports. From the root of your project:
+
+```bash
+# 1. bump the pin in gradle/libs.versions.toml to 2.0.0 (the module coordinate stays the same)
+# 2. imports
+grep -rlZ "com\.apptolast\.customlogin" --include="*.kt" . \
+  | xargs -0 sed -i '' 's/com\.apptolast\.customlogin/com.apptolast.baselogin/g'
+# 3. the Android entry point, if you call it
+grep -rlZ "CustomLoginAndroid" --include="*.kt" . \
+  | xargs -0 sed -i '' 's/CustomLoginAndroid/BaseLoginAndroid/g'
+```
+
+Swift needs no changes for this part: Kotlin/Native flattens packages when exporting to
+Objective-C, so the symbols Swift sees never carried the package name.
+
+If you use the iOS sub-module exclude workaround documented above, update the module name in it
+too — `custom-login-iosarm64` became `baselogin-iosarm64`.
 
 ### iOS providers: one way to reach them from Swift
 
@@ -334,7 +371,7 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         Firebase.initialize(this)
-        CustomLoginAndroid.initialize(this)
+        BaseLoginAndroid.initialize(this)
 
         initLoginKoin(
             config = LoginLibraryConfig(
@@ -372,13 +409,13 @@ Attach the foreground `Activity` for Google, web OAuth, and phone flows:
 ```kotlin
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        CustomLoginAndroid.attachActivity(this)
+        BaseLoginAndroid.attachActivity(this)
         super.onCreate(savedInstanceState)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        CustomLoginAndroid.detachActivity(this)
+        BaseLoginAndroid.detachActivity(this)
     }
 }
 ```
@@ -1081,7 +1118,7 @@ when (val result = authRepository.signIn(credentials)) {
 
 The library ships with strings in **5 languages**: English (default), Spanish, French, Italian, Portuguese.
 
-String resources are in `custom-login/src/commonMain/composeResources/`:
+String resources are in `baselogin/src/commonMain/composeResources/`:
 - `values/strings.xml` (EN)
 - `values-es/strings.xml` (ES)
 - `values-fr/strings.xml` (FR)
@@ -1095,12 +1132,12 @@ The active locale is picked up automatically from the device language. To add a 
 ## Module Structure
 
 ```
-custom-login/
+baselogin/
 └── src/
     ├── commonMain/          ← All shared Kotlin: domain, data, presentation, DI
     │   ├── composeResources/
     │   │   └── values[-xx]/ ← String resources (5 locales)
-    │   └── kotlin/com/apptolast/customlogin/
+    │   └── kotlin/com/apptolast/baselogin/
     │       ├── config/      ← GoogleSignInConfig, AppleSignInConfig, MagicLinkConfig
     │       ├── data/        ← FirebaseAuthProvider, AuthRepositoryImpl, DataMapper
     │       ├── di/          ← KoinInitializer, LoginLibraryConfig, DataModule, PresentationModule
@@ -1114,14 +1151,14 @@ custom-login/
     │       │   └── util/         ← AuthErrorExt (toStringRes)
     │       └── util/        ← Logger (expect/actual), Validators, ValidationError(Ext)
     ├── androidMain/         ← Android implementations
-    │   └── kotlin/com/apptolast/customlogin/
+    │   └── kotlin/com/apptolast/baselogin/
     │       ├── Platform.android.kt          ← getSocialIdToken, phone auth (actual)
     │       ├── provider/
     │       │   ├── GoogleSignInProviderAndroid.kt  ← Credential Manager API
     │       │   └── WebOAuthProviderAndroid.kt      ← Firebase web OAuth for all others
     │       └── util/Logger.android.kt
     └── iosMain/             ← iOS implementations
-        └── kotlin/com/apptolast/customlogin/
+        └── kotlin/com/apptolast/baselogin/
             ├── Platform.ios.kt              ← getSocialIdToken, phone auth (actual)
             ├── provider/
             │   ├── GoogleSignInProviderIOS.kt

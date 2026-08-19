@@ -1,6 +1,6 @@
 # Spec 009: Una sesión de teléfono igual a las demás
 
-> Rama: `feature/009-phone-session-parity` · Proyecto: `BaseLogin` (`:custom-login`)
+> Rama: `feature/009-phone-session-parity` · Proyecto: `BaseLogin` (`:baselogin`)
 > Estado: implementado · Sale de `feature/008-demo-bundle-id`.
 > Sin ticket FLE: sale de la auditoría de iOS.
 

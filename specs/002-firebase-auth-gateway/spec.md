@@ -1,6 +1,6 @@
 # Spec 002: Puerto de Firebase Auth y capa social completa (FLE-90)
 
-> Rama: `feature/002-firebase-auth-gateway` · Proyecto: `BaseLogin` (`:custom-login`) · Estado: draft
+> Rama: `feature/002-firebase-auth-gateway` · Proyecto: `BaseLogin` (`:baselogin`) · Estado: draft
 > **Precedido por FLE-91** (spec 001, CocoaPods → SPM), ya implementado en el PR #11. El smoke
 > manual de iOS de este spec corre sobre SPM con `firebase-ios-sdk` 11.8.1, el mismo que Fledge.
 > El spec es el mecanismo anti-deriva: debe ser autosuficiente (releíble al inicio de cada fase).
@@ -74,7 +74,7 @@ Gradle. Excepción necesaria: `function-naming` para `@Composable`.
 
 ### El puerto
 
-`custom-login/src/commonMain/kotlin/com/apptolast/customlogin/data/firebase/`
+`baselogin/src/commonMain/kotlin/com/apptolast/baselogin/data/firebase/`
 
 | Fichero | Rol |
 |---|---|
@@ -226,8 +226,8 @@ Scenario [AC-11]: observeAuthState refleja los cambios del SDK
 
 Scenario [AC-12]: El proyecto sigue construyendo y pasa el estilo
   Given ktlint configurado con .editorconfig como única fuente de estilo
-  When  se ejecutan ktlintCheck, :custom-login:testDebugUnitTest,
-        :custom-login:linkDebugFrameworkIosSimulatorArm64 y :composeApp:assembleDebug
+  When  se ejecutan ktlintCheck, :baselogin:testDebugUnitTest,
+        :baselogin:linkDebugFrameworkIosSimulatorArm64 y :composeApp:assembleDebug
   Then  todos terminan en BUILD SUCCESSFUL
 ```
 
@@ -282,9 +282,9 @@ que ocurrir en `/test`** — en `/implement` un hook bloquea los ficheros de tes
 |---|---|---|
 | **D-1** ⚠️ | **Cambio de firma pública** en el constructor de `FirebaseAuthProvider`. | Aceptarlo: es el precio de la testabilidad y solo afecta a quien lo construya a mano, no a quien use `loginDataModule()`. Alternativa descartada: mantener un constructor secundario que tome `FirebaseAuth`, que reintroduce la dependencia intestable. |
 | **D-2** | **Formato del token de Apple**: segmento adicional retrocompatible frente a tipo estructurado. | Segmento adicional. El tipo estructurado es más limpio pero rompe todos los handlers Swift ya cableados. Anotar como mejora futura. |
-| **D-3** | **`:custom-login:iosSimulatorArm64Test` existe** como tarea aquí, a diferencia de Fledge. No se ha comprobado si enlaza (en Fledge falla con `ld: framework 'FirebaseCore' not found`). | Comprobarlo en `/plan`, **después de FLE-91**: el resultado depende de si las dependencias nativas vienen por pods o por SPM, así que medirlo ahora daría una respuesta que caduca. Si enlaza, es cobertura nativa gratis que Fledge no puede tener; si no, se documenta y se queda fuera del gate. |
+| **D-3** | **`:baselogin:iosSimulatorArm64Test` existe** como tarea aquí, a diferencia de Fledge. No se ha comprobado si enlaza (en Fledge falla con `ld: framework 'FirebaseCore' not found`). | Comprobarlo en `/plan`, **después de FLE-91**: el resultado depende de si las dependencias nativas vienen por pods o por SPM, así que medirlo ahora daría una respuesta que caduca. Si enlaza, es cobertura nativa gratis que Fledge no puede tener; si no, se documenta y se queda fuera del gate. |
 | **D-4** | **Versiones**: BaseLogin fija GitLive 2.4.0 y BOM 34.14.1; Fledge usa 2.5.0 y BOM 33.15.0. | No tocarlas en este ticket. Verificado en FLE-88 que Gradle eleva el transitivo a 2.5.0 sin conflicto y que compila y enlaza. Alinearlas es un ticket propio. |
-| **D-5** | El working tree tiene cambios sin commitear en `iosApp/`: `project.pbxproj` con `DEVELOPMENT_TEAM = 3NXH5U7C5A` sustituyendo al placeholder `${TEAM_ID}` y `CODE_SIGN_STYLE = Manual`, más un `iosApp.entitlements` nuevo con la capacidad Apple Sign-In. | **Decisión del usuario.** El `entitlements` parece legítimo y útil; el team id hardcodeado parece artefacto local que no debería commitearse. No se tocan en este ticket: están en la app de demo, no en `:custom-login`. |
+| **D-5** | El working tree tiene cambios sin commitear en `iosApp/`: `project.pbxproj` con `DEVELOPMENT_TEAM = 3NXH5U7C5A` sustituyendo al placeholder `${TEAM_ID}` y `CODE_SIGN_STYLE = Manual`, más un `iosApp.entitlements` nuevo con la capacidad Apple Sign-In. | **Decisión del usuario.** El `entitlements` parece legítimo y útil; el team id hardcodeado parece artefacto local que no debería commitearse. No se tocan en este ticket: están en la app de demo, no en `:baselogin`. |
 
 ## Evidencia del smoke manual (29-07-2026)
 
@@ -305,7 +305,7 @@ Suite completa del modulo: **245 tests, 0 fallos**. Los 18 nuevos estuvieron en 
 
 | AC | Test(s) que lo cubren | ¿Rojo antes de implementar? |
 |----|-----------------------|------------------------------|
-| AC-01 | *(no unitario)* — `grep -rn "dev.gitlive" custom-login/src/commonTest/` → **0**, y un solo fichero de `commonMain` lo importa: `GitLiveFirebaseAuthGateway.kt` | n/a — verificable por inspección |
+| AC-01 | *(no unitario)* — `grep -rn "dev.gitlive" baselogin/src/commonTest/` → **0**, y un solo fichero de `commonMain` lo importa: `GitLiveFirebaseAuthGateway.kt` | n/a — verificable por inspección |
 | AC-02 | *(no unitario)* — `loginDataModule` registra el gateway sin `createdAtStart`; el adaptador resuelve `Firebase.auth` en un getter | n/a — verificable por inspección |
 | AC-03 | `` `FLE-90 email password sign in delegates to the gateway` `` | **sí** — `NotImplementedError` |
 | AC-04 | `` `FLE-90 sign up propagates the display name to the profile` ``, `` `…without display name does not touch the profile` `` | **sí** |
@@ -316,7 +316,7 @@ Suite completa del modulo: **245 tests, 0 fallos**. Los 18 nuevos estuvieron en 
 | AC-09 | `` `FLE-90 network failures map to NetworkError and not to Unknown` ``, `` `…wrong password maps to InvalidCredentials` ``, `` `…too many requests maps to TooManyRequests` ``, más los **43 tests existentes** de `DataMapperTest` | **sí** |
 | AC-10 | `` `FLE-90 sign out clears the platform social state` `` | **sí** |
 | AC-11 | `` `FLE-90 auth state stream starts with Loading` `` | **sí** |
-| AC-12 | *(no unitario)* — `ktlintCheck`, `:custom-login:testDebugUnitTest`, `:composeApp:linkDebugFrameworkIosSimulatorArm64`, `:composeApp:assembleDebug`, `xcodebuild` | n/a — verificable por build |
+| AC-12 | *(no unitario)* — `ktlintCheck`, `:baselogin:testDebugUnitTest`, `:composeApp:linkDebugFrameworkIosSimulatorArm64`, `:composeApp:assembleDebug`, `xcodebuild` | n/a — verificable por build |
 | **extra** | `` `FLE-90 get current session reads the cache without requesting a token` `` — cubre el cuarto defecto encontrado en `/plan`: el contrato dice «MUST NOT perform network I/O» | **sí** |
 | **extra** | `` `FLE-90 cancelled social sign in never touches the gateway` ``, `` `FLE-90 password reset delegates the email to the gateway` `` | **sí** |
 

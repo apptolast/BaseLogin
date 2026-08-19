@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**custom-login** is a Kotlin Multiplatform (KMP) authentication library targeting Android and iOS. It provides a configurable login UI and auth flows backed by Firebase Authentication (via GitLive SDK). A sample consumer app lives in `composeApp/`.
+**baselogin** is a Kotlin Multiplatform (KMP) authentication library targeting Android and iOS. It provides a configurable login UI and auth flows backed by Firebase Authentication (via GitLive SDK). A sample consumer app lives in `composeApp/`.
 
-**Package namespace:** `com.apptolast.customlogin`
+**Package namespace:** `com.apptolast.baselogin`
 
 ## Build Commands
 
@@ -16,10 +16,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ./gradlew :composeApp:installDebug
 
 # Run all tests
-./gradlew :custom-login:testDebugUnitTest
+./gradlew :baselogin:testDebugUnitTest
 
 # iOS - build Kotlin framework.
-# The task lives in :composeApp, not :custom-login — the library declares no
+# The task lives in :composeApp, not :baselogin — the library declares no
 # binaries.framework of its own, it is export()ed through the demo's ComposeApp framework.
 ./gradlew :composeApp:linkDebugFrameworkIosArm64
 ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
@@ -77,12 +77,12 @@ Download both from the Firebase console for this project. The iOS one must be re
 bundle id above. `iosApp/iosApp/` is a `fileSystemSynchronizedGroup`, so dropping the plist in the
 folder is enough — no `project.pbxproj` edit.
 
-This is why `:custom-login` tasks are the ones to run for a quick check: they need neither file.
+This is why `:baselogin` tasks are the ones to run for a quick check: they need neither file.
 
 ## Module Structure
 
 ```
-custom-login/          ← Library module (the deliverable)
+baselogin/          ← Library module (the deliverable)
   src/commonMain/      ← Shared code
   src/androidMain/     ← Android-specific (Credential Manager, Logger)
   src/iosMain/         ← iOS-specific (Swift sign-in handlers, Logger)
@@ -139,7 +139,7 @@ top-level `expect` functions, none of which can be faked from `commonTest`. Anyt
 directly is untestable by construction — which is why this class had zero real coverage before.
 
 **`GitLiveFirebaseAuthGateway` is the only file in `commonMain` allowed to import `dev.gitlive.*`.**
-Verifiable rule: `grep -rn "dev.gitlive" custom-login/src/commonTest/` must return nothing.
+Verifiable rule: `grep -rn "dev.gitlive" baselogin/src/commonTest/` must return nothing.
 
 Two invariants inside the adapter:
 
@@ -183,7 +183,7 @@ Key methods: `signIn(credentials)`, `signUp(data)`, `signOut()`, `sendPasswordRe
 Note: `signOut()`, `deleteAccount()`, `update*()`, `sendEmailVerification()` return `Result<Unit>`; auth flow methods return `AuthResult`.
 
 ## String Resources
-Library strings live in `custom-login/src/commonMain/composeResources/values/strings.xml`. Validation message strings (`validation_*`) are defined there as a foundation for localization, though ViewModels currently use hardcoded English equivalents.
+Library strings live in `baselogin/src/commonMain/composeResources/values/strings.xml`. Validation message strings (`validation_*`) are defined there as a foundation for localization, though ViewModels currently use hardcoded English equivalents.
 
 ## KMP guardrails
 
@@ -212,7 +212,7 @@ speaks only in library-owned types, and keep the SDK handle inside a thin adapte
 
 ## Testing
 
-The suite lives in `custom-login/src/commonTest`. Stack: `kotlin.test` + `kotlinx-coroutines-test`
+The suite lives in `baselogin/src/commonTest`. Stack: `kotlin.test` + `kotlinx-coroutines-test`
 (`runTest`) + hand-written fakes. **No mocking libraries.**
 
 Existing fakes to reuse rather than duplicate: `test/FakeAuthProvider.kt` and
@@ -234,25 +234,30 @@ pattern.
 
 ```bash
 # Unit tests (host)
-./gradlew :custom-login:testDebugUnitTest
+./gradlew :baselogin:testDebugUnitTest
 
 # iOS compile + link
 ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 
 # Full check before opening a PR
-./gradlew :custom-login:testDebugUnitTest :composeApp:linkDebugFrameworkIosSimulatorArm64 \
+./gradlew :baselogin:testDebugUnitTest :composeApp:linkDebugFrameworkIosSimulatorArm64 \
   :composeApp:assembleDebug --console=plain
 ```
 
-`ktlint` is **not configured yet**; the `/validate` gate of the SDD harness runs `./gradlew
-ktlintCheck`, so it has to be added before that gate can pass. When it is, its configuration (style,
-exclusions, per-file rules) belongs in `.editorconfig`, not in `filter {}` blocks in Gradle.
+`ktlint` **is configured**: the root `build.gradle.kts` puts it on the buildscript classpath and
+applies it per module only when `ktlintEnabled` (off on JitPack, and off with `-PskipKtlint=true`),
+and CI runs `./gradlew ktlintCheck`. Every style decision lives in `.editorconfig` — not in
+`filter {}` blocks in Gradle.
 
 ## How this library is consumed
 
 Published through **JitPack** as `com.github.apptolast.BaseLogin:baselogin` (see `jitpack.yml`, which
-runs `:custom-login:publishToMavenLocal`; the artifactId is `baselogin` even though the module is
-`custom-login`). Consumers pin a **commit SHA**, not a tag.
+runs `:baselogin:publishToMavenLocal`). The Gradle module, the Kotlin package, the Android
+namespace and the artifactId are all `baselogin` — before 2.0.0 the module was `custom-login` and
+only the root artifactId said `baselogin`, which is what the rename fixed.
+
+Consumers pin either a **commit SHA** (Fledge) or a **tag** (Paparcar pins `1.1.0`), so both forms
+are in use — do not assume SHA-only.
 
 The loop is therefore: change here → commit → push → consumer bumps the pin → consumer rebuilds. It is
 slower than a local project dependency, so batch related changes into one commit where it makes sense.

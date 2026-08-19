@@ -1,0 +1,27 @@
+package com.apptolast.baselogin.presentation.navigation
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data object AuthRoutesFlow
+
+@Serializable
+data object WelcomeRoute
+
+@Serializable
+data object LoginRoute
+
+@Serializable
+data object RegisterRoute
+
+@Serializable
+data object ForgotPasswordRoute
+
+@Serializable
+data class ResetPasswordRoute(val resetCode: String)
+
+@Serializable
+data object PhoneAuthRoute
+
+@Serializable
+data object MagicLinkRoute

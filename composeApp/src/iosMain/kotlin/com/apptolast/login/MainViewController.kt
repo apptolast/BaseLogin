@@ -1,11 +1,11 @@
 package com.apptolast.login
 
 import androidx.compose.ui.window.ComposeUIViewController
-import com.apptolast.customlogin.config.AppleSignInConfig
-import com.apptolast.customlogin.config.GoogleSignInConfig
-import com.apptolast.customlogin.config.MagicLinkConfig
-import com.apptolast.customlogin.di.LoginLibraryConfig
-import com.apptolast.customlogin.di.initLoginKoin
+import com.apptolast.baselogin.config.AppleSignInConfig
+import com.apptolast.baselogin.config.GoogleSignInConfig
+import com.apptolast.baselogin.config.MagicLinkConfig
+import com.apptolast.baselogin.di.LoginLibraryConfig
+import com.apptolast.baselogin.di.initLoginKoin
 import com.apptolast.login.di.appModule
 
 /**

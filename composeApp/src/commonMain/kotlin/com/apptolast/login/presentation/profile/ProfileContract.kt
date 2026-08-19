@@ -1,6 +1,6 @@
 package com.apptolast.login.presentation.profile
 
-import com.apptolast.customlogin.domain.model.UserSession
+import com.apptolast.baselogin.domain.model.UserSession
 
 /**
  * Represents the state of the Profile screen.

@@ -26,7 +26,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
-            export(project(":custom-login"))
+            export(project(":baselogin"))
         }
     }
 
@@ -40,7 +40,7 @@ kotlin {
                 implementation(compose.components.uiToolingPreview)
 
                 // Add dependency to our new login module
-                api(project(":custom-login"))
+                api(project(":baselogin"))
 
                 // Add navigation dependency for NavGraphBuilder
                 implementation(libs.navigation.compose)

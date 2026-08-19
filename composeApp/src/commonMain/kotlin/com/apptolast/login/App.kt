@@ -10,11 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.apptolast.customlogin.domain.model.AuthState
-import com.apptolast.customlogin.presentation.navigation.AuthRoutesFlow
-import com.apptolast.customlogin.presentation.navigation.LoginRoute
-import com.apptolast.customlogin.presentation.navigation.NavTransitions
-import com.apptolast.customlogin.presentation.navigation.authRoutesFlow
+import com.apptolast.baselogin.domain.model.AuthState
+import com.apptolast.baselogin.presentation.navigation.AuthRoutesFlow
+import com.apptolast.baselogin.presentation.navigation.LoginRoute
+import com.apptolast.baselogin.presentation.navigation.NavTransitions
+import com.apptolast.baselogin.presentation.navigation.authRoutesFlow
 import com.apptolast.login.presentation.navigation.MainRoutesFlow
 import com.apptolast.login.presentation.navigation.mainRoutesFlow
 import com.apptolast.login.theme.SampleAppTheme

@@ -3,4 +3,4 @@ jdk:
 os:
   - osx
 install:
-  - ./gradlew :custom-login:publishToMavenLocal
+  - ./gradlew :baselogin:publishToMavenLocal

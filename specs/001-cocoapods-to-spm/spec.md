@@ -11,7 +11,7 @@ repo es el que queda.
 
 Conviene ser preciso sobre dónde están los pods, porque cambia el argumento:
 
-- **La librería publicada `:custom-login` no usa pods.** No declara ninguno y no importa ninguna clase
+- **La librería publicada `:baselogin` no usa pods.** No declara ninguno y no importa ninguna clase
   de pod — `grep "^import cocoapods"` sobre sus fuentes devuelve vacío. Sus providers de iOS usan solo
   handlers de Swift y `platform.UIKit`, que son las platform libs estándar de Kotlin/Native.
 - Los pods viven en **`composeApp`** (bloque `cocoapods {}` con `FirebaseCore`, `FirebaseAuth`,
@@ -42,7 +42,7 @@ majors es justo lo que produce símbolos ausentes en el enlazado.
 **Dentro:**
 
 - Quitar el plugin `kotlin.cocoapods` y el bloque `cocoapods {}` de `composeApp`, y declarar el
-  framework con `binaries.framework { … export(project(":custom-login")) }`.
+  framework con `binaries.framework { … export(project(":baselogin")) }`.
 - Borrar `Podfile`, `Podfile.lock`, `composeApp.podspec` y el `.xcworkspace`; pasar a trabajar sobre
   `iosApp.xcodeproj`. (`Pods/` ya está en `.gitignore`, así que no está versionado.)
 - Limpiar el `project.pbxproj` de CocoaPods: 30 referencias, incluidas las tres fases
@@ -55,7 +55,7 @@ majors es justo lo que produce símbolos ausentes en el enlazado.
 
 **Fuera:**
 
-- Tocar el código de `:custom-login` — la librería no cambia en este ticket.
+- Tocar el código de `:baselogin` — la librería no cambia en este ticket.
 - El puerto de `FirebaseAuthGateway`, el `displayName` de Apple y el `signOut` social: **FLE-90**,
   spec 002.
 - Cambiar la UI, los flujos de auth o los modelos de dominio.
@@ -134,7 +134,7 @@ Scenario [AC-02]: El framework de Kotlin se declara en Gradle
   Given composeApp sin el bloque cocoapods
   When  se inspecciona su configuración de targets iOS
   Then  cada target iOS declara binaries.framework con baseName "ComposeApp"
-   And  el framework exporta el proyecto :custom-login
+   And  el framework exporta el proyecto :baselogin
 
 Scenario [AC-03]: Xcode compila el framework de Kotlin al construir
   Given el proyecto iosApp sin el script del podspec
@@ -172,7 +172,7 @@ Scenario [AC-07]: La firma de código vuelve a ser portable
 
 Scenario [AC-08]: Android no se ve afectado
   Given la migración, que solo toca la integración de iOS
-  When  se ejecutan :composeApp:assembleDebug y :custom-login:testDebugUnitTest
+  When  se ejecutan :composeApp:assembleDebug y :baselogin:testDebugUnitTest
   Then  ambos terminan en BUILD SUCCESSFUL
 
 Scenario [AC-09]: La demo sigue autenticando en iOS
@@ -197,7 +197,7 @@ Scenario [AC-09]: La demo sigue autenticando en iOS
 - [ ] **T6** — Firma: restaurar `${TEAM_ID}` y `CODE_SIGN_STYLE = Automatic`; conservar y versionar
       `iosApp.entitlements`. → **AC-07**
 - [ ] **T7** — Validación: `xcodebuild` con DerivedData limpio, `:composeApp:assembleDebug`,
-      `:custom-login:testDebugUnitTest`. → **AC-06**, **AC-08**
+      `:baselogin:testDebugUnitTest`. → **AC-06**, **AC-08**
 - [ ] **T8** — Smoke manual de Google y Apple en el simulador. → **AC-09**
 - [ ] **T9** — Actualizar `CLAUDE.md` (§Module Structure menciona «GoogleSignIn pod», §Build Commands
       dice «build/run from Xcode in /iosApp») y el `README` si documenta `pod install`.
@@ -265,7 +265,7 @@ que sí toca Kotlin; esta feature apenas toca `.kts`.
 | AC-05 | *(no unitario)* — comparación de `Package.resolved` con el de Fledge | n/a — verificable por build |
 | AC-06 | *(no unitario)* — `xcodebuild` con DerivedData limpio | n/a — verificable por build |
 | AC-07 | *(no unitario)* — inspección de `project.pbxproj` y `git ls-files` del entitlements | n/a — verificable por build |
-| AC-08 | *(no unitario)* — `:composeApp:assembleDebug`, `:custom-login:testDebugUnitTest` | n/a — verificable por build |
+| AC-08 | *(no unitario)* — `:composeApp:assembleDebug`, `:baselogin:testDebugUnitTest` | n/a — verificable por build |
 | AC-09 | *(no unitario)* — smoke manual en el simulador | n/a — ✅ **completo**, ver evidencia abajo |
 
 > Nota para `/validate`: **ningún AC de este spec es verificable con un test unitario**, y no se

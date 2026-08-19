@@ -41,7 +41,7 @@ El orden importa: sin (1), los tests de (2) no se pueden escribir.
 
 ## El puerto
 
-`custom-login/src/commonMain/kotlin/com/apptolast/customlogin/data/firebase/`
+`baselogin/src/commonMain/kotlin/com/apptolast/baselogin/data/firebase/`
 
 ```
 FirebaseAuthGateway.kt          ← interfaz + tipos propios. Ningún dev.gitlive.* lo cruza
@@ -156,7 +156,7 @@ respuestas y contadores/registros para assertear interacciones.
 otro fake— y no prueba nada del provider. Es el fichero que da nombre a la mentira que este ticket
 corrige.
 
-Regla verificable en `/validate`: `grep -rn "dev.gitlive" custom-login/src/commonTest/` → 0.
+Regla verificable en `/validate`: `grep -rn "dev.gitlive" baselogin/src/commonTest/` → 0.
 
 ## Orden de tareas
 
@@ -187,14 +187,14 @@ un ticket que ya cambia la firma pública del provider. Ticket propio.
 
 ```bash
 ./gradlew ktlintFormat && ./gradlew ktlintCheck
-./gradlew :custom-login:testDebugUnitTest
-./gradlew :custom-login:linkDebugFrameworkIosSimulatorArm64
+./gradlew :baselogin:testDebugUnitTest
+./gradlew :baselogin:linkDebugFrameworkIosSimulatorArm64
 ./gradlew :composeApp:assembleDebug
 
 xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug \
   -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' build
 
-grep -rn "dev.gitlive" custom-login/src/commonTest/   # -> 0
+grep -rn "dev.gitlive" baselogin/src/commonTest/   # -> 0
 ```
 
 > Gotcha de método aprendido en FLE-91: al capturar `xcodebuild`, **no** usar `| grep … | head -N`.
@@ -210,6 +210,6 @@ comprobando que **el nombre llega al perfil**.
 | # | Decisión | Propuesta |
 |---|---|---|
 | **D-1** ⚠️ | **Cambio de firma pública**: `FirebaseAuthProvider(firebaseAuth: FirebaseAuth)` → `(gateway: FirebaseAuthGateway)`. Rompe a quien lo construya a mano; no a quien use `loginDataModule()`. | Aceptarlo. Es el precio de la testabilidad. Mantener un constructor secundario con `FirebaseAuth` reintroduciría la dependencia intestable y dejaría el ticket sin sentido. |
-| **D-2** | **`:custom-login:iosSimulatorArm64Test`** existe como tarea. Tras FLE-91 las dependencias nativas vienen por SPM, así que puede que ahora enlace (en Fledge falla con `ld: framework 'FirebaseCore' not found`). | Medirlo en `/test`, que es cuando habrá tests que ejecutar. Si enlaza, es cobertura nativa gratis. Si no, se documenta y queda fuera del gate. |
+| **D-2** | **`:baselogin:iosSimulatorArm64Test`** existe como tarea. Tras FLE-91 las dependencias nativas vienen por SPM, así que puede que ahora enlace (en Fledge falla con `ld: framework 'FirebaseCore' not found`). | Medirlo en `/test`, que es cuando habrá tests que ejecutar. Si enlaza, es cobertura nativa gratis. Si no, se documenta y queda fuera del gate. |
 | **D-3** | **Alcance de la reescritura de `FirebaseAuthProviderTest`**: sus 8 tests actuales prueban `FakeAuthRepository`, no el provider. | Reescribirlo entero contra el gateway falso. Los tests de repositorio que se pierdan ya están cubiertos por `AuthRepositoryImplTest`. |
 | **D-4** | **`updateProfile` en el login de Apple** añade una llamada de red al flujo. | Hacerla solo si llega nombre **y** el usuario no tiene `displayName`, y no fallar el login si esa llamada falla: el usuario ya está autenticado. |

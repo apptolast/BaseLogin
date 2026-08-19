@@ -36,16 +36,16 @@ jobs:
         run: ./gradlew ktlintCheck
 
       - name: Unit tests
-        run: ./gradlew :custom-login:testDebugUnitTest
+        run: ./gradlew :baselogin:testDebugUnitTest
 
       - name: Assemble library
-        run: ./gradlew :custom-login:assembleRelease
+        run: ./gradlew :baselogin:assembleRelease
 
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-reports
-          path: custom-login/build/reports/tests/
+          path: baselogin/build/reports/tests/
           retention-days: 14
 
   apple:
@@ -71,4 +71,4 @@ jobs:
       - name: Publication (as JitPack runs it)
         env:
           JITPACK: 'true'
-        run: ./gradlew :custom-login:publishToMavenLocal
+        run: ./gradlew :baselogin:publishToMavenLocal

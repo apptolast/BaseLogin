@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.apptolast.customlogin.CustomLoginAndroid
+import com.apptolast.baselogin.BaseLoginAndroid
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
     private val splashViewModel: SplashViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        CustomLoginAndroid.attachActivity(this)
+        BaseLoginAndroid.attachActivity(this)
 
         val splashScreen = installSplashScreen()
 
@@ -32,6 +32,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        CustomLoginAndroid.detachActivity(this)
+        BaseLoginAndroid.detachActivity(this)
     }
 }

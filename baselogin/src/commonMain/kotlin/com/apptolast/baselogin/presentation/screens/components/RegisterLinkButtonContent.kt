@@ -1,0 +1,26 @@
+package com.apptolast.baselogin.presentation.screens.components
+
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import login.baselogin.generated.resources.Res
+import login.baselogin.generated.resources.login_screen_no_account_text
+import login.baselogin.generated.resources.register_screen_register_button
+import org.jetbrains.compose.resources.stringResource
+
+@Composable
+fun RegisterLinkButtonContent(onNavigateToRegister: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = stringResource(Res.string.login_screen_no_account_text),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        TextButton(onClick = onNavigateToRegister) {
+            Text(stringResource(Res.string.register_screen_register_button))
+        }
+    }
+}

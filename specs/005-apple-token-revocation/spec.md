@@ -1,6 +1,6 @@
 # Spec 005: Revocar el token de Apple al borrar la cuenta
 
-> Rama: `feature/005-apple-token-revocation` · Proyecto: `BaseLogin` (`:custom-login` + demo)
+> Rama: `feature/005-apple-token-revocation` · Proyecto: `BaseLogin` (`:baselogin` + demo)
 > Estado: implementado · Sale de `feature/004-ios-social-handlers`.
 > Sin ticket FLE: sale de la auditoría de iOS. Es el primero de la tanda que **añade API pública**.
 

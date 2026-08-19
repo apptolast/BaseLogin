@@ -54,7 +54,7 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 koin-android = { module = "io.insert-koin:koin-android" }
 koin-test = { module = "io.insert-koin:koin-test" }
 
-# KMP GitLive Wrapper (for :custom-login)
+# KMP GitLive Wrapper (for :baselogin)
 firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "gitlive-firebase" }
 
 # Firebase App Check (Android native)

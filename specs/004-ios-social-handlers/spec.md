@@ -30,7 +30,7 @@ es la mitad menos ejercitada del contrato Kotlin↔Swift.
 
 **Fuera:**
 
-- Tocar `:custom-login`. La librería ya expone los seams; lo que faltaba era el lado Swift.
+- Tocar `:baselogin`. La librería ya expone los seams; lo que faltaba era el lado Swift.
 - Magic link: no necesita handler, necesita Universal Links y tiene un `iosBundleId` discrepante.
   Es el **spec 008**.
 - Sustituir el flujo OAuth web de Facebook por el SDK nativo de Facebook. Android usa el mismo flujo
@@ -112,7 +112,7 @@ Scenario [AC-06]: El teléfono completa los dos saltos
 Scenario [AC-07]: La librería no se toca
   Given la rama de esta feature
   When  se listan los ficheros cambiados
-  Then  ninguno está bajo custom-login/src
+  Then  ninguno está bajo baselogin/src
 ```
 
 ## Trazabilidad

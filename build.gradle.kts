@@ -2,7 +2,7 @@
 // block so that it can be skipped entirely.
 //
 // Reason: this library is published by the JitPack builder, which runs only
-// `:custom-login:publishToMavenLocal` and cannot resolve plugins from the Gradle Plugin Portal —
+// `:baselogin:publishToMavenLocal` and cannot resolve plugins from the Gradle Plugin Portal —
 // the ktlint plugin is not mirrored on Maven Central, so the whole publication failed and every
 // consumer pinning a newer commit broke. Publishing must never depend on a linter.
 //
