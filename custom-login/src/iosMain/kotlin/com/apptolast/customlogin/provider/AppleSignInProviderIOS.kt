@@ -12,8 +12,8 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  * and the user sees a generic "cancelled or failed" error.
  *
  * This is a Kotlin `object`, so from Swift it is reached through **`.shared`** —
- * `AppleSignInProviderIOS.shared.signInHandler = …`. (`.companion` exists only for the companion
- * object of a class, such as `GoogleSignInProviderIOS`.)
+ * `AppleSignInProviderIOS.shared.signInHandler = …`. Every iOS provider in this library has that
+ * same shape, so `.shared` is the only form you ever need.
  *
  * ## Token format
  *

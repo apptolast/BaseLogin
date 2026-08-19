@@ -65,8 +65,7 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
                 return null
             }
 
-            val googleProvider = GoogleSignInProviderIOS(config = config)
-            googleProvider.signIn()?.let { SocialTokenResult.Token(it) }
+            GoogleSignInProviderIOS.signIn(config)?.let { SocialTokenResult.Token(it) }
         }
         is IdentityProvider.Apple -> {
             // Same source of truth as Android, which reads these scopes for its web OAuth flow.
@@ -120,7 +119,7 @@ actual suspend fun clearSocialSignInState() {
     if (handler == null) {
         Logger.w(
             "Platform",
-            "signOutHandler not configured. Set GoogleSignInProviderIOS.Companion.shared.signOutHandler " +
+            "signOutHandler not configured. Set GoogleSignInProviderIOS.shared.signOutHandler " +
                 "from Swift, or the Google account stays signed in after sign-out.",
         )
         return
