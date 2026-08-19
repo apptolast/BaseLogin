@@ -12,13 +12,21 @@ dependencies {
 }
 ```
 
-Published artifact:
+Published artifact (JitPack):
 
 ```kotlin
 dependencies {
-    implementation("com.github.apptolast:baselogin:1.1.0")
+    implementation("com.github.apptolast.BaseLogin:baselogin:2.0.0")
 }
 ```
+
+> The group must carry the **repository** name after the user name —
+> `com.github.apptolast.BaseLogin`, capitalised — even though this module declares
+> `group = "com.github.apptolast"`. JitPack republishes multi-module builds under
+> `com.github.<user>.<repo>`. The two-segment form `com.github.apptolast:baselogin` still answers
+> with a POM, so it does not fail as a 404: it resolves to JitPack's aggregate POM, with no variant
+> metadata and an empty KMP metadata jar, and surfaces much later as unresolved symbols. See the
+> [root README](../README.md#project-setup) for the full table.
 
 ## Koin Integration
 
