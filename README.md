@@ -331,12 +331,17 @@ For a consumer this is a find-and-replace over imports. From the root of your pr
 ```bash
 # 1. bump the pin in gradle/libs.versions.toml to 2.0.0 (the module coordinate stays the same)
 # 2. imports
-grep -rlZ "com\.apptolast\.customlogin" --include="*.kt" . \
+grep -rl --null "com\.apptolast\.customlogin" --include="*.kt" . \
   | xargs -0 sed -i '' 's/com\.apptolast\.customlogin/com.apptolast.baselogin/g'
 # 3. the Android entry point, if you call it
-grep -rlZ "CustomLoginAndroid" --include="*.kt" . \
+grep -rl --null "CustomLoginAndroid" --include="*.kt" . \
   | xargs -0 sed -i '' 's/CustomLoginAndroid/BaseLoginAndroid/g'
 ```
+
+> Use `--null` in long form, not `-Z`. BSD `grep` — the one macOS ships — accepts `-Z` but does not
+> emit the NUL separators, so `xargs -0` receives every path as a single argument and `sed` fails
+> with `No such file or directory`. `--null` behaves correctly on both BSD and GNU. On Linux, drop
+> the `''` after `sed -i`.
 
 Swift needs no changes for this part: Kotlin/Native flattens packages when exporting to
 Objective-C, so the symbols Swift sees never carried the package name.
