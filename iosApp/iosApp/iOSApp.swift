@@ -72,12 +72,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     private func configureGoogleSignIn() {
         // Firebase's signOut() does not touch GIDSignIn: its currentUser lives in the keychain, and
         // without this the next sign-in reuses the same account and nobody can switch.
-        GoogleSignInProviderIOS.Companion.shared.signOutHandler = {
+        GoogleSignInProviderIOS.shared.signOutHandler = {
             GIDSignIn.sharedInstance.signOut()
         }
 
         // Set up the Google Sign-In handler that Kotlin will call
-        GoogleSignInProviderIOS.Companion.shared.signInHandler = { clientId, completion in
+        GoogleSignInProviderIOS.shared.signInHandler = { clientId, completion in
             guard let clientId = clientId else {
                 completion(nil)
                 return

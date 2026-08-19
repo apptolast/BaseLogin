@@ -1,9 +1,10 @@
 # Spec 011: Simetría de los providers de iOS — `GoogleSignInProviderIOS` como `object`
 
 > Rama: `feature/011-ios-provider-symmetry` · Proyecto: `BaseLogin` (`:custom-login` + demo + README)
-> Estado: **especificado, sin implementar**. Sale de `feature/010-ios-build-hygiene`.
+> Estado: **implementado**. Sale de `feature/010-ios-build-hygiene`.
 > Sin ticket FLE: cierra la causa de un hallazgo del spec 003.
-> ⚠️ **Rompe a los hosts Swift ya integrados. Va en 1.2.0.**
+> ⚠️ **Rompe a los hosts Swift ya integrados. Va en 2.0.0**, junto con el renombrado
+> `custom-login` → `baselogin`, para que los consumidores migren una sola vez en vez de dos.
 
 ## Contexto y objetivo
 
@@ -55,7 +56,8 @@ el README no pueda volver a contradecirse.
 - `iosApp/iosApp/iOSApp.swift:75,80`.
 - `CLAUDE.md:94`, que hoy nombra el seam sin decir cómo se alcanza desde Swift.
 - Decidir el destino de `getClientId()` y `getTopViewController()` — ver *Decisión abierta*.
-- Declarar el break: bump a **1.2.0** y nota explícita en el README.
+- Declarar el break: la versión la fija la PR del renombrado (**2.0.0**); aquí va la nota explícita
+  en el README, en una sección `Migrating to 2.0.0`.
 
 **Fuera:**
 
@@ -114,20 +116,23 @@ arrastraban los specs 003 y 004.
 
 Y como los consumidores pinean **SHA, no tag** (ver `CLAUDE.md`, *How this library is consumed*), no
 es una publicación a ciegas: el break se coordina con el bump de Fledge en la misma tanda, un commit
-aquí y dos líneas de Swift allí. La versión sube a 1.2.0 por honestidad semántica, no porque alguien
-consuma por versión.
+aquí y dos líneas de Swift allí. La versión sube a 2.0.0 por honestidad semántica. Y sí hay quien
+consume por versión: Paparcar pinea el tag `1.1.0`, no un SHA.
 
-### Decisión abierta: `getClientId()` y `getTopViewController()`
+### Decisión (era abierta): `getClientId()` y `getTopViewController()`
 
 Ambas son públicas y tienen **cero call sites** en este repo. `getClientId()` depende de la `config`,
 así que al vaciar el constructor hay que hacer algo con ella; `getTopViewController()` no depende de
 nada y sobrevive tal cual.
 
-Esta es la única ventana barata para tocarlas: ya estamos rompiendo el tipo. Propuesta —
+Esta es la única ventana barata para tocarlas: ya estamos rompiendo el tipo. **Resuelto así:**
 `getClientId()` **desaparece** (quien la llamaría ya tiene la `config` en la mano) y
-`getTopViewController()` **se queda** como función del `object`. Si se prefiere no arriesgar con un
-consumidor Swift desconocido, la alternativa es `getClientId(config: GoogleSignInConfig)`. Se decide
-en `/plan`.
+`getTopViewController()` **se queda** como función del `object`, con su `@Deprecated` del spec 010
+intacto.
+
+El riesgo del «consumidor Swift desconocido» se pudo medir en lugar de estimar: `getClientId()`
+tiene **cero call sites** en toda la organización `apptolast`, y ni Fledge ni Paparcar mencionan
+`GoogleSignInProviderIOS` en Kotlin ni en Swift. Quitarla no rompe a nadie hoy.
 
 ## Criterios de aceptación (Gherkin)
 
@@ -165,7 +170,7 @@ Scenario [AC-06]: El break está declarado, no descubierto
   Given un host Swift escrito contra 1.1.0
   When  compila contra esta versión
   Then  falla en compilación con símbolo no resuelto
-   And  el README declara el cambio como breaking de 1.2.0
+   And  el README declara el cambio como breaking de 2.0.0
 ```
 
 ## Trazabilidad
@@ -187,7 +192,7 @@ Scenario [AC-06]: El break está declarado, no descubierto
 
 **Plataformas**: solo iOS. Android no ve nada de esto.
 
-**Compatibilidad**: **BREAKING** para cualquier host Swift ya integrado, Fledge incluido. Es la razón
+**Compatibilidad**: **BREAKING** para cualquier host Swift ya integrado — en teoría. Es la razón
 de ser del bump a 1.2.0 y de que esto no se coló en el 003, que se declaró explícitamente
 *«no cambiar la API pública»*.
 
@@ -195,7 +200,9 @@ de ser del bump a 1.2.0 y de que esto no se coló en el 003, que se declaró exp
 sobre `feature/010-ios-build-hygiene` o posterior; hacerlo antes obliga a rehacer el trabajo cuando
 006 aterrice.
 
-**Coordinación**: el commit que aterrice esto necesita su pareja en `apptolast/Fledge` — bump del pin
-`baselogin` en `gradle/libs.versions.toml` y las dos líneas de Swift. Merecen ir juntos.
+**Coordinación**: comprobado antes de implementar — **ningún consumidor toca esta API**. Ni Fledge ni
+Paparcar nombran `GoogleSignInProviderIOS` en Kotlin ni en Swift, así que este spec por sí solo no
+obliga a ningún cambio río abajo. Lo que sí se lo obliga es el renombrado del paquete que viaja en
+la misma 2.0.0.
 
 **Requisitos externos**: ninguno. No toca entitlements, consola de Firebase ni SPM.

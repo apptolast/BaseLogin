@@ -18,9 +18,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Run all tests
 ./gradlew :custom-login:testDebugUnitTest
 
-# iOS - build Kotlin framework
-./gradlew :custom-login:linkDebugFrameworkIosArm64
-./gradlew :custom-login:linkDebugFrameworkIosSimulatorArm64
+# iOS - build Kotlin framework.
+# The task lives in :composeApp, not :custom-login — the library declares no
+# binaries.framework of its own, it is export()ed through the demo's ComposeApp framework.
+./gradlew :composeApp:linkDebugFrameworkIosArm64
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 
 # iOS demo app - open iosApp/iosApp.xcodeproj (NOT a .xcworkspace: there is no CocoaPods)
 xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -configuration Debug \
@@ -112,7 +114,13 @@ Default implementations live in `presentation/slots/defaultslots/`.
 ### Library Entry Points
 - Kotlin: `initLoginKoin(config: LoginLibraryConfig, appDeclaration?)` — call once at app start
 - Compose: `AuthNavFlow(authSlots, onAuthSuccess)` from `RootNavGraph.kt`
-- iOS helper: `GoogleSignInProviderIOS.signInHandler` must be set from Swift
+- iOS helper: `GoogleSignInProviderIOS.shared.signInHandler` must be set from Swift
+
+All six iOS providers are `object`s, so Swift reaches every one of them the same way —
+`X.shared.…`. There is deliberately no second form: `GoogleSignInProviderIOS` used to be a
+`class` whose companion Kotlin/Native exported separately, and the two coexisting spellings are
+what let the README publish sign-in examples that did not compile. If a provider ever needs
+per-call configuration, it travels as a `signIn(...)` parameter — never in a constructor.
 
 ### Dependency Injection
 `LoginLibraryConfig` is registered as a Koin `single`. If `googleSignInConfig != null`, `GoogleSignInConfig` is also registered. `AuthRepositoryImpl` takes `AuthProvider` and `LoginLibraryConfig`.
@@ -229,10 +237,10 @@ pattern.
 ./gradlew :custom-login:testDebugUnitTest
 
 # iOS compile + link
-./gradlew :custom-login:linkDebugFrameworkIosSimulatorArm64
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 
 # Full check before opening a PR
-./gradlew :custom-login:testDebugUnitTest :custom-login:linkDebugFrameworkIosSimulatorArm64 \
+./gradlew :custom-login:testDebugUnitTest :composeApp:linkDebugFrameworkIosSimulatorArm64 \
   :composeApp:assembleDebug --console=plain
 ```
 
