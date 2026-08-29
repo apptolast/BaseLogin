@@ -49,7 +49,7 @@ jobs:
           retention-days: 14
 
   apple:
-    name: iOS framework + JitPack publication
+    name: iOS framework + demo app + JitPack publication
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -63,6 +63,29 @@ jobs:
 
       - name: Link iOS framework
         run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+
+      # The step above only links the Kotlin framework. Nothing compiled the Swift
+      # in iosApp/ — the coordinators were written on Windows, where they cannot be
+      # built at all — so a syntax or API error there reached develop unnoticed.
+      #
+      # Signing is off: the runner holds no certificates and a simulator build needs
+      # none. ARCHS is pinned because iosSimulatorArm64 is the only simulator target
+      # the project declares; if Xcode picked x86_64 on an Intel runner, the Gradle
+      # `embedAndSignAppleFrameworkForXcode` run script phase would fail on it.
+      # GoogleService-Info.plist is absent here on purpose (it is gitignored) and
+      # that is fine — it is not a build input, the app only reads it at launch.
+      - name: Build the iOS demo app
+        run: |
+          xcodebuild build \
+            -project iosApp/iosApp.xcodeproj \
+            -scheme iosApp \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY=""
 
       # Reproduces exactly what the JitPack builder runs (jitpack.yml: osx + JDK 17
       # + publishToMavenLocal). JITPACK=true is what disables ktlint in the root

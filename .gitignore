@@ -559,6 +559,11 @@ fabric.properties
 iosApp/iosApp/GoogleService-Info.plist
 /shared/schemas/
 
+# Per-user Xcode state. The iosApp scheme used to live here, under one developer's
+# .xcuserdatad, so xcodebuild could not find it on any other machine. It is shared
+# now, in xcshareddata/xcschemes/.
+iosApp/iosApp.xcodeproj/xcuserdata/
+
 # Claude Code / SDD harness state (local, not shared)
 .claude/.sdd-state.json
 .claude/settings.local.json
