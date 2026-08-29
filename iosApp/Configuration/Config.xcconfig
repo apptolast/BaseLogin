@@ -2,11 +2,11 @@ TEAM_ID=
 
 PRODUCT_NAME=Login
 
-# Fixed on purpose. The KMP template ships this as `…$(TEAM_ID)` so every developer gets a unique id,
-# which is fine for a throwaway sample and wrong here: this bundle id has to match the iOS app
-# registered in Firebase, the iOS OAuth client that issued the reversed client id in Info.plist, and
-# `MagicLinkConfig.iosBundleId`. With the suffix, setting TEAM_ID locally silently changed the app's
-# identity and broke all three.
+// Fixed on purpose. The KMP template ships this as `…$(TEAM_ID)` so every developer gets a unique id,
+// which is fine for a throwaway sample and wrong here: this bundle id has to match the iOS app
+// registered in Firebase, the iOS OAuth client that issued the reversed client id in Info.plist, and
+// `MagicLinkConfig.iosBundleId`. With the suffix, setting TEAM_ID locally silently changed the app's
+// identity and broke all three.
 PRODUCT_BUNDLE_IDENTIFIER=com.apptolast.login.Login
 
 CURRENT_PROJECT_VERSION=1
