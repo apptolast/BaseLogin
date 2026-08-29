@@ -1,10 +1,12 @@
 // ktlint is a developer-only tool and is applied through `buildscript` instead of the `plugins {}`
 // block so that it can be skipped entirely.
 //
-// Reason: this library is published by the JitPack builder, which runs only
-// `:baselogin:publishToMavenLocal` and cannot resolve plugins from the Gradle Plugin Portal —
-// the ktlint plugin is not mirrored on Maven Central, so the whole publication failed and every
-// consumer pinning a newer commit broke. Publishing must never depend on a linter.
+// Reason: publishing must never depend on a linter. It did once, under JitPack: the builder could
+// not resolve the ktlint plugin from the Gradle Plugin Portal, the whole publication failed, and
+// every consumer pinning a newer commit broke. JitPack is gone as of 2.0.0 — the release job
+// publishes to Maven Central instead — but the escape hatch stays and that job passes
+// `-PskipKtlint=true`. `JITPACK` is never set any more; it is kept so an old tag still builds if
+// anyone ever requests one from JitPack.
 //
 // Locally nothing changes: ktlintCheck and ktlintFormat work as usual.
 val ktlintEnabled: Boolean = System.getenv("JITPACK") == null &&

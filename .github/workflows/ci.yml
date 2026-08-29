@@ -8,6 +8,9 @@ on:
     branches: [develop, main, 'feature/**']
   push:
     branches: [develop, main]
+    # Publishing is driven by the tag, and the tag must equal `version` in
+    # baselogin/build.gradle.kts.
+    tags: ['[0-9]+.[0-9]+.[0-9]+']
   workflow_dispatch:
 
 concurrency:
@@ -49,7 +52,7 @@ jobs:
           retention-days: 14
 
   apple:
-    name: iOS framework + demo app + JitPack publication
+    name: iOS framework + demo app
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -87,11 +90,42 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY=""
 
-      # Reproduces exactly what the JitPack builder runs (jitpack.yml: osx + JDK 17
-      # + publishToMavenLocal). JITPACK=true is what disables ktlint in the root
-      # build — publishing broke once because the linter was in that path, and this
-      # job is here so it cannot break silently again.
-      - name: Publication (as JitPack runs it)
+  # Runs only for a version tag, and only once the library and the Apple side are both green:
+  # a publication that fails validation is recoverable, one that publishes a broken artifact is not.
+  #
+  # macOS is not strictly required. Kotlin/Native cross-compiles the Apple *klibs* from any host, and
+  # that was measured here: a Windows `publishToMavenLocal` produced both baselogin-iosarm64 and
+  # baselogin-iossimulatorarm64 at ~640 KB each. The macOS-only rules are final Apple binaries and
+  # projects that declare cinterop or CocoaPods dependencies — this one declares neither.
+  #
+  # It runs on macOS anyway, deliberately: klib cross-compilation is still being stabilised, a
+  # released version on Central can never be deleted or overwritten, and this is the same runner that
+  # already builds the framework and the demo. For the one irreversible step, use the host with no
+  # caveats attached.
+  #
+  # The gradle task uploads to a pending deployment and stops; releasing is a manual step in the
+  # Central Portal. See the `mavenPublishing` block in baselogin/build.gradle.kts.
+  release:
+    name: Publish to Maven Central (pending deployment)
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [library, apple]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish
         env:
-          JITPACK: 'true'
-        run: ./gradlew :baselogin:publishToMavenLocal
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_IN_MEMORY_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_IN_MEMORY_KEY_PASSWORD }}
+        # skipKtlint because publishing must never depend on the linter: it already broke a
+        # publication once. ktlintCheck still gates this job through `needs: library`.
+        run: ./gradlew :baselogin:publishToMavenCentral --no-configuration-cache -PskipKtlint=true

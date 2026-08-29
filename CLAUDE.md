@@ -257,10 +257,15 @@ and CI runs `./gradlew ktlintCheck`. Every style decision lives in `.editorconfi
 
 ## How this library is consumed
 
-Published through **JitPack** as `com.github.apptolast.BaseLogin:baselogin` (see `jitpack.yml`, which
-runs `:baselogin:publishToMavenLocal`). The Gradle module, the Kotlin package, the Android
-namespace and the artifactId are all `baselogin` — before 2.0.0 the module was `custom-login` and
-only the root artifactId said `baselogin`, which is what the rename fixed.
+Published to **Maven Central** as `io.github.apptolast:baselogin`, by the `release` job in
+`.github/workflows/ci.yml`, which fires on a version tag and uploads a *pending* deployment that a
+human releases from the Central Portal. The Gradle module, the Kotlin package, the Android namespace
+and the artifactId are all `baselogin` — before 2.0.0 the module was `custom-login` and only the root
+artifactId said `baselogin`, which is what the rename fixed.
+
+Up to 1.1.0 it was published through **JitPack** as `com.github.apptolast.BaseLogin:baselogin`. Those
+versions stay there; `jitpack.yml` was removed in 2.0.0. `com.github.*` is not a namespace Sonatype
+grants, which is why the coordinate had to change and not just the version.
 
 Consumers pin either a **commit SHA** (Fledge) or a **tag** (Paparcar pins `1.1.0`), so both forms
 are in use — do not assume SHA-only.

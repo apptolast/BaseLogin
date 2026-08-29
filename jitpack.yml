@@ -1,6 +1,0 @@
-jdk:
-  - openjdk17
-os:
-  - osx
-install:
-  - ./gradlew :baselogin:publishToMavenLocal

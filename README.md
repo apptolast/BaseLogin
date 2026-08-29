@@ -200,17 +200,16 @@ Each screen follows the same MVI pattern:
 
 ## Project Setup
 
-There are two ways to consume the library. Host apps use **JitPack**; the local module is for working on the library itself.
+There are two ways to consume the library. Host apps use **Maven Central**; the local module is for working on the library itself.
 
-### Option A — JitPack (host apps)
+### Option A — Maven Central (host apps)
 
-**`settings.gradle.kts`** — add the JitPack repository:
+**`settings.gradle.kts`** — no extra repository is needed, `mavenCentral()` is almost certainly already there:
 ```kotlin
 dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven("https://jitpack.io")
     }
 }
 ```
@@ -220,7 +219,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("com.github.apptolast.BaseLogin:baselogin:2.0.0")
+            implementation("io.github.apptolast:baselogin:2.0.0")
         }
     }
 }
@@ -229,31 +228,32 @@ kotlin {
 Android-only host:
 ```kotlin
 dependencies {
-    implementation("com.github.apptolast.BaseLogin:baselogin:2.0.0")
+    implementation("io.github.apptolast:baselogin:2.0.0")
 }
 ```
 
-**Get the group exactly right — it is the single most common way to break this.**
-
-| Coordinate | What Gradle gets |
-|---|---|
-| `com.github.apptolast.BaseLogin:baselogin` | ✅ the real `.module` file, with variant metadata for every target |
-| `com.github.apptolast:baselogin` | ❌ resolves, but only to JitPack's aggregate POM — no variant metadata, and the KMP metadata jar it serves is empty |
-
-The group must carry the **repository** name (`BaseLogin`, capitalised) after the user name, even though `baselogin/build.gradle.kts` declares `group = "com.github.apptolast"` — JitPack republishes multi-module builds under `com.github.<user>.<repo>`. The two-segment form still answers with a POM, so the failure is not a 404: it surfaces later as unresolved symbols or an empty metadata jar.
-
 The artifact id is **`baselogin`**, matching the Gradle module. From the root publication Gradle resolves the per-target artifacts (`baselogin-android`, `baselogin-iosarm64`, `baselogin-iossimulatorarm64`) automatically — never depend on those directly.
 
-> **Before 2.0.0 the module was called `custom-login`**, so those per-target artifacts were published as `custom-login-android`, `custom-login-iosarm64` and `custom-login-iossimulatorarm64`. Only the root id was ever `baselogin`. If you carry the exclude workaround below, or pin a version older than 2.0.0, use the names that match your pin.
+`dev.gitlive:firebase-auth` resolves transitively from the same repository, so nothing else is required.
 
-`dev.gitlive:firebase-auth` resolves transitively from Maven Central, so no extra repository is required.
+#### Coming from JitPack
 
-#### Pinning a commit instead of a tag
+**2.0.0 moved the library to Maven Central, and the coordinate changed with it.** Versions up to 1.1.0 were served by JitPack and stay there; nothing new will be published under that group.
 
-Any commit on `develop` is a valid version, which is how you consume a fix before it is tagged:
-```kotlin
-implementation("com.github.apptolast.BaseLogin:baselogin:35a5e15")
-```
+| | Group | Example |
+|---|---|---|
+| Up to 1.1.0 | `com.github.apptolast.BaseLogin` | `com.github.apptolast.BaseLogin:baselogin:1.1.0` |
+| From 2.0.0 | `io.github.apptolast` | `io.github.apptolast:baselogin:2.0.0` |
+
+`io.github.*` and not `com.apptolast`: the namespace is verified against the GitHub organisation. The old JitPack group could never have worked on Central, which does not grant namespaces under `com.github.*`.
+
+If you drop the `maven("https://jitpack.io")` line from `settings.gradle.kts`, check first that nothing else in your build resolves from it.
+
+> **Before 2.0.0 the module was called `custom-login`**, so the per-target artifacts were published as `custom-login-android`, `custom-login-iosarm64` and `custom-login-iossimulatorarm64`. Only the root id was ever `baselogin`. If you carry the exclude workaround below, or pin a version older than 2.0.0, use the names — and the group — that match your pin.
+
+#### Consuming a fix before it is tagged
+
+JitPack could build any commit; Maven Central cannot. Until a version is tagged and released, use **Option B** below and depend on the module directly from a local checkout.
 
 #### If the Android classpath fails on iOS sub-modules
 
@@ -266,7 +266,7 @@ resolution configurations only — excluding them higher up propagates and silen
 afterEvaluate {
     configurations
         .filter { it.name.endsWith("CompileClasspath") || it.name.endsWith("RuntimeClasspath") }
-        .forEach { it.exclude(group = "com.github.apptolast.BaseLogin", module = "baselogin-iosarm64") }
+        .forEach { it.exclude(group = "io.github.apptolast", module = "baselogin-iosarm64") }
 }
 ```
 
@@ -277,12 +277,15 @@ obsolete for hosts that have moved to SPM.
 #### Publishing a new version
 
 1. Set `version` in `baselogin/build.gradle.kts`.
-2. Merge into `develop` and tag with **exactly that same string** — `git tag 1.2.0 && git push origin 1.2.0`. If the tag and `version` disagree, the JitPack build succeeds but serves nothing under that tag.
-3. JitPack builds **on demand**: the first request for a version triggers it. Per `jitpack.yml` it runs on macOS with JDK 17 and executes `:baselogin:publishToMavenLocal`, which takes a few minutes. A 404 immediately after tagging usually means "not built yet", not "broken".
+2. Merge into `develop`, wait for CI to be green, and tag with **exactly that same string** — `git tag 2.1.0 && git push origin 2.1.0`.
+3. The tag triggers the `release` job in `.github/workflows/ci.yml`. It runs **on macOS**, after the `library` and `apple` jobs pass, and uploads a **pending deployment** to the Central Portal. Nothing is public yet.
+4. Open <https://central.sonatype.com/publishing/deployments>, check the artifact list, and press **Publish**. Reaching Maven Central search takes a few minutes more.
 
-Build status for every version: <https://jitpack.io/#apptolast/BaseLogin>
+> **Why step 4 is manual: a released version on Maven Central can never be deleted or overwritten**, only superseded by a higher one. A pending deployment can still be dropped, so the artifact list is worth reading before pressing the button.
 
-> **Check that page before pinning.** Not every tag here has been published — a tag existing in git does not mean JitPack ever served it.
+> **On the macOS runner.** It is a deliberate choice, not a hard requirement. Kotlin/Native [cross-compiles the Apple `.klib` artifacts from any host](https://kotlinlang.org/docs/native-target-support.html) — a Windows `publishToMavenLocal` here produced both `baselogin-iosarm64` and `baselogin-iossimulatorarm64` at ~640 KB each. What genuinely needs macOS is building *final* Apple binaries, and any project declaring cinterop or CocoaPods dependencies; this library declares neither. The release job still runs there because klib cross-compilation is [still being stabilised](https://kotlinlang.org/docs/multiplatform/multiplatform-publish-lib-setup.html) and the publication is the one step that cannot be undone.
+
+Publishing needs four repository secrets: `MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD` (a Sonatype **user token**, not the account password), `SIGNING_IN_MEMORY_KEY` (the ASCII-armored GPG private key) and `SIGNING_IN_MEMORY_KEY_PASSWORD`.
 
 ### Option B — local module (working on the library)
 

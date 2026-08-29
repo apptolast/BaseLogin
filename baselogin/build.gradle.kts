@@ -1,4 +1,3 @@
-import org.gradle.api.publish.maven.MavenPublication
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -7,10 +6,13 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.kotlinx.serialization)
-    id("maven-publish")
+    alias(libs.plugins.maven.publish)
 }
 
-group = "com.github.apptolast"
+// `io.github.apptolast` and not `com.apptolast`: the namespace is verified against the GitHub
+// organisation. It is also not `com.github.apptolast`, the old JitPack coordinate — Sonatype does
+// not grant namespaces under `com.github.*`, so that one could never have reached Central.
+group = "io.github.apptolast"
 version = "2.0.0"
 
 kotlin {
@@ -103,36 +105,41 @@ android {
     }
 }
 
-afterEvaluate {
-    publishing {
-        publications.withType<MavenPublication> {
-            if (name == "kotlinMultiplatform") {
-                artifactId = "baselogin"
+mavenPublishing {
+    // Uploads to a *pending* deployment and stops there. Releasing is a separate, manual step in the
+    // Central Portal, on purpose: a released version on Maven Central can never be deleted or
+    // overwritten, while a pending one can still be dropped. Switching to
+    // `publishAndReleaseToMavenCentral` would remove that safety net.
+    publishToMavenCentral()
+    signAllPublications()
+
+    // The per-target artifacts derive from this one: baselogin-android, baselogin-iosarm64, …
+    coordinates(group.toString(), "baselogin", version.toString())
+
+    pom {
+        name.set("BaseLogin")
+        description.set(
+            "Composable Kotlin Multiplatform authentication library with Firebase defaults and replaceable auth providers.",
+        )
+        url.set("https://github.com/apptolast/BaseLogin")
+        licenses {
+            license {
+                name.set("MIT License")
+                url.set("https://opensource.org/licenses/MIT")
+                distribution.set("https://opensource.org/licenses/MIT")
             }
-            pom {
-                name.set("BaseLogin")
-                description.set(
-                    "Composable Kotlin Multiplatform authentication library with Firebase defaults and replaceable auth providers.",
-                )
-                url.set("https://github.com/apptolast/BaseLogin")
-                licenses {
-                    license {
-                        name.set("MIT License")
-                        url.set("https://opensource.org/licenses/MIT")
-                    }
-                }
-                developers {
-                    developer {
-                        id.set("apptolast")
-                        name.set("AppToLast")
-                    }
-                }
-                scm {
-                    url.set("https://github.com/apptolast/BaseLogin")
-                    connection.set("scm:git:https://github.com/apptolast/BaseLogin.git")
-                    developerConnection.set("scm:git:ssh://git@github.com:apptolast/BaseLogin.git")
-                }
+        }
+        developers {
+            developer {
+                id.set("apptolast")
+                name.set("AppToLast")
+                url.set("https://github.com/apptolast")
             }
+        }
+        scm {
+            url.set("https://github.com/apptolast/BaseLogin")
+            connection.set("scm:git:https://github.com/apptolast/BaseLogin.git")
+            developerConnection.set("scm:git:ssh://git@github.com:apptolast/BaseLogin.git")
         }
     }
 }

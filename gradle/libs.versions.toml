@@ -29,6 +29,7 @@ gitlive-firebase = "2.6.0"
 firebase-bom = "34.14.1"
 firebase-appcheck-debug = "19.4.0"
 firebase-appcheck-playintegrity = "19.4.0"
+maven-publish = "0.37.0"
 #compose = "1.10.1"
 
 [libraries]
@@ -87,3 +88,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 gitlive-firebase = { id = "dev.gitlive.firebase.plugin", version.ref = "gitlive-firebase" }
+maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }

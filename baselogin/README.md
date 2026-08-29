@@ -12,21 +12,18 @@ dependencies {
 }
 ```
 
-Published artifact (JitPack):
+Published artifact (Maven Central):
 
 ```kotlin
 dependencies {
-    implementation("com.github.apptolast.BaseLogin:baselogin:2.0.0")
+    implementation("io.github.apptolast:baselogin:2.0.0")
 }
 ```
 
-> The group must carry the **repository** name after the user name —
-> `com.github.apptolast.BaseLogin`, capitalised — even though this module declares
-> `group = "com.github.apptolast"`. JitPack republishes multi-module builds under
-> `com.github.<user>.<repo>`. The two-segment form `com.github.apptolast:baselogin` still answers
-> with a POM, so it does not fail as a 404: it resolves to JitPack's aggregate POM, with no variant
-> metadata and an empty KMP metadata jar, and surfaces much later as unresolved symbols. See the
-> [root README](../README.md#project-setup) for the full table.
+> **The coordinate changed in 2.0.0.** Up to 1.1.0 this was `com.github.apptolast.BaseLogin:baselogin`
+> on JitPack; those versions stay there and nothing new is published under that group. Sonatype does
+> not grant namespaces under `com.github.*`, so moving to Central meant a new group, not just a new
+> version. See the [root README](../README.md#project-setup) for the migration notes.
 
 ## Koin Integration
 
