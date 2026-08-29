@@ -664,6 +664,38 @@ Set up all handlers **before** the first Composable renders, typically in `AppDe
 
 ---
 
+### First: the `completion` you receive is not `(String?) -> Void`
+
+Every handler below hands you a `completion`. It comes from a Kotlin `(String?) -> Unit` that sits **nested** inside another lambda, and Kotlin/Native cannot export that as a block returning `void` — an Objective-C block has no way to express `void` in that position. What arrives in Swift is `(String?) -> KotlinUnit`, and it bites in two different ways:
+
+| What you write | What you get |
+|---|---|
+| `completion(token)` | compiles, with `warning: result of call to function returning 'KotlinUnit' is unused` |
+| `completion` passed to anything typed `(String?) -> Void` | `error: cannot convert value of type '(String?) -> KotlinUnit' to expected argument type '(String?) -> Void'` |
+
+Adapt it once and everything downstream stays ordinary Swift:
+
+```swift
+/// Generic on the return type on purpose: nothing has to name `KotlinUnit`, so this keeps
+/// compiling if the export ever maps it differently.
+func discardingResult<T>(_ body: @escaping (String?) -> T) -> (String?) -> Void {
+    { token in _ = body(token) }
+}
+```
+
+Then shadow the parameter on the first line of each handler:
+
+```swift
+SomeProviderIOS.shared.signInHandler = { _, completion in
+    let completion = discardingResult(completion)
+    // from here down it is a plain (String?) -> Void
+}
+```
+
+The demo keeps this in **[`iosApp/iosApp/KotlinInterop.swift`](iosApp/iosApp/KotlinInterop.swift)**, and every example below assumes it exists.
+
+---
+
 ### Google (iOS)
 
 ```swift
@@ -671,6 +703,7 @@ import GoogleSignIn
 
 // In AppDelegate.application(_:didFinishLaunchingWithOptions:) or equivalent:
 GoogleSignInProviderIOS.shared.signInHandler = { clientId, completion in
+    let completion = discardingResult(completion)
     guard let clientId = clientId,
           let rootVC = UIApplication.shared.connectedScenes
               .compactMap({ ($0 as? UIWindowScene)?.keyWindow?.rootViewController })
@@ -730,7 +763,7 @@ final class AppleSignInCoordinator: NSObject {
 
     func register() {
         AppleSignInProviderIOS.shared.signInHandler = { [weak self] _, completion in
-            self?.start(completion: completion)
+            self?.start(completion: discardingResult(completion))
         }
     }
 
@@ -866,6 +899,7 @@ import FirebaseAuth
 
 // GitHub example — call this at app startup
 GitHubSignInProviderIOS.shared.signInHandler = { _, completion in
+    let completion = discardingResult(completion)
     let provider = OAuthProvider(providerID: "github.com")
     provider.scopes = ["user:email"]
 
@@ -882,6 +916,7 @@ GitHubSignInProviderIOS.shared.signInHandler = { _, completion in
 
 // Microsoft
 MicrosoftSignInProviderIOS.shared.signInHandler = { _, completion in
+    let completion = discardingResult(completion)
     let provider = OAuthProvider(providerID: "microsoft.com")
     provider.scopes = ["email", "profile"]
     // Optional: provider.customParameters = ["tenant": "your-tenant-id"]
@@ -895,6 +930,7 @@ MicrosoftSignInProviderIOS.shared.signInHandler = { _, completion in
 
 // Twitter
 TwitterSignInProviderIOS.shared.signInHandler = { _, completion in
+    let completion = discardingResult(completion)
     let provider = OAuthProvider(providerID: "twitter.com")
     provider.getCredentialWith(nil) { credential, error in
         guard let credential = credential, error == nil else { completion(nil); return }
@@ -906,6 +942,7 @@ TwitterSignInProviderIOS.shared.signInHandler = { _, completion in
 
 // Facebook
 FacebookSignInProviderIOS.shared.signInHandler = { _, completion in
+    let completion = discardingResult(completion)
     let provider = OAuthProvider(providerID: "facebook.com")
     provider.scopes = ["email", "public_profile"]
     provider.getCredentialWith(nil) { credential, error in
@@ -934,6 +971,7 @@ import FirebaseAuth
 
 // Handler 1: send the OTP
 PhoneAuthProviderIOS.shared.sendCodeHandler = { phoneNumber, completion in
+    let completion = discardingResult(completion)
     PhoneAuthProvider.provider().verifyPhoneNumber(phoneNumber, uiDelegate: nil) { verificationId, error in
         completion(verificationId)  // nil on failure
     }
@@ -941,6 +979,7 @@ PhoneAuthProviderIOS.shared.sendCodeHandler = { phoneNumber, completion in
 
 // Handler 2: verify the OTP and sign in
 PhoneAuthProviderIOS.shared.verifyCodeHandler = { verificationId, smsCode, completion in
+    let completion = discardingResult(completion)
     let credential = PhoneAuthProvider.provider()
         .credential(withVerificationID: verificationId, verificationCode: smsCode)
     Auth.auth().signIn(with: credential) { result, error in
