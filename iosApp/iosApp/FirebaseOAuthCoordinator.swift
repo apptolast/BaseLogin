@@ -31,7 +31,7 @@ final class FirebaseOAuthCoordinator {
                 providerId: "github.com",
                 scopes: ["user:email"],
                 handledSentinel: GitHubSignInProviderIOS.shared.PLATFORM_AUTH_HANDLED,
-                completion: completion
+                completion: discardingResult(completion)
             )
         }
 
@@ -40,7 +40,7 @@ final class FirebaseOAuthCoordinator {
                 providerId: "microsoft.com",
                 scopes: ["email", "profile"],
                 handledSentinel: MicrosoftSignInProviderIOS.shared.PLATFORM_AUTH_HANDLED,
-                completion: completion
+                completion: discardingResult(completion)
             )
         }
 
@@ -49,7 +49,7 @@ final class FirebaseOAuthCoordinator {
                 providerId: "twitter.com",
                 scopes: ["email"],
                 handledSentinel: TwitterSignInProviderIOS.shared.PLATFORM_AUTH_HANDLED,
-                completion: completion
+                completion: discardingResult(completion)
             )
         }
 
@@ -58,7 +58,7 @@ final class FirebaseOAuthCoordinator {
                 providerId: "facebook.com",
                 scopes: ["email", "public_profile"],
                 handledSentinel: FacebookSignInProviderIOS.shared.PLATFORM_AUTH_HANDLED,
-                completion: completion
+                completion: discardingResult(completion)
             )
         }
     }

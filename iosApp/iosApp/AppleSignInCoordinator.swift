@@ -50,11 +50,11 @@ final class AppleSignInCoordinator: NSObject {
     /// Installs both handlers. Call once at startup, before the first Composable renders.
     func register() {
         AppleSignInProviderIOS.shared.signInHandler = { [weak self] scopes, completion in
-            self?.start(.signIn(completion), scopes: Self.scopes(from: scopes))
+            self?.start(.signIn(discardingResult(completion)), scopes: Self.scopes(from: scopes))
         }
 
         AppleSignInProviderIOS.shared.revokeHandler = { [weak self] completion in
-            self?.start(.revoke(completion), scopes: Self.defaultScopes)
+            self?.start(.revoke(discardingResult(completion)), scopes: Self.defaultScopes)
         }
     }
 
