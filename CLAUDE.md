@@ -58,11 +58,17 @@ diagnose.
 Signing reads `DEVELOPMENT_TEAM` from `${TEAM_ID}`, defined in `iosApp/Configuration/Config.xcconfig`.
 Set it locally; **never hardcode a team id into `project.pbxproj`**.
 
-The bundle id is fixed at `com.apptolast.login.Login` — deliberately **without** the `$(TEAM_ID)`
+The bundle id is fixed at `com.apptolast.login` — deliberately **without** the `$(TEAM_ID)`
 suffix the KMP template ships. It has to match three things at once: the iOS app registered in
 Firebase, the iOS OAuth client behind the reversed client id in `Info.plist`, and
 `MagicLinkConfig.iosBundleId` in `MainViewController.kt`. With the suffix, setting `TEAM_ID` locally
 silently changed the app's identity and broke all three.
+
+It read `com.apptolast.login.Login` until 2026-08-29. Spec 008 kept that value because the
+`GoogleService-Info.plist` was gitignored and nobody could check it against the console; when the
+plist finally arrived, its `BUNDLE_ID` said otherwise. The Google client ids moved in the same pass:
+the demo was wired to project `495458702268` while both config files belong to `base-login-59395`
+(`218717255604`), so Google sign-in could not have worked on either platform.
 
 ## Files the demo needs and the repository does not have
 

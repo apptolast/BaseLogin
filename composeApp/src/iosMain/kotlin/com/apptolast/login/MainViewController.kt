@@ -30,8 +30,8 @@ private fun initKoinIfNeeded() {
         // Configure Google Sign-In with both Web and iOS Client IDs
         val loginConfig = LoginLibraryConfig(
             googleSignInConfig = GoogleSignInConfig(
-                webClientId = "495458702268-al98mksrlh27v607972b0oaa0g98pfru.apps.googleusercontent.com",
-                iosClientId = "495458702268-1ekoub6nmp7hmkhinuasdlup1rke9kg4.apps.googleusercontent.com",
+                webClientId = "218717255604-h57da28qm4s2ed0f8js5a9q54gnbett5.apps.googleusercontent.com",
+                iosClientId = "218717255604-lncshc55j3qko90c3v798h15g2oocuv4.apps.googleusercontent.com",
             ),
             appleSignInConfig = AppleSignInConfig(),
             githubEnabled = true,
@@ -42,7 +42,7 @@ private fun initKoinIfNeeded() {
                 // Must be the app's real bundle id, or the link never reopens the app.
                 // See iosApp/Configuration/Config.xcconfig.
                 continueUrl = "https://apptolast.com/login",
-                iosBundleId = "com.apptolast.login.Login",
+                iosBundleId = "com.apptolast.login",
             ),
         )
 
