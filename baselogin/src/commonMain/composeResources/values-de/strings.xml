@@ -1,0 +1,122 @@
+<resources>
+    <!-- Common -->
+    <string name="common_error">Fehler</string>
+    <string name="common_email_label">E-Mail</string>
+    <string name="common_password_label">Passwort</string>
+    <string name="common_full_name_label">Vollständiger Name</string>
+    <string name="common_continue_button">Weiter</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_show_password">Passwort anzeigen</string>
+    <string name="cd_hide_password">Passwort verbergen</string>
+    <string name="cd_navigate_back">Zurück</string>
+    <string name="cd_dismiss">Schließen</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_screen_title">Willkommen zurück! 😊</string>
+    <string name="welcome_screen_subtitle">Dein sicherer Zugang beginnt hier. Erstelle ein Konto oder melde dich an, um fortzufahren.</string>
+    <string name="welcome_screen_create_account_button">Konto erstellen</string>
+    <string name="welcome_screen_sign_in_button">Anmelden</string>
+
+    <!-- Divider -->
+    <string name="divider_or">ODER</string>
+
+    <!-- Login Screen -->
+    <string name="login_screen_sign_in_button">Anmelden</string>
+    <string name="login_screen_forgot_password_link">Passwort vergessen?</string>
+    <string name="login_screen_no_account_text">Noch kein Konto?</string>
+    <string name="login_screen_sign_up_link">Registrieren</string>
+    <string name="login_google_button">Mit Google anmelden</string>
+    <string name="login_loading_text">Anmeldung läuft...</string>
+
+    <!-- Register Screen -->
+    <string name="register_screen_register_button">Registrieren</string>
+    <string name="register_screen_confirm_password_label">Passwort bestätigen</string>
+    <string name="register_screen_terms_prefix">Ich akzeptiere die</string>
+    <string name="register_screen_terms_and_conditions">Allgemeinen Geschäftsbedingungen</string>
+    <string name="register_screen_terms_conjunction">und die</string>
+    <string name="register_screen_privacy_policy">Datenschutzerklärung</string>
+    <string name="register_screen_already_have_account_text">Du hast bereits ein Konto?</string>
+    <string name="register_screen_sign_in_link">Anmelden</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_screen_title">Passwort vergessen</string>
+    <string name="forgot_password_screen_description">Gib deine E-Mail-Adresse ein und wir senden dir einen Link zum Zurücksetzen deines Passworts.</string>
+    <string name="forgot_password_screen_send_button">Link senden</string>
+    <string name="forgot_password_screen_success_title">Prüfe dein Postfach</string>
+    <string name="forgot_password_screen_success_description">Wir haben einen Link zum Zurücksetzen des Passworts an deine E-Mail-Adresse gesendet.</string>
+
+    <!-- Validation Messages -->
+    <string name="validation_email_empty">Die E-Mail-Adresse darf nicht leer sein</string>
+    <string name="validation_email_invalid">Ungültiges E-Mail-Format</string>
+    <string name="validation_password_empty">Das Passwort darf nicht leer sein</string>
+    <string name="validation_password_too_short">Das Passwort muss mindestens 6 Zeichen lang sein</string>
+    <string name="validation_name_required">Der vollständige Name ist erforderlich</string>
+    <string name="validation_confirm_password_empty">Bitte bestätige dein Passwort</string>
+    <string name="validation_passwords_no_match">Die Passwörter stimmen nicht überein</string>
+    <string name="validation_phone_empty">Die Telefonnummer darf nicht leer sein</string>
+    <string name="validation_otp_empty">Der Bestätigungscode darf nicht leer sein</string>
+
+    <!-- Auth Error Messages -->
+    <string name="auth_error_invalid_credentials">E-Mail-Adresse oder Passwort ist falsch</string>
+    <string name="auth_error_user_not_found">Mit dieser E-Mail-Adresse wurde kein Konto gefunden</string>
+    <string name="auth_error_email_already_in_use">Diese E-Mail-Adresse ist bereits registriert</string>
+    <string name="auth_error_weak_password">Das Passwort ist zu schwach</string>
+    <string name="auth_error_invalid_email">Ungültiges E-Mail-Format</string>
+    <string name="auth_error_invalid_reset_code">Ungültiger oder abgelaufener Link zum Zurücksetzen des Passworts</string>
+    <string name="auth_error_network_error">Netzwerkfehler. Bitte prüfe deine Verbindung</string>
+    <string name="auth_error_too_many_requests">Zu viele Versuche. Bitte versuche es später erneut</string>
+    <string name="auth_error_user_disabled">Dieses Konto wurde deaktiviert</string>
+    <string name="auth_error_operation_not_allowed">Dieser Vorgang ist nicht zulässig</string>
+    <string name="auth_error_session_expired">Deine Sitzung ist abgelaufen. Bitte melde dich erneut an</string>
+    <string name="auth_error_requires_email_verification">Bitte bestätige deine E-Mail-Adresse, bevor du dich anmeldest</string>
+    <string name="auth_error_unknown">Ein unerwarteter Fehler ist aufgetreten</string>
+    <string name="auth_error_registration_failed">Registrierung fehlgeschlagen. Bitte versuche es erneut</string>
+    <string name="auth_error_phone_unexpected">Unerwarteter Fehler bei der Telefonverifizierung</string>
+    <string name="auth_error_phone_verification_failed">Telefonverifizierung fehlgeschlagen</string>
+    <string name="auth_error_phone_invalid">Ungültige Telefonnummer</string>
+    <string name="auth_error_invalid_otp">Ungültiger Bestätigungscode</string>
+
+    <!-- Phone Auth Screen -->
+    <string name="phone_auth_screen_title">Mit Telefonnummer anmelden</string>
+    <string name="phone_auth_screen_phone_header">Anmeldung per Telefon</string>
+    <string name="phone_auth_screen_phone_description">Gib deine Telefonnummer ein, um einen Bestätigungscode zu erhalten.</string>
+    <string name="phone_auth_screen_send_button">Code senden</string>
+    <string name="phone_auth_screen_otp_header">Bestätigungscode eingeben</string>
+    <string name="phone_auth_screen_otp_description">Gib den 6-stelligen Code ein, der an %1$s gesendet wurde</string>
+    <string name="phone_auth_screen_verify_button">Bestätigen</string>
+    <string name="phone_auth_screen_country_code_label">Vorwahl</string>
+    <string name="phone_auth_screen_phone_label">Telefonnummer</string>
+    <string name="phone_auth_screen_otp_label">Bestätigungscode</string>
+
+    <!-- Social Sign-In Buttons -->
+    <string name="login_apple_button">Mit Apple anmelden</string>
+    <string name="login_github_button">Mit GitHub anmelden</string>
+    <string name="login_microsoft_button">Mit Microsoft anmelden</string>
+    <string name="login_magic_link_button">Mit E-Mail-Link anmelden</string>
+    <string name="login_phone_button">Mit Telefonnummer anmelden</string>
+    <string name="login_twitter_button">Mit Twitter anmelden</string>
+    <string name="login_facebook_button">Mit Facebook anmelden</string>
+
+    <!-- Magic Link Screen -->
+    <string name="magic_link_screen_title">Anmeldung per E-Mail-Link</string>
+    <string name="magic_link_screen_description">Gib deine E-Mail-Adresse ein und wir senden dir einen Anmeldelink. Kein Passwort nötig.</string>
+    <string name="magic_link_screen_send_button">Anmeldelink senden</string>
+    <string name="magic_link_screen_success_title">Prüfe dein Postfach</string>
+    <string name="magic_link_screen_success_description">Wir haben einen Anmeldelink an %1$s gesendet. Klicke auf den Link in der E-Mail, um die Anmeldung abzuschließen.</string>
+
+    <!-- Reset Password Screen -->
+    <string name="reset_password_screen_title">Neues Passwort erstellen</string>
+    <string name="reset_password_screen_new_password_label">Neues Passwort</string>
+    <string name="reset_password_screen_confirm_new_password_label">Neues Passwort bestätigen</string>
+    <string name="reset_password_screen_description">Dein neues Passwort muss sich von zuvor verwendeten Passwörtern unterscheiden.</string>
+    <string name="reset_password_screen_reset_button">Passwort zurücksetzen</string>
+    <string name="reset_password_screen_success_title">Passwort zurückgesetzt!</string>
+    <string name="reset_password_screen_success_description">Du kannst dich jetzt mit deinem neuen Passwort in deinem Konto anmelden.</string>
+
+    <!-- Re-authentication Screen -->
+    <string name="reauth_screen_title">Bestätige deine Identität</string>
+    <string name="reauth_screen_description">Bitte gib zu deiner Sicherheit deine Zugangsdaten erneut ein, um fortzufahren.</string>
+    <string name="reauth_submit_button">Bestätigen</string>
+
+</resources>
