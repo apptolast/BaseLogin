@@ -1,0 +1,122 @@
+<resources>
+    <!-- Common -->
+    <string name="common_error">Błąd</string>
+    <string name="common_email_label">E-mail</string>
+    <string name="common_password_label">Hasło</string>
+    <string name="common_full_name_label">Imię i nazwisko</string>
+    <string name="common_continue_button">Kontynuuj</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_show_password">Pokaż hasło</string>
+    <string name="cd_hide_password">Ukryj hasło</string>
+    <string name="cd_navigate_back">Wstecz</string>
+    <string name="cd_dismiss">Zamknij</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_screen_title">Witamy ponownie! 😊</string>
+    <string name="welcome_screen_subtitle">Twój bezpieczny dostęp zaczyna się tutaj. Załóż konto lub zaloguj się, aby kontynuować.</string>
+    <string name="welcome_screen_create_account_button">Załóż konto</string>
+    <string name="welcome_screen_sign_in_button">Zaloguj się</string>
+
+    <!-- Divider -->
+    <string name="divider_or">LUB</string>
+
+    <!-- Login Screen -->
+    <string name="login_screen_sign_in_button">Zaloguj się</string>
+    <string name="login_screen_forgot_password_link">Nie pamiętasz hasła?</string>
+    <string name="login_screen_no_account_text">Nie masz konta?</string>
+    <string name="login_screen_sign_up_link">Zarejestruj się</string>
+    <string name="login_google_button">Zaloguj się przez Google</string>
+    <string name="login_loading_text">Logowanie...</string>
+
+    <!-- Register Screen -->
+    <string name="register_screen_register_button">Zarejestruj się</string>
+    <string name="register_screen_confirm_password_label">Potwierdź hasło</string>
+    <string name="register_screen_terms_prefix">Akceptuję</string>
+    <string name="register_screen_terms_and_conditions">Regulamin</string>
+    <string name="register_screen_terms_conjunction">oraz</string>
+    <string name="register_screen_privacy_policy">Politykę prywatności</string>
+    <string name="register_screen_already_have_account_text">Masz już konto?</string>
+    <string name="register_screen_sign_in_link">Zaloguj się</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_screen_title">Nie pamiętam hasła</string>
+    <string name="forgot_password_screen_description">Podaj swój adres e-mail, a wyślemy Ci link do zresetowania hasła.</string>
+    <string name="forgot_password_screen_send_button">Wyślij link</string>
+    <string name="forgot_password_screen_success_title">Sprawdź swoją skrzynkę</string>
+    <string name="forgot_password_screen_success_description">Wysłaliśmy link do zresetowania hasła na Twój adres e-mail.</string>
+
+    <!-- Validation Messages -->
+    <string name="validation_email_empty">Adres e-mail nie może być pusty</string>
+    <string name="validation_email_invalid">Nieprawidłowy format adresu e-mail</string>
+    <string name="validation_password_empty">Hasło nie może być puste</string>
+    <string name="validation_password_too_short">Hasło musi mieć co najmniej 6 znaków</string>
+    <string name="validation_name_required">Imię i nazwisko jest wymagane</string>
+    <string name="validation_confirm_password_empty">Potwierdź swoje hasło</string>
+    <string name="validation_passwords_no_match">Hasła nie są takie same</string>
+    <string name="validation_phone_empty">Numer telefonu nie może być pusty</string>
+    <string name="validation_otp_empty">Kod weryfikacyjny nie może być pusty</string>
+
+    <!-- Auth Error Messages -->
+    <string name="auth_error_invalid_credentials">Nieprawidłowy adres e-mail lub hasło</string>
+    <string name="auth_error_user_not_found">Nie znaleziono konta z tym adresem e-mail</string>
+    <string name="auth_error_email_already_in_use">Ten adres e-mail jest już zarejestrowany</string>
+    <string name="auth_error_weak_password">Hasło jest zbyt słabe</string>
+    <string name="auth_error_invalid_email">Nieprawidłowy format adresu e-mail</string>
+    <string name="auth_error_invalid_reset_code">Nieprawidłowy lub wygasły link do resetowania hasła</string>
+    <string name="auth_error_network_error">Błąd sieci. Sprawdź swoje połączenie</string>
+    <string name="auth_error_too_many_requests">Zbyt wiele prób. Spróbuj ponownie później</string>
+    <string name="auth_error_user_disabled">To konto zostało zablokowane</string>
+    <string name="auth_error_operation_not_allowed">Ta operacja jest niedozwolona</string>
+    <string name="auth_error_session_expired">Twoja sesja wygasła. Zaloguj się ponownie</string>
+    <string name="auth_error_requires_email_verification">Potwierdź swój adres e-mail przed zalogowaniem</string>
+    <string name="auth_error_unknown">Wystąpił nieoczekiwany błąd</string>
+    <string name="auth_error_registration_failed">Rejestracja nie powiodła się. Spróbuj ponownie</string>
+    <string name="auth_error_phone_unexpected">Nieoczekiwany błąd podczas weryfikacji telefonu</string>
+    <string name="auth_error_phone_verification_failed">Weryfikacja telefonu nie powiodła się</string>
+    <string name="auth_error_phone_invalid">Nieprawidłowy numer telefonu</string>
+    <string name="auth_error_invalid_otp">Nieprawidłowy kod weryfikacyjny</string>
+
+    <!-- Phone Auth Screen -->
+    <string name="phone_auth_screen_title">Zaloguj się przez telefon</string>
+    <string name="phone_auth_screen_phone_header">Logowanie przez telefon</string>
+    <string name="phone_auth_screen_phone_description">Podaj swój numer telefonu, aby otrzymać kod weryfikacyjny.</string>
+    <string name="phone_auth_screen_send_button">Wyślij kod</string>
+    <string name="phone_auth_screen_otp_header">Wpisz kod weryfikacyjny</string>
+    <string name="phone_auth_screen_otp_description">Wpisz 6-cyfrowy kod wysłany na %1$s</string>
+    <string name="phone_auth_screen_verify_button">Zweryfikuj</string>
+    <string name="phone_auth_screen_country_code_label">Kierunkowy</string>
+    <string name="phone_auth_screen_phone_label">Numer telefonu</string>
+    <string name="phone_auth_screen_otp_label">Kod weryfikacyjny</string>
+
+    <!-- Social Sign-In Buttons -->
+    <string name="login_apple_button">Zaloguj się przez Apple</string>
+    <string name="login_github_button">Zaloguj się przez GitHub</string>
+    <string name="login_microsoft_button">Zaloguj się przez Microsoft</string>
+    <string name="login_magic_link_button">Zaloguj się linkiem e-mail</string>
+    <string name="login_phone_button">Zaloguj się przez telefon</string>
+    <string name="login_twitter_button">Zaloguj się przez Twitter</string>
+    <string name="login_facebook_button">Zaloguj się przez Facebook</string>
+
+    <!-- Magic Link Screen -->
+    <string name="magic_link_screen_title">Logowanie linkiem e-mail</string>
+    <string name="magic_link_screen_description">Podaj swój adres e-mail, a wyślemy Ci link do logowania. Hasło nie jest potrzebne.</string>
+    <string name="magic_link_screen_send_button">Wyślij link do logowania</string>
+    <string name="magic_link_screen_success_title">Sprawdź swoją skrzynkę</string>
+    <string name="magic_link_screen_success_description">Wysłaliśmy link do logowania na %1$s. Kliknij link w wiadomości, aby dokończyć logowanie.</string>
+
+    <!-- Reset Password Screen -->
+    <string name="reset_password_screen_title">Utwórz nowe hasło</string>
+    <string name="reset_password_screen_new_password_label">Nowe hasło</string>
+    <string name="reset_password_screen_confirm_new_password_label">Potwierdź nowe hasło</string>
+    <string name="reset_password_screen_description">Twoje nowe hasło musi różnić się od haseł używanych wcześniej.</string>
+    <string name="reset_password_screen_reset_button">Zresetuj hasło</string>
+    <string name="reset_password_screen_success_title">Hasło zresetowane!</string>
+    <string name="reset_password_screen_success_description">Możesz teraz zalogować się na swoje konto przy użyciu nowego hasła.</string>
+
+    <!-- Re-authentication Screen -->
+    <string name="reauth_screen_title">Potwierdź swoją tożsamość</string>
+    <string name="reauth_screen_description">Ze względów bezpieczeństwa wprowadź ponownie swoje dane, aby kontynuować.</string>
+    <string name="reauth_submit_button">Potwierdź</string>
+
+</resources>

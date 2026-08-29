@@ -1,0 +1,122 @@
+<resources>
+    <!-- Common -->
+    <string name="common_error">Eroare</string>
+    <string name="common_email_label">E-mail</string>
+    <string name="common_password_label">Parolă</string>
+    <string name="common_full_name_label">Nume complet</string>
+    <string name="common_continue_button">Continuă</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_show_password">Afișează parola</string>
+    <string name="cd_hide_password">Ascunde parola</string>
+    <string name="cd_navigate_back">Înapoi</string>
+    <string name="cd_dismiss">Închide</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_screen_title">Bine ai revenit! 😊</string>
+    <string name="welcome_screen_subtitle">Accesul tău sigur începe aici. Creează un cont sau conectează-te pentru a continua.</string>
+    <string name="welcome_screen_create_account_button">Creează cont</string>
+    <string name="welcome_screen_sign_in_button">Conectare</string>
+
+    <!-- Divider -->
+    <string name="divider_or">SAU</string>
+
+    <!-- Login Screen -->
+    <string name="login_screen_sign_in_button">Conectare</string>
+    <string name="login_screen_forgot_password_link">Ai uitat parola?</string>
+    <string name="login_screen_no_account_text">Nu ai cont?</string>
+    <string name="login_screen_sign_up_link">Înregistrează-te</string>
+    <string name="login_google_button">Conectare cu Google</string>
+    <string name="login_loading_text">Se conectează...</string>
+
+    <!-- Register Screen -->
+    <string name="register_screen_register_button">Înregistrare</string>
+    <string name="register_screen_confirm_password_label">Confirmă parola</string>
+    <string name="register_screen_terms_prefix">Sunt de acord cu</string>
+    <string name="register_screen_terms_and_conditions">Termenii și condițiile</string>
+    <string name="register_screen_terms_conjunction">și</string>
+    <string name="register_screen_privacy_policy">Politica de confidențialitate</string>
+    <string name="register_screen_already_have_account_text">Ai deja un cont?</string>
+    <string name="register_screen_sign_in_link">Conectare</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_screen_title">Ai uitat parola</string>
+    <string name="forgot_password_screen_description">Introdu adresa ta de e-mail și îți vom trimite un link pentru resetarea parolei.</string>
+    <string name="forgot_password_screen_send_button">Trimite linkul</string>
+    <string name="forgot_password_screen_success_title">Verifică-ți inboxul</string>
+    <string name="forgot_password_screen_success_description">Am trimis un link de resetare a parolei la adresa ta de e-mail.</string>
+
+    <!-- Validation Messages -->
+    <string name="validation_email_empty">Adresa de e-mail nu poate fi goală</string>
+    <string name="validation_email_invalid">Format de e-mail invalid</string>
+    <string name="validation_password_empty">Parola nu poate fi goală</string>
+    <string name="validation_password_too_short">Parola trebuie să aibă cel puțin 6 caractere</string>
+    <string name="validation_name_required">Numele complet este obligatoriu</string>
+    <string name="validation_confirm_password_empty">Te rugăm să confirmi parola</string>
+    <string name="validation_passwords_no_match">Parolele nu coincid</string>
+    <string name="validation_phone_empty">Numărul de telefon nu poate fi gol</string>
+    <string name="validation_otp_empty">Codul de verificare nu poate fi gol</string>
+
+    <!-- Auth Error Messages -->
+    <string name="auth_error_invalid_credentials">Adresă de e-mail sau parolă incorectă</string>
+    <string name="auth_error_user_not_found">Nu a fost găsit niciun cont cu acest e-mail</string>
+    <string name="auth_error_email_already_in_use">Această adresă de e-mail este deja înregistrată</string>
+    <string name="auth_error_weak_password">Parola este prea slabă</string>
+    <string name="auth_error_invalid_email">Format de e-mail invalid</string>
+    <string name="auth_error_invalid_reset_code">Link de resetare a parolei invalid sau expirat</string>
+    <string name="auth_error_network_error">Eroare de rețea. Verifică-ți conexiunea</string>
+    <string name="auth_error_too_many_requests">Prea multe încercări. Încearcă din nou mai târziu</string>
+    <string name="auth_error_user_disabled">Acest cont a fost dezactivat</string>
+    <string name="auth_error_operation_not_allowed">Această operațiune nu este permisă</string>
+    <string name="auth_error_session_expired">Sesiunea ta a expirat. Conectează-te din nou</string>
+    <string name="auth_error_requires_email_verification">Te rugăm să îți confirmi adresa de e-mail înainte de conectare</string>
+    <string name="auth_error_unknown">A apărut o eroare neașteptată</string>
+    <string name="auth_error_registration_failed">Înregistrarea a eșuat. Te rugăm să încerci din nou</string>
+    <string name="auth_error_phone_unexpected">Eroare neașteptată în timpul verificării telefonului</string>
+    <string name="auth_error_phone_verification_failed">Verificarea telefonului a eșuat</string>
+    <string name="auth_error_phone_invalid">Număr de telefon invalid</string>
+    <string name="auth_error_invalid_otp">Cod de verificare invalid</string>
+
+    <!-- Phone Auth Screen -->
+    <string name="phone_auth_screen_title">Conectare cu telefonul</string>
+    <string name="phone_auth_screen_phone_header">Conectare prin telefon</string>
+    <string name="phone_auth_screen_phone_description">Introdu numărul tău de telefon pentru a primi un cod de verificare.</string>
+    <string name="phone_auth_screen_send_button">Trimite codul</string>
+    <string name="phone_auth_screen_otp_header">Introdu codul de verificare</string>
+    <string name="phone_auth_screen_otp_description">Introdu codul din 6 cifre trimis la %1$s</string>
+    <string name="phone_auth_screen_verify_button">Verifică</string>
+    <string name="phone_auth_screen_country_code_label">Prefix</string>
+    <string name="phone_auth_screen_phone_label">Număr de telefon</string>
+    <string name="phone_auth_screen_otp_label">Cod de verificare</string>
+
+    <!-- Social Sign-In Buttons -->
+    <string name="login_apple_button">Conectare cu Apple</string>
+    <string name="login_github_button">Conectare cu GitHub</string>
+    <string name="login_microsoft_button">Conectare cu Microsoft</string>
+    <string name="login_magic_link_button">Conectare cu link pe e-mail</string>
+    <string name="login_phone_button">Conectare cu telefonul</string>
+    <string name="login_twitter_button">Conectare cu Twitter</string>
+    <string name="login_facebook_button">Conectare cu Facebook</string>
+
+    <!-- Magic Link Screen -->
+    <string name="magic_link_screen_title">Conectare prin link pe e-mail</string>
+    <string name="magic_link_screen_description">Introdu adresa ta de e-mail și îți vom trimite un link de conectare. Fără parolă.</string>
+    <string name="magic_link_screen_send_button">Trimite linkul de conectare</string>
+    <string name="magic_link_screen_success_title">Verifică-ți inboxul</string>
+    <string name="magic_link_screen_success_description">Am trimis un link de conectare la %1$s. Apasă pe linkul din e-mail pentru a finaliza conectarea.</string>
+
+    <!-- Reset Password Screen -->
+    <string name="reset_password_screen_title">Creează o parolă nouă</string>
+    <string name="reset_password_screen_new_password_label">Parolă nouă</string>
+    <string name="reset_password_screen_confirm_new_password_label">Confirmă parola nouă</string>
+    <string name="reset_password_screen_description">Parola ta nouă trebuie să fie diferită de parolele folosite anterior.</string>
+    <string name="reset_password_screen_reset_button">Resetează parola</string>
+    <string name="reset_password_screen_success_title">Parolă resetată!</string>
+    <string name="reset_password_screen_success_description">Acum te poți conecta la contul tău cu noua parolă.</string>
+
+    <!-- Re-authentication Screen -->
+    <string name="reauth_screen_title">Confirmă-ți identitatea</string>
+    <string name="reauth_screen_description">Pentru siguranța ta, reintrodu datele de conectare pentru a continua.</string>
+    <string name="reauth_submit_button">Confirmă</string>
+
+</resources>

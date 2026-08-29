@@ -1,0 +1,122 @@
+<resources>
+    <!-- Common -->
+    <string name="common_error">Fout</string>
+    <string name="common_email_label">E-mail</string>
+    <string name="common_password_label">Wachtwoord</string>
+    <string name="common_full_name_label">Volledige naam</string>
+    <string name="common_continue_button">Doorgaan</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_show_password">Wachtwoord tonen</string>
+    <string name="cd_hide_password">Wachtwoord verbergen</string>
+    <string name="cd_navigate_back">Terug</string>
+    <string name="cd_dismiss">Sluiten</string>
+
+    <!-- Welcome Screen -->
+    <string name="welcome_screen_title">Welkom terug! 😊</string>
+    <string name="welcome_screen_subtitle">Je veilige toegang begint hier. Maak een account aan of log in om door te gaan.</string>
+    <string name="welcome_screen_create_account_button">Account aanmaken</string>
+    <string name="welcome_screen_sign_in_button">Inloggen</string>
+
+    <!-- Divider -->
+    <string name="divider_or">OF</string>
+
+    <!-- Login Screen -->
+    <string name="login_screen_sign_in_button">Inloggen</string>
+    <string name="login_screen_forgot_password_link">Wachtwoord vergeten?</string>
+    <string name="login_screen_no_account_text">Nog geen account?</string>
+    <string name="login_screen_sign_up_link">Registreren</string>
+    <string name="login_google_button">Inloggen met Google</string>
+    <string name="login_loading_text">Bezig met inloggen...</string>
+
+    <!-- Register Screen -->
+    <string name="register_screen_register_button">Registreren</string>
+    <string name="register_screen_confirm_password_label">Wachtwoord bevestigen</string>
+    <string name="register_screen_terms_prefix">Ik ga akkoord met de</string>
+    <string name="register_screen_terms_and_conditions">Algemene voorwaarden</string>
+    <string name="register_screen_terms_conjunction">en het</string>
+    <string name="register_screen_privacy_policy">Privacybeleid</string>
+    <string name="register_screen_already_have_account_text">Heb je al een account?</string>
+    <string name="register_screen_sign_in_link">Inloggen</string>
+
+    <!-- Forgot Password Screen -->
+    <string name="forgot_password_screen_title">Wachtwoord vergeten</string>
+    <string name="forgot_password_screen_description">Voer je e-mailadres in en we sturen je een link om je wachtwoord opnieuw in te stellen.</string>
+    <string name="forgot_password_screen_send_button">Link versturen</string>
+    <string name="forgot_password_screen_success_title">Controleer je inbox</string>
+    <string name="forgot_password_screen_success_description">We hebben een link om je wachtwoord opnieuw in te stellen naar je e-mailadres gestuurd.</string>
+
+    <!-- Validation Messages -->
+    <string name="validation_email_empty">Het e-mailadres mag niet leeg zijn</string>
+    <string name="validation_email_invalid">Ongeldig e-mailadres</string>
+    <string name="validation_password_empty">Het wachtwoord mag niet leeg zijn</string>
+    <string name="validation_password_too_short">Het wachtwoord moet minstens 6 tekens bevatten</string>
+    <string name="validation_name_required">Volledige naam is verplicht</string>
+    <string name="validation_confirm_password_empty">Bevestig je wachtwoord</string>
+    <string name="validation_passwords_no_match">De wachtwoorden komen niet overeen</string>
+    <string name="validation_phone_empty">Het telefoonnummer mag niet leeg zijn</string>
+    <string name="validation_otp_empty">De verificatiecode mag niet leeg zijn</string>
+
+    <!-- Auth Error Messages -->
+    <string name="auth_error_invalid_credentials">Onjuist e-mailadres of wachtwoord</string>
+    <string name="auth_error_user_not_found">Er is geen account gevonden met dit e-mailadres</string>
+    <string name="auth_error_email_already_in_use">Dit e-mailadres is al geregistreerd</string>
+    <string name="auth_error_weak_password">Het wachtwoord is te zwak</string>
+    <string name="auth_error_invalid_email">Ongeldig e-mailadres</string>
+    <string name="auth_error_invalid_reset_code">Ongeldige of verlopen link om het wachtwoord opnieuw in te stellen</string>
+    <string name="auth_error_network_error">Netwerkfout. Controleer je verbinding</string>
+    <string name="auth_error_too_many_requests">Te veel pogingen. Probeer het later opnieuw</string>
+    <string name="auth_error_user_disabled">Dit account is uitgeschakeld</string>
+    <string name="auth_error_operation_not_allowed">Deze bewerking is niet toegestaan</string>
+    <string name="auth_error_session_expired">Je sessie is verlopen. Log opnieuw in</string>
+    <string name="auth_error_requires_email_verification">Bevestig je e-mailadres voordat je inlogt</string>
+    <string name="auth_error_unknown">Er is een onverwachte fout opgetreden</string>
+    <string name="auth_error_registration_failed">Registratie mislukt. Probeer het opnieuw</string>
+    <string name="auth_error_phone_unexpected">Onverwachte fout tijdens de telefoonverificatie</string>
+    <string name="auth_error_phone_verification_failed">Telefoonverificatie mislukt</string>
+    <string name="auth_error_phone_invalid">Ongeldig telefoonnummer</string>
+    <string name="auth_error_invalid_otp">Ongeldige verificatiecode</string>
+
+    <!-- Phone Auth Screen -->
+    <string name="phone_auth_screen_title">Inloggen met telefoonnummer</string>
+    <string name="phone_auth_screen_phone_header">Inloggen per telefoon</string>
+    <string name="phone_auth_screen_phone_description">Voer je telefoonnummer in om een verificatiecode te ontvangen.</string>
+    <string name="phone_auth_screen_send_button">Code versturen</string>
+    <string name="phone_auth_screen_otp_header">Voer de verificatiecode in</string>
+    <string name="phone_auth_screen_otp_description">Voer de 6-cijferige code in die naar %1$s is gestuurd</string>
+    <string name="phone_auth_screen_verify_button">Verifiëren</string>
+    <string name="phone_auth_screen_country_code_label">Landcode</string>
+    <string name="phone_auth_screen_phone_label">Telefoonnummer</string>
+    <string name="phone_auth_screen_otp_label">Verificatiecode</string>
+
+    <!-- Social Sign-In Buttons -->
+    <string name="login_apple_button">Inloggen met Apple</string>
+    <string name="login_github_button">Inloggen met GitHub</string>
+    <string name="login_microsoft_button">Inloggen met Microsoft</string>
+    <string name="login_magic_link_button">Inloggen met e-maillink</string>
+    <string name="login_phone_button">Inloggen met telefoonnummer</string>
+    <string name="login_twitter_button">Inloggen met Twitter</string>
+    <string name="login_facebook_button">Inloggen met Facebook</string>
+
+    <!-- Magic Link Screen -->
+    <string name="magic_link_screen_title">Inloggen met e-maillink</string>
+    <string name="magic_link_screen_description">Voer je e-mailadres in en we sturen je een inloglink. Geen wachtwoord nodig.</string>
+    <string name="magic_link_screen_send_button">Inloglink versturen</string>
+    <string name="magic_link_screen_success_title">Controleer je inbox</string>
+    <string name="magic_link_screen_success_description">We hebben een inloglink naar %1$s gestuurd. Klik op de link in de e-mail om het inloggen te voltooien.</string>
+
+    <!-- Reset Password Screen -->
+    <string name="reset_password_screen_title">Nieuw wachtwoord aanmaken</string>
+    <string name="reset_password_screen_new_password_label">Nieuw wachtwoord</string>
+    <string name="reset_password_screen_confirm_new_password_label">Nieuw wachtwoord bevestigen</string>
+    <string name="reset_password_screen_description">Je nieuwe wachtwoord moet verschillen van eerder gebruikte wachtwoorden.</string>
+    <string name="reset_password_screen_reset_button">Wachtwoord opnieuw instellen</string>
+    <string name="reset_password_screen_success_title">Wachtwoord opnieuw ingesteld!</string>
+    <string name="reset_password_screen_success_description">Je kunt nu met je nieuwe wachtwoord inloggen op je account.</string>
+
+    <!-- Re-authentication Screen -->
+    <string name="reauth_screen_title">Bevestig je identiteit</string>
+    <string name="reauth_screen_description">Voer voor je veiligheid je gegevens opnieuw in om door te gaan.</string>
+    <string name="reauth_submit_button">Bevestigen</string>
+
+</resources>
