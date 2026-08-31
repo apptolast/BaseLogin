@@ -312,8 +312,10 @@ The library's own dependencies (Firebase, Koin, Compose, etc.) are defined in `b
 2.0.0 is a **breaking release**. Everything in it fails at compile time, never at runtime — you find
 out when you bump the pin, not a month later with a dead button.
 
-The Maven coordinate does **not** change: it is still
-`com.github.apptolast.BaseLogin:baselogin`. Only the pin moves.
+**The Maven coordinate changes too**, because 2.0.0 also moves the library from JitPack to Maven
+Central: `com.github.apptolast.BaseLogin:baselogin` becomes `io.github.apptolast:baselogin`. See
+[Coming from JitPack](#coming-from-jitpack) — the group, the repository and the pin all move
+together. The artifact id stays `baselogin`.
 
 ### The name: `custom-login` is now `baselogin`
 
@@ -332,7 +334,8 @@ Android namespace, the resource package. One name now runs through all of it.
 For a consumer this is a find-and-replace over imports. From the root of your project:
 
 ```bash
-# 1. bump the pin in gradle/libs.versions.toml to 2.0.0 (the module coordinate stays the same)
+# 1. in gradle/libs.versions.toml: bump the pin to 2.0.0 *and* change the module coordinate
+#    from com.github.apptolast.BaseLogin:baselogin to io.github.apptolast:baselogin
 # 2. imports
 grep -rl --null "com\.apptolast\.customlogin" --include="*.kt" . \
   | xargs -0 sed -i '' 's/com\.apptolast\.customlogin/com.apptolast.baselogin/g'
@@ -349,8 +352,9 @@ grep -rl --null "CustomLoginAndroid" --include="*.kt" . \
 Swift needs no changes for this part: Kotlin/Native flattens packages when exporting to
 Objective-C, so the symbols Swift sees never carried the package name.
 
-If you use the iOS sub-module exclude workaround documented above, update the module name in it
-too — `custom-login-iosarm64` became `baselogin-iosarm64`.
+If you use the iOS sub-module exclude workaround documented above, update **both** halves of it —
+the group became `io.github.apptolast` and the module `custom-login-iosarm64` became
+`baselogin-iosarm64`.
 
 ### iOS providers: one way to reach them from Swift
 
