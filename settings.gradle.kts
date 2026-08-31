@@ -12,7 +12,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven("https://jitpack.io")
         // Also add the GitLive repository here for the libraries
         maven("https://gitlive.github.io/firebase-kotlin-sdk/maven/")
     }
