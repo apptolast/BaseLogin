@@ -76,6 +76,9 @@ class GitLiveFirebaseAuthGateway : FirebaseAuthGateway {
     override suspend fun getIdToken(forceRefresh: Boolean): String? =
         runGateway { auth.currentUser?.getIdToken(forceRefresh) }
 
+    override suspend fun reloadCurrentUser() =
+        runGateway { auth.currentUser?.reload() ?: Unit }
+
     override suspend fun updateDisplayName(displayName: String) =
         runGateway { requireCurrentUser().updateProfile(displayName = displayName) }
 
@@ -98,10 +101,27 @@ class GitLiveFirebaseAuthGateway : FirebaseAuthGateway {
         uid = uid,
         email = email,
         displayName = displayName,
-        photoUrl = photoURL,
+        photoUrl = freshestPhotoUrl(),
         isEmailVerified = isEmailVerified,
         providerIds = providerData.map { it.providerId },
     )
+
+    /**
+     * The photo the identity provider says TODAY, not the copy Firebase froze at account creation.
+     *
+     * Firebase seeds the top-level `photoURL` from the provider **once** and never follows later
+     * changes (a new Google profile picture, for instance); `providerData` *is* refreshed on every
+     * credential sign-in and on `reload()`. The synthetic `"firebase"` entry mirrors the frozen
+     * top-level value, so only real provider entries count. Top-level stays as fallback — it is the
+     * only source for email/password accounts, and the one `updateProfile` writes to.
+     *
+     * `displayName` deliberately keeps top-level precedence: [updateDisplayName] exists, so the
+     * top-level name is user-managed and must not be clobbered by the provider's.
+     */
+    private fun FirebaseUser.freshestPhotoUrl(): String? =
+        providerData.firstNotNullOfOrNull { info ->
+            info.photoURL?.takeIf { info.providerId != AGGREGATE_PROVIDER_ID }
+        } ?: photoURL
 
     private fun FirebaseUser?.requireUser(message: String): FirebaseAuthUser =
         this?.toFirebaseAuthUser() ?: throw FirebaseAuthFailure(message)
@@ -131,5 +151,11 @@ class GitLiveFirebaseAuthGateway : FirebaseAuthGateway {
         throw e
     } catch (e: Exception) {
         throw FirebaseAuthFailure(e.message ?: "Authentication error", e)
+    }
+
+    private companion object {
+        /** The synthetic aggregate entry Firebase adds to `providerData` — it mirrors the frozen
+         *  top-level profile, so it never counts as a fresh provider source. */
+        const val AGGREGATE_PROVIDER_ID = "firebase"
     }
 }

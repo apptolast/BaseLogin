@@ -46,6 +46,16 @@ interface FirebaseAuthGateway {
 
     suspend fun getIdToken(forceRefresh: Boolean): String?
 
+    /**
+     * Re-reads the current user's profile from the Firebase servers into the SDK's local cache.
+     *
+     * Networked, so it must never sit on the [currentUser] path — but it is what makes identity
+     * changes made at the provider (a new Google profile photo, a renamed account) visible without
+     * forcing a full re-sign-in: `providerData` only refreshes on credential sign-in or here.
+     * No-op when nobody is signed in.
+     */
+    suspend fun reloadCurrentUser()
+
     suspend fun updateDisplayName(displayName: String)
 
     suspend fun updateEmail(newEmail: String)

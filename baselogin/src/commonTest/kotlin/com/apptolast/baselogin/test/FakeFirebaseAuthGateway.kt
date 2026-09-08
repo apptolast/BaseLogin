@@ -108,6 +108,18 @@ class FakeFirebaseAuthGateway : FirebaseAuthGateway {
         return idToken
     }
 
+    /** When set, [reloadCurrentUser] swaps the user for it — simulating a server-side profile
+     *  change (new provider photo) becoming visible after the reload. */
+    var userAfterReload: FirebaseAuthUser? = null
+    var reloadCalls = 0
+        private set
+
+    override suspend fun reloadCurrentUser() {
+        record()
+        reloadCalls++
+        userAfterReload?.let { user = it }
+    }
+
     override suspend fun updateDisplayName(displayName: String) {
         record()
         updatedDisplayNames += displayName

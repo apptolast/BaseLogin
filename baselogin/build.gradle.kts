@@ -13,7 +13,7 @@ plugins {
 // organisation. It is also not `com.github.apptolast`, the old JitPack coordinate — Sonatype does
 // not grant namespaces under `com.github.*`, so that one could never have reached Central.
 group = "io.github.apptolast"
-version = "2.0.0"
+version = "2.0.1"
 
 kotlin {
     androidTarget().apply {

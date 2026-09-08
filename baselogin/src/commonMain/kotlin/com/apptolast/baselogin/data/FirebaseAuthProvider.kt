@@ -110,6 +110,10 @@ class FirebaseAuthProvider(
     override suspend fun getCurrentSession(): UserSession? = gateway.currentUser?.toUserSession()
 
     override suspend fun refreshSession(): AuthResult = runAuth {
+        // Reload BEFORE reading: this is the one verb allowed to go to the network, so it is where
+        // identity changes made at the provider (photo, name) get pulled into the local cache that
+        // getCurrentSession serves from.
+        gateway.reloadCurrentUser()
         val token = gateway.getIdToken(forceRefresh = true)
         val user = gateway.currentUser ?: return@runAuth AuthResult.Failure(AuthError.SessionExpired())
         AuthResult.Success(user.toUserSession(accessToken = token))

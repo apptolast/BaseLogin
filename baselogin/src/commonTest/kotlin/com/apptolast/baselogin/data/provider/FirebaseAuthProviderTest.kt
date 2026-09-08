@@ -396,4 +396,30 @@ class FirebaseAuthProviderTest {
 
         assertEquals("+34600000000" to 90L, phoneAuth.sentCodes.single())
     }
+
+    // ── refreshSession pulls provider-side identity changes ────────────────────────
+
+    @Test
+    fun `refresh session reloads the user before reading it`() = runTest {
+        // Given: the cached user carries the frozen photo; the server has a newer one that only
+        // a reload makes visible
+        gateway.user = FirebaseAuthUser(uid = "u-9", photoUrl = "https://old/photo.jpg")
+        gateway.userAfterReload = FirebaseAuthUser(uid = "u-9", photoUrl = "https://new/photo.jpg")
+
+        val result = provider().refreshSession()
+
+        assertIs<AuthResult.Success>(result)
+        assertEquals(1, gateway.reloadCalls)
+        assertEquals("https://new/photo.jpg", result.session.photoUrl)
+    }
+
+    @Test
+    fun `refresh session without a signed-in user fails as session expired, after the no-op reload`() = runTest {
+        gateway.user = null
+
+        val result = provider().refreshSession()
+
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.SessionExpired>(result.error)
+    }
 }
