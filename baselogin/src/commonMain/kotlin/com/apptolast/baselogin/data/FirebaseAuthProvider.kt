@@ -2,6 +2,7 @@ package com.apptolast.baselogin.data
 
 import com.apptolast.baselogin.SocialTokenResult
 import com.apptolast.baselogin.data.firebase.FirebaseAuthCredential
+import com.apptolast.baselogin.data.firebase.FirebaseAuthFailure
 import com.apptolast.baselogin.data.firebase.FirebaseAuthGateway
 import com.apptolast.baselogin.data.firebase.FirebaseAuthUser
 import com.apptolast.baselogin.data.firebase.PhoneAuthPort
@@ -178,8 +179,9 @@ class FirebaseAuthProvider(
             is Credentials.EmailPassword ->
                 FirebaseAuthCredential.EmailPassword(credentials.email, credentials.password)
             is Credentials.OAuthToken -> when (val token = socialTokens.tokenFor(credentials.provider)) {
-                null -> return@runAuth AuthResult.Failure(AuthError.OperationNotAllowed(SOCIAL_CANCELLED))
+                null -> return@runAuth AuthResult.Failure(socialTokenMissing(credentials.provider))
                 is SocialTokenResult.PlatformHandled -> return@runAuth refreshSession()
+                is SocialTokenResult.Failed -> return@runAuth AuthResult.Failure(token.toAuthError())
                 is SocialTokenResult.Token -> credentials.provider.toCredential(token.value)
                     ?: return@runAuth AuthResult.Failure(unsupported(credentials.provider))
             }
@@ -228,11 +230,14 @@ class FirebaseAuthProvider(
 
     private suspend fun signInWithOAuth(provider: IdentityProvider): AuthResult = runAuth {
         when (val token = socialTokens.tokenFor(provider)) {
-            // Cancelled or failed on the platform side: never reaches the SDK.
-            null -> AuthResult.Failure(AuthError.OperationNotAllowed(SOCIAL_CANCELLED))
+            // Cancelled on the platform side (or failed where the platform cannot tell): never reaches the SDK.
+            null -> AuthResult.Failure(socialTokenMissing(provider))
 
             // The platform already completed the Firebase sign-in (e.g. Android web OAuth).
             is SocialTokenResult.PlatformHandled -> refreshSession()
+
+            // Failed on the platform side for a reason it could name: never reaches the SDK either.
+            is SocialTokenResult.Failed -> AuthResult.Failure(token.toAuthError())
 
             is SocialTokenResult.Token -> {
                 val credential = provider.toCredential(token.value)
@@ -300,29 +305,49 @@ class FirebaseAuthProvider(
     /**
      * Single funnel for every failure.
      *
-     * Catching `FirebaseAuthException` alone is not enough: `FirebaseNetworkException` and
-     * `FirebaseTooManyRequestsException` extend `FirebaseException` and are its *siblings*, so they
-     * used to fall through to a generic catch and be reported as [AuthError.Unknown] — even though
-     * [mapFirebaseErrorMessage] already knew how to classify their message.
+     * Classifies by the error code the gateway carries ([FirebaseAuthFailure.code]) and falls back
+     * to the message. Every failure is logged with its code, exception class and resulting type —
+     * never the message, which on iOS can hold the user's email.
      */
     private inline fun runAuth(block: () -> AuthResult): AuthResult = try {
         block()
     } catch (e: Exception) {
-        AuthResult.Failure(e.toAuthError())
+        val code = (e as? FirebaseAuthFailure)?.code
+        val error = e.toAuthError()
+        Logger.w(LOG_TAG, authFailureLogLine(code, e::class.simpleName, error))
+        AuthResult.Failure(error)
     }
 
-    private fun Throwable.toAuthError(): AuthError =
-        mapFirebaseErrorMessage(message?.trim()?.ifBlank { null } ?: cause?.message?.trim() ?: "Authentication error")
+    private fun Throwable.toAuthError(): AuthError = mapFirebaseError(
+        code = (this as? FirebaseAuthFailure)?.code,
+        message = message?.trim()?.ifBlank { null } ?: cause?.message?.trim() ?: "Authentication error",
+        cause = this,
+    )
+
+    private fun SocialTokenResult.Failed.toAuthError(): AuthError {
+        val error = mapFirebaseError(code, message)
+        Logger.w(LOG_TAG, authFailureLogLine(code, SocialTokenResult.Failed::class.simpleName, error))
+        return error
+    }
+
+    /**
+     * A missing social token reads as a cancellation. On iOS the Swift handlers cannot tell a real
+     * failure apart, so every one is logged with the provider to keep those failures visible.
+     */
+    private fun socialTokenMissing(provider: IdentityProvider): AuthError {
+        Logger.w(LOG_TAG, nullSocialTokenLogLine(provider.id))
+        return AuthError.SignInCancelled()
+    }
 
     private fun unsupported(provider: IdentityProvider): AuthError =
-        AuthError.OperationNotAllowed("Provider not supported: ${provider.id}")
+        AuthError.ProviderNotConfigured("Provider not supported: ${provider.id}")
 
     private fun FirebaseAuthUser.toSuccess(): AuthResult.Success = AuthResult.Success(toUserSession())
 
     companion object {
         const val PROVIDER_ID = "firebase"
 
-        private const val SOCIAL_CANCELLED = "Social sign-in cancelled or failed."
+        private const val LOG_TAG = "FirebaseAuthProvider"
 
         /** Separator in the Google token string: `"idToken$GOOGLE_ACCESS_TOKEN_SEPARATOR$accessToken"`. */
         const val GOOGLE_ACCESS_TOKEN_SEPARATOR = "|||accessToken|||"

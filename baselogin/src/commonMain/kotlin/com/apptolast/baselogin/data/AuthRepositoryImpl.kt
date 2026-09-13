@@ -115,7 +115,7 @@ class AuthRepositoryImpl(private val authProvider: AuthProvider, private val con
     override suspend fun sendMagicLink(email: String): AuthResult {
         val mlConfig = config.magicLinkConfig
             ?: return AuthResult.Failure(
-                AuthError.OperationNotAllowed(
+                AuthError.ProviderNotConfigured(
                     "Magic Link is not configured. Provide MagicLinkConfig in LoginLibraryConfig.",
                 ),
             )

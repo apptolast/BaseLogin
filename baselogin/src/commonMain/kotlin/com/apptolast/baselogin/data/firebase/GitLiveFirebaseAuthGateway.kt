@@ -1,15 +1,19 @@
 package com.apptolast.baselogin.data.firebase
 
 import dev.gitlive.firebase.Firebase
+import dev.gitlive.firebase.FirebaseNetworkException
+import dev.gitlive.firebase.FirebaseTooManyRequestsException
 import dev.gitlive.firebase.auth.ActionCodeSettings
 import dev.gitlive.firebase.auth.AuthCredential
 import dev.gitlive.firebase.auth.EmailAuthProvider
 import dev.gitlive.firebase.auth.FirebaseAuth
+import dev.gitlive.firebase.auth.FirebaseAuthException
 import dev.gitlive.firebase.auth.FirebaseUser
 import dev.gitlive.firebase.auth.GithubAuthProvider
 import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.auth.OAuthProvider
 import dev.gitlive.firebase.auth.auth
+import dev.gitlive.firebase.auth.code
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -23,10 +27,11 @@ import kotlinx.coroutines.flow.map
  *    initialised, and Koin constructs this object while building the graph — well before the host
  *    app configures Firebase. Nothing may resolve the SDK in the constructor, hence [auth] being a
  *    getter rather than a field.
- * 2. **Every throwable becomes [FirebaseAuthFailure], carrying the original message.** Catching only
- *    `FirebaseAuthException` is not enough: `FirebaseNetworkException` and
- *    `FirebaseTooManyRequestsException` extend `FirebaseException` and are its *siblings*, not its
- *    subclasses, so they slip through and end up mis-mapped as `AuthError.Unknown`.
+ * 2. **Every throwable becomes [FirebaseAuthFailure], carrying the original message and, when the
+ *    SDK has one, the error code.** On Android the message is human text without the code, so the
+ *    code is what classifies. Catching only `FirebaseAuthException` is not enough:
+ *    `FirebaseNetworkException` and `FirebaseTooManyRequestsException` extend `FirebaseException`
+ *    and are its *siblings*, not its subclasses, so they carry no code and get a synthetic one.
  */
 class GitLiveFirebaseAuthGateway : FirebaseAuthGateway {
 
@@ -76,8 +81,7 @@ class GitLiveFirebaseAuthGateway : FirebaseAuthGateway {
     override suspend fun getIdToken(forceRefresh: Boolean): String? =
         runGateway { auth.currentUser?.getIdToken(forceRefresh) }
 
-    override suspend fun reloadCurrentUser() =
-        runGateway { auth.currentUser?.reload() ?: Unit }
+    override suspend fun reloadCurrentUser() = runGateway { auth.currentUser?.reload() ?: Unit }
 
     override suspend fun updateDisplayName(displayName: String) =
         runGateway { requireCurrentUser().updateProfile(displayName = displayName) }
@@ -118,10 +122,9 @@ class GitLiveFirebaseAuthGateway : FirebaseAuthGateway {
      * `displayName` deliberately keeps top-level precedence: [updateDisplayName] exists, so the
      * top-level name is user-managed and must not be clobbered by the provider's.
      */
-    private fun FirebaseUser.freshestPhotoUrl(): String? =
-        providerData.firstNotNullOfOrNull { info ->
-            info.photoURL?.takeIf { info.providerId != AGGREGATE_PROVIDER_ID }
-        } ?: photoURL
+    private fun FirebaseUser.freshestPhotoUrl(): String? = providerData.firstNotNullOfOrNull { info ->
+        info.photoURL?.takeIf { info.providerId != AGGREGATE_PROVIDER_ID }
+    } ?: photoURL
 
     private fun FirebaseUser?.requireUser(message: String): FirebaseAuthUser =
         this?.toFirebaseAuthUser() ?: throw FirebaseAuthFailure(message)
@@ -142,20 +145,33 @@ class GitLiveFirebaseAuthGateway : FirebaseAuthGateway {
     }
 
     /**
-     * Funnels every SDK throwable into [FirebaseAuthFailure] **without touching the message**: that
-     * string is what `mapFirebaseErrorMessage` inspects to produce a typed `AuthError`.
+     * Funnels every SDK throwable into [FirebaseAuthFailure] **without touching the message**, and
+     * with the error code the SDK knows: `FirebaseAuthException.code` (`ERROR_*` on Android, the
+     * `FIRAuthErrorCode` number on iOS) or a synthetic one for the two sibling exceptions.
      */
     private inline fun <T> runGateway(block: () -> T): T = try {
         block()
     } catch (e: FirebaseAuthFailure) {
         throw e
+    } catch (e: FirebaseAuthException) {
+        throw FirebaseAuthFailure(e.message ?: DEFAULT_MESSAGE, e, e.code)
+    } catch (e: FirebaseNetworkException) {
+        throw FirebaseAuthFailure(e.message ?: DEFAULT_MESSAGE, e, NETWORK_REQUEST_FAILED)
+    } catch (e: FirebaseTooManyRequestsException) {
+        throw FirebaseAuthFailure(e.message ?: DEFAULT_MESSAGE, e, TOO_MANY_REQUESTS)
     } catch (e: Exception) {
-        throw FirebaseAuthFailure(e.message ?: "Authentication error", e)
+        throw FirebaseAuthFailure(e.message ?: DEFAULT_MESSAGE, e, null)
     }
 
     private companion object {
         /** The synthetic aggregate entry Firebase adds to `providerData` — it mirrors the frozen
          *  top-level profile, so it never counts as a fresh provider source. */
         const val AGGREGATE_PROVIDER_ID = "firebase"
+
+        const val DEFAULT_MESSAGE = "Authentication error"
+
+        /** Synthetic codes for the exceptions that are siblings of `FirebaseAuthException`. */
+        const val NETWORK_REQUEST_FAILED = "ERROR_NETWORK_REQUEST_FAILED"
+        const val TOO_MANY_REQUESTS = "ERROR_TOO_MANY_REQUESTS"
     }
 }
