@@ -24,6 +24,7 @@ import com.apptolast.baselogin.presentation.util.toStringRes
 import com.apptolast.baselogin.util.toStringRes
 import kotlinx.coroutines.flow.collectLatest
 import login.baselogin.generated.resources.Res
+import login.baselogin.generated.resources.auth_error_requires_email_verification
 import login.baselogin.generated.resources.divider_or
 import login.baselogin.generated.resources.register_screen_register_button
 import org.jetbrains.compose.resources.getString
@@ -60,6 +61,12 @@ fun RegisterScreen(
                 is RegisterEffect.ShowError -> {
                     snackbarHostState.showSnackbar(
                         message = getString(effect.error.toStringRes()),
+                        withDismissAction = true,
+                    )
+                }
+                is RegisterEffect.EmailVerificationRequired -> {
+                    snackbarHostState.showSnackbar(
+                        message = getString(Res.string.auth_error_requires_email_verification),
                         withDismissAction = true,
                     )
                 }

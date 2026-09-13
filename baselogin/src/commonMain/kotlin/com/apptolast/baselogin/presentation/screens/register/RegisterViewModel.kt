@@ -8,6 +8,7 @@ import com.apptolast.baselogin.domain.model.AuthError
 import com.apptolast.baselogin.domain.model.AuthResult
 import com.apptolast.baselogin.domain.model.Credentials
 import com.apptolast.baselogin.domain.model.IdentityProvider
+import com.apptolast.baselogin.presentation.util.isUserCancellation
 import com.apptolast.baselogin.util.ValidationError
 import com.apptolast.baselogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -87,7 +88,7 @@ class RegisterViewModel(private val authRepository: AuthRepository, private val 
                 }
                 is AuthResult.Failure -> {
                     _uiState.update { it.copy(loadingProvider = null) }
-                    _effect.emit(RegisterEffect.ShowError(result.error))
+                    if (!result.error.isUserCancellation) _effect.emit(RegisterEffect.ShowError(result.error))
                 }
                 else -> {
                     _uiState.update { it.copy(loadingProvider = null) }
@@ -124,7 +125,7 @@ class RegisterViewModel(private val authRepository: AuthRepository, private val 
                     }
                     is AuthResult.RequiresEmailVerification -> {
                         _uiState.update { it.copy(isLoading = false) }
-                        _effect.emit(RegisterEffect.ShowError(AuthError.RequiresEmailVerification()))
+                        _effect.emit(RegisterEffect.EmailVerificationRequired)
                     }
                     else -> {
                         _uiState.update { it.copy(isLoading = false) }

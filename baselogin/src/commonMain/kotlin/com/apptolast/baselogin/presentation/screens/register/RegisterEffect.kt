@@ -10,4 +10,7 @@ sealed interface RegisterEffect {
     data object NavigateToPhoneAuth : RegisterEffect
     data object NavigateToMagicLink : RegisterEffect
     data class ShowError(val error: AuthError) : RegisterEffect
+
+    /** Sign-up succeeded but the account still has to verify its email. Not an error. */
+    data object EmailVerificationRequired : RegisterEffect
 }
