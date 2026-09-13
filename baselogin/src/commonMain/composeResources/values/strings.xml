@@ -61,21 +61,28 @@
     <string name="auth_error_invalid_credentials">Invalid email or password</string>
     <string name="auth_error_user_not_found">No account found with this email</string>
     <string name="auth_error_email_already_in_use">This email is already registered</string>
-    <string name="auth_error_weak_password">Password is too weak</string>
-    <string name="auth_error_invalid_email">Invalid email format</string>
+    <string name="auth_error_weak_password">The password is too weak. Try a longer password that is harder to guess.</string>
+    <string name="auth_error_invalid_email">Enter a valid email address.</string>
     <string name="auth_error_invalid_reset_code">Invalid or expired password reset link</string>
     <string name="auth_error_network_error">Network error. Please check your connection</string>
     <string name="auth_error_too_many_requests">Too many attempts. Please try again later</string>
-    <string name="auth_error_user_disabled">This account has been disabled</string>
-    <string name="auth_error_operation_not_allowed">This operation is not allowed</string>
+    <string name="auth_error_user_disabled">This account is disabled. Please contact support.</string>
+    <string name="auth_error_operation_not_allowed">This sign-in method isn't available right now.</string>
     <string name="auth_error_session_expired">Your session has expired. Please sign in again</string>
     <string name="auth_error_requires_email_verification">Please verify your email address before signing in</string>
-    <string name="auth_error_unknown">An unexpected error occurred</string>
+    <string name="auth_error_unknown">We couldn't complete the operation. Please try again.</string>
     <string name="auth_error_registration_failed">Registration failed. Please try again</string>
     <string name="auth_error_phone_unexpected">Unexpected error during phone verification</string>
     <string name="auth_error_phone_verification_failed">Phone verification failed</string>
     <string name="auth_error_phone_invalid">Invalid phone number</string>
-    <string name="auth_error_invalid_otp">Invalid verification code</string>
+    <string name="auth_error_invalid_otp">The code is incorrect. Check it or request a new one.</string>
+    <string name="auth_error_account_exists_with_different_credential">An account already exists with this email. Sign in with the method you used before.</string>
+    <string name="auth_error_credential_already_in_use">This account is already linked to another user.</string>
+    <string name="auth_error_requires_recent_login">For your security, sign in again to continue.</string>
+    <string name="auth_error_verification_code_expired">The code has expired. Request a new one.</string>
+    <string name="auth_error_quota_exceeded">The sending limit has been reached. Please try again later.</string>
+    <string name="auth_error_sign_in_cancelled">Sign-in was cancelled.</string>
+    <string name="auth_error_provider_not_configured">This sign-in method isn't set up.</string>
 
     <!-- Phone Auth Screen -->
     <string name="phone_auth_screen_title">Sign In with Phone</string>

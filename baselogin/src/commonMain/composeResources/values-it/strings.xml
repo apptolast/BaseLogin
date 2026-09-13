@@ -61,21 +61,28 @@
     <string name="auth_error_invalid_credentials">Indirizzo e-mail o password errati</string>
     <string name="auth_error_user_not_found">Nessun account trovato con questa e-mail</string>
     <string name="auth_error_email_already_in_use">Questa e-mail è già registrata</string>
-    <string name="auth_error_weak_password">La password è troppo debole</string>
-    <string name="auth_error_invalid_email">Formato e-mail non valido</string>
+    <string name="auth_error_weak_password">La password è troppo debole. Scegline una più lunga e difficile da indovinare.</string>
+    <string name="auth_error_invalid_email">Inserisci un indirizzo e-mail valido.</string>
     <string name="auth_error_invalid_reset_code">Link di reimpostazione non valido o scaduto</string>
     <string name="auth_error_network_error">Errore di rete. Controlla la connessione</string>
     <string name="auth_error_too_many_requests">Troppi tentativi. Riprova più tardi</string>
-    <string name="auth_error_user_disabled">Questo account è stato disabilitato</string>
-    <string name="auth_error_operation_not_allowed">Questa operazione non è consentita</string>
+    <string name="auth_error_user_disabled">Questo account è disattivato. Contatta l'assistenza.</string>
+    <string name="auth_error_operation_not_allowed">Questo metodo di accesso non è disponibile al momento.</string>
     <string name="auth_error_session_expired">La sessione è scaduta. Accedi di nuovo</string>
     <string name="auth_error_requires_email_verification">Verifica il tuo indirizzo email prima di accedere</string>
-    <string name="auth_error_unknown">Si è verificato un errore imprevisto</string>
+    <string name="auth_error_unknown">Non è stato possibile completare l'operazione. Riprova.</string>
     <string name="auth_error_registration_failed">Registrazione non riuscita. Riprova</string>
     <string name="auth_error_phone_unexpected">Errore imprevisto durante la verifica del telefono</string>
     <string name="auth_error_phone_verification_failed">La verifica del telefono non è riuscita</string>
     <string name="auth_error_phone_invalid">Numero di telefono non valido</string>
-    <string name="auth_error_invalid_otp">Codice di verifica non valido</string>
+    <string name="auth_error_invalid_otp">Il codice non è corretto. Controllalo o richiedine uno nuovo.</string>
+    <string name="auth_error_account_exists_with_different_credential">Esiste già un account con questa e-mail. Accedi con il metodo che hai usato la prima volta.</string>
+    <string name="auth_error_credential_already_in_use">Questo account è già collegato a un altro utente.</string>
+    <string name="auth_error_requires_recent_login">Per sicurezza, accedi di nuovo per continuare.</string>
+    <string name="auth_error_verification_code_expired">Il codice è scaduto. Richiedine uno nuovo.</string>
+    <string name="auth_error_quota_exceeded">È stato raggiunto il limite di invii. Riprova più tardi.</string>
+    <string name="auth_error_sign_in_cancelled">Accesso annullato.</string>
+    <string name="auth_error_provider_not_configured">Questo metodo di accesso non è configurato.</string>
 
     <!-- Phone Auth Screen -->
     <string name="phone_auth_screen_title">Accedi con telefono</string>

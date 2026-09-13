@@ -61,21 +61,28 @@
     <string name="auth_error_invalid_credentials">Adresă de e-mail sau parolă incorectă</string>
     <string name="auth_error_user_not_found">Nu a fost găsit niciun cont cu acest e-mail</string>
     <string name="auth_error_email_already_in_use">Această adresă de e-mail este deja înregistrată</string>
-    <string name="auth_error_weak_password">Parola este prea slabă</string>
-    <string name="auth_error_invalid_email">Format de e-mail invalid</string>
+    <string name="auth_error_weak_password">Parola este prea slabă. Alege o parolă mai lungă, mai greu de ghicit.</string>
+    <string name="auth_error_invalid_email">Introdu o adresă de e-mail validă.</string>
     <string name="auth_error_invalid_reset_code">Link de resetare a parolei invalid sau expirat</string>
     <string name="auth_error_network_error">Eroare de rețea. Verifică-ți conexiunea</string>
     <string name="auth_error_too_many_requests">Prea multe încercări. Încearcă din nou mai târziu</string>
-    <string name="auth_error_user_disabled">Acest cont a fost dezactivat</string>
-    <string name="auth_error_operation_not_allowed">Această operațiune nu este permisă</string>
+    <string name="auth_error_user_disabled">Acest cont este dezactivat. Contactează asistența.</string>
+    <string name="auth_error_operation_not_allowed">Această metodă de conectare nu este disponibilă momentan.</string>
     <string name="auth_error_session_expired">Sesiunea ta a expirat. Conectează-te din nou</string>
     <string name="auth_error_requires_email_verification">Te rugăm să îți confirmi adresa de e-mail înainte de conectare</string>
-    <string name="auth_error_unknown">A apărut o eroare neașteptată</string>
+    <string name="auth_error_unknown">Nu am putut finaliza operațiunea. Încearcă din nou.</string>
     <string name="auth_error_registration_failed">Înregistrarea a eșuat. Te rugăm să încerci din nou</string>
     <string name="auth_error_phone_unexpected">Eroare neașteptată în timpul verificării telefonului</string>
     <string name="auth_error_phone_verification_failed">Verificarea telefonului a eșuat</string>
     <string name="auth_error_phone_invalid">Număr de telefon invalid</string>
-    <string name="auth_error_invalid_otp">Cod de verificare invalid</string>
+    <string name="auth_error_invalid_otp">Codul este incorect. Verifică-l sau solicită unul nou.</string>
+    <string name="auth_error_account_exists_with_different_credential">Există deja un cont cu acest e-mail. Conectează-te cu metoda pe care ai folosit-o prima dată.</string>
+    <string name="auth_error_credential_already_in_use">Acest cont este deja asociat cu alt utilizator.</string>
+    <string name="auth_error_requires_recent_login">Pentru siguranța ta, conectează-te din nou pentru a continua.</string>
+    <string name="auth_error_verification_code_expired">Codul a expirat. Solicită unul nou.</string>
+    <string name="auth_error_quota_exceeded">Limita de trimiteri a fost atinsă. Încearcă din nou mai târziu.</string>
+    <string name="auth_error_sign_in_cancelled">Conectarea a fost anulată.</string>
+    <string name="auth_error_provider_not_configured">Această metodă de conectare nu este configurată.</string>
 
     <!-- Phone Auth Screen -->
     <string name="phone_auth_screen_title">Conectare cu telefonul</string>
