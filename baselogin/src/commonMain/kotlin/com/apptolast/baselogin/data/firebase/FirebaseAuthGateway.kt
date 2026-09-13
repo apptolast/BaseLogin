@@ -113,9 +113,14 @@ sealed interface FirebaseAuthCredential {
 /**
  * The only exception this port throws.
  *
- * It carries the SDK's original [message] untouched, because that string is what
- * `mapFirebaseErrorMessage` inspects to produce a typed `AuthError`. Do not normalise or translate
- * it here: the mapper already understands the three families of Firebase error strings (REST codes,
- * native Android codes and web SDK codes).
+ * It carries the SDK's error [code] when there is one (`ERROR_*` on Android, the `FIRAuthErrorCode`
+ * number on iOS) and the original [message] untouched. `mapFirebaseError` classifies by [code] first
+ * — on Android the message is human text with no code in it — and falls back to the message. Do not
+ * normalise or translate either here: the mapper already understands every family of Firebase error
+ * strings.
  */
-class FirebaseAuthFailure(message: String, cause: Throwable? = null) : Exception(message, cause)
+class FirebaseAuthFailure(message: String, cause: Throwable?, val code: String?) : Exception(message, cause) {
+
+    /** Kept explicitly so the two-argument signature published before `code` existed stays binary compatible. */
+    constructor(message: String, cause: Throwable? = null) : this(message, cause, null)
+}

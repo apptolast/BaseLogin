@@ -20,6 +20,14 @@ sealed interface SocialTokenResult {
      * of creating a new credential.
      */
     data object PlatformHandled : SocialTokenResult
+
+    /**
+     * The platform flow failed for a reason other than the user cancelling it.
+     *
+     * [code] is the platform error code when one exists (e.g. `ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL`
+     * on Android web OAuth); [message] is kept for diagnostics only.
+     */
+    data class Failed(val code: String?, val message: String) : SocialTokenResult
 }
 
 /**

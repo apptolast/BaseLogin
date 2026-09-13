@@ -202,4 +202,42 @@ class LoginViewModelTest {
         assertIs<LoginEffect.ShowError>(effects.first())
         job.cancel()
     }
+
+    // ── 013: cancelar no es un error ───────────────────────────────────────
+
+    @Test
+    fun `013 cancelling a social sign in shows no error and clears the loading provider`() = runTest {
+        // Given (AC-12)
+        repo.signInResult = AuthResult.Failure(AuthError.SignInCancelled())
+        val effects = mutableListOf<LoginEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        // When
+        viewModel.onAction(LoginAction.SocialSignInClicked(IdentityProvider.Google))
+        advanceUntilIdle()
+
+        // Then
+        assertTrue(effects.none { it is LoginEffect.ShowError }, "unexpected effects: $effects")
+        assertNull(viewModel.uiState.value.loadingProvider)
+        job.cancel()
+    }
+
+    @Test
+    fun `013 other social failures are still shown with the same error`() = runTest {
+        // Given (AC-16)
+        val error = AuthError.AccountExistsWithDifferentCredential()
+        repo.signInResult = AuthResult.Failure(error)
+        val effects = mutableListOf<LoginEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        // When
+        viewModel.onAction(LoginAction.SocialSignInClicked(IdentityProvider.Google))
+        advanceUntilIdle()
+
+        // Then
+        val shown = effects.single()
+        assertIs<LoginEffect.ShowError>(shown)
+        assertEquals(error, shown.error)
+        job.cancel()
+    }
 }

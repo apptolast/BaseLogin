@@ -61,21 +61,28 @@
     <string name="auth_error_invalid_credentials">Adresse e-mail ou mot de passe incorrect</string>
     <string name="auth_error_user_not_found">Aucun compte trouvé avec cette adresse e-mail</string>
     <string name="auth_error_email_already_in_use">Cette adresse e-mail est déjà enregistrée</string>
-    <string name="auth_error_weak_password">Le mot de passe est trop faible</string>
-    <string name="auth_error_invalid_email">Format d'adresse e-mail invalide</string>
+    <string name="auth_error_weak_password">Le mot de passe est trop faible. Choisissez-en un plus long et plus difficile à deviner.</string>
+    <string name="auth_error_invalid_email">Saisissez une adresse e-mail valide.</string>
     <string name="auth_error_invalid_reset_code">Lien de réinitialisation invalide ou expiré</string>
     <string name="auth_error_network_error">Erreur réseau. Vérifiez votre connexion</string>
     <string name="auth_error_too_many_requests">Trop de tentatives. Veuillez réessayer plus tard</string>
-    <string name="auth_error_user_disabled">Ce compte a été désactivé</string>
-    <string name="auth_error_operation_not_allowed">Cette opération n'est pas autorisée</string>
+    <string name="auth_error_user_disabled">Ce compte est désactivé. Veuillez contacter l'assistance.</string>
+    <string name="auth_error_operation_not_allowed">Ce mode de connexion n'est pas disponible pour le moment.</string>
     <string name="auth_error_session_expired">Votre session a expiré. Veuillez vous reconnecter</string>
     <string name="auth_error_requires_email_verification">Veuillez vérifier votre adresse e-mail avant de vous connecter</string>
-    <string name="auth_error_unknown">Une erreur inattendue s'est produite</string>
+    <string name="auth_error_unknown">Impossible de terminer l'opération. Veuillez réessayer.</string>
     <string name="auth_error_registration_failed">L'inscription a échoué. Veuillez réessayer</string>
     <string name="auth_error_phone_unexpected">Erreur inattendue lors de la vérification du téléphone</string>
     <string name="auth_error_phone_verification_failed">La vérification du téléphone a échoué</string>
     <string name="auth_error_phone_invalid">Numéro de téléphone non valide</string>
-    <string name="auth_error_invalid_otp">Code de vérification non valide</string>
+    <string name="auth_error_invalid_otp">Le code est incorrect. Vérifiez-le ou demandez-en un nouveau.</string>
+    <string name="auth_error_account_exists_with_different_credential">Un compte existe déjà avec cette adresse e-mail. Connectez-vous avec la méthode utilisée la première fois.</string>
+    <string name="auth_error_credential_already_in_use">Ce compte est déjà associé à un autre utilisateur.</string>
+    <string name="auth_error_requires_recent_login">Pour votre sécurité, reconnectez-vous pour continuer.</string>
+    <string name="auth_error_verification_code_expired">Le code a expiré. Demandez-en un nouveau.</string>
+    <string name="auth_error_quota_exceeded">La limite d'envoi a été atteinte. Veuillez réessayer plus tard.</string>
+    <string name="auth_error_sign_in_cancelled">La connexion a été annulée.</string>
+    <string name="auth_error_provider_not_configured">Ce mode de connexion n'est pas configuré.</string>
 
     <!-- Phone Auth Screen -->
     <string name="phone_auth_screen_title">Connexion par téléphone</string>

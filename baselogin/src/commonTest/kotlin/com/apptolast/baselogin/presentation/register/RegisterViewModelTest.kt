@@ -180,16 +180,37 @@ class RegisterViewModelTest {
     }
 
     @Test
-    fun `SignUpClicked with RequiresEmailVerification result emits ShowError`() = runTest {
+    fun `013 sign up pending email verification emits EmailVerificationRequired and no error`() = runTest {
+        // Given (AC-15)
         repo.signUpResult = AuthResult.RequiresEmailVerification
         val effects = mutableListOf<RegisterEffect>()
         val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
 
+        // When
         fillValidForm()
         viewModel.onAction(RegisterAction.SignUpClicked)
         advanceUntilIdle()
 
-        assertIs<RegisterEffect.ShowError>(effects.first())
+        // Then
+        assertTrue(effects.contains(RegisterEffect.EmailVerificationRequired), "effects: $effects")
+        assertTrue(effects.none { it is RegisterEffect.ShowError }, "unexpected effects: $effects")
+        job.cancel()
+    }
+
+    @Test
+    fun `013 cancelling a social sign up shows no error and clears the loading provider`() = runTest {
+        // Given (AC-13)
+        repo.signInResult = AuthResult.Failure(AuthError.SignInCancelled())
+        val effects = mutableListOf<RegisterEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        // When
+        viewModel.onAction(RegisterAction.SignUpWithOAuth(IdentityProvider.Google))
+        advanceUntilIdle()
+
+        // Then
+        assertTrue(effects.none { it is RegisterEffect.ShowError }, "unexpected effects: $effects")
+        assertNull(viewModel.uiState.value.loadingProvider)
         job.cancel()
     }
 

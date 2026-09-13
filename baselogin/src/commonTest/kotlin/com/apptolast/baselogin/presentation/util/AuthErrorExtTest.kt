@@ -28,6 +28,14 @@ class AuthErrorExtTest {
         AuthError.PhoneNumberInvalid(),
         AuthError.InvalidVerificationCode(),
         AuthError.Unknown(),
+        // Spec 013 (AC-17)
+        AuthError.AccountExistsWithDifferentCredential(),
+        AuthError.CredentialAlreadyInUse(),
+        AuthError.RequiresRecentLogin(),
+        AuthError.VerificationCodeExpired(),
+        AuthError.QuotaExceeded(),
+        AuthError.SignInCancelled(),
+        AuthError.ProviderNotConfigured(),
     )
 
     @Test

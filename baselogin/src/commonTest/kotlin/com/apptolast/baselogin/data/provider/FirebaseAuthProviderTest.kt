@@ -348,7 +348,7 @@ class FirebaseAuthProviderTest {
     // ── 009: la sesion de telefono, igual que las demas ───────────────────────
 
     @Test
-    fun `009 verifyPhoneOtp returns the full user, not the platform stub`() = runTest {
+    fun `009 verifyPhoneOtp returns the full user and not the platform stub`() = runTest {
         // Given: iOS only knows the uid its Swift handler sent back, while Android fills the session
         // from the Firebase user. The gateway is the one that knows the whole user.
         phoneAuth.verifyResult = AuthResult.Success(UserSession(userId = "p-1", email = null))
@@ -414,12 +414,116 @@ class FirebaseAuthProviderTest {
     }
 
     @Test
-    fun `refresh session without a signed-in user fails as session expired, after the no-op reload`() = runTest {
+    fun `refresh session without a signed-in user fails as session expired after the no-op reload`() = runTest {
         gateway.user = null
 
         val result = provider().refreshSession()
 
         assertIs<AuthResult.Failure>(result)
         assertIs<AuthError.SessionExpired>(result.error)
+    }
+
+    // ── 013: errores descriptivos ──────────────────────────────────────────────
+
+    @Test
+    fun `013 the provider classifies by the code the gateway carries`() = runTest {
+        // Given: Android's human message has no code in it; only FirebaseAuthFailure.code does (AC-08)
+        gateway.failWith = FirebaseAuthFailure(
+            message = "The email address is already in use by another account.",
+            cause = null,
+            code = "ERROR_EMAIL_ALREADY_IN_USE",
+        )
+
+        // When
+        val result = provider().signUp(SignUpData("taken@test.com", "secret"))
+
+        // Then
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.EmailAlreadyInUse>(result.error)
+    }
+
+    @Test
+    fun `013 a cancelled social sign in is SignInCancelled for sign in and reauthenticate`() = runTest {
+        // Given (AC-09)
+        socialTokens.returnsCancelled(IdentityProvider.Google)
+
+        // When
+        val signIn = provider().signIn(Credentials.OAuthToken(IdentityProvider.Google))
+        val reauth = provider().reauthenticate(Credentials.OAuthToken(IdentityProvider.Google))
+
+        // Then
+        assertIs<AuthResult.Failure>(signIn)
+        assertIs<AuthError.SignInCancelled>(signIn.error)
+        assertIs<AuthResult.Failure>(reauth)
+        assertIs<AuthError.SignInCancelled>(reauth.error)
+        assertEquals(0, gateway.totalInteractions)
+    }
+
+    @Test
+    fun `013 a failed social sign in keeps the type of its platform code`() = runTest {
+        // Given: Android web OAuth for Apple fails with an account collision (AC-10)
+        socialTokens.returnsFailure(
+            IdentityProvider.Apple,
+            code = "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL",
+            message = "An account already exists with the same email address but different sign-in credentials.",
+        )
+
+        // When
+        val result = provider().signIn(Credentials.OAuthToken(IdentityProvider.Apple))
+
+        // Then
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.AccountExistsWithDifferentCredential>(result.error)
+        assertEquals(0, gateway.totalInteractions)
+    }
+
+    @Test
+    fun `013 a failed reauthentication social flow keeps the type of its platform code`() = runTest {
+        // Given (AC-10, reauthenticate path)
+        socialTokens.returnsFailure(
+            IdentityProvider.Apple,
+            code = "ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL",
+            message = "An account already exists with the same email address but different sign-in credentials.",
+        )
+
+        // When
+        val result = provider().reauthenticate(Credentials.OAuthToken(IdentityProvider.Apple))
+
+        // Then
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.AccountExistsWithDifferentCredential>(result.error)
+        assertEquals(0, gateway.totalInteractions)
+    }
+
+    @Test
+    fun `013 a provider without a buildable credential is ProviderNotConfigured`() = runTest {
+        // Given: the platform hands back a token for a provider the library cannot build a credential for (AC-11)
+        val custom = IdentityProvider.Custom("oidc.acme")
+        socialTokens.returnsToken(custom, "some-token")
+
+        // When
+        val result = provider().signIn(Credentials.OAuthToken(custom))
+
+        // Then
+        assertIs<AuthResult.Failure>(result)
+        assertIs<AuthError.ProviderNotConfigured>(result.error)
+    }
+
+    @Test
+    fun `013 a failed google credential picker is shown and is not a cancellation`() = runTest {
+        // Given: Credential Manager found no way to get a credential — SHA-1 or client id misconfigured (AC-23)
+        socialTokens.returnsFailure(
+            IdentityProvider.Google,
+            code = "android.credentials.GetCredentialException.TYPE_NO_CREDENTIAL",
+            message = "No credentials available",
+        )
+
+        // When
+        val result = provider().signIn(Credentials.OAuthToken(IdentityProvider.Google))
+
+        // Then
+        assertIs<AuthResult.Failure>(result)
+        assertTrue(result.error !is AuthError.SignInCancelled, "got ${result.error}")
+        assertEquals(0, gateway.totalInteractions)
     }
 }

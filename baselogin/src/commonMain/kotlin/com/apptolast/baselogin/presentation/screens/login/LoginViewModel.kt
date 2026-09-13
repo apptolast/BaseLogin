@@ -7,6 +7,7 @@ import com.apptolast.baselogin.domain.model.AuthError
 import com.apptolast.baselogin.domain.model.AuthResult
 import com.apptolast.baselogin.domain.model.Credentials
 import com.apptolast.baselogin.domain.model.IdentityProvider
+import com.apptolast.baselogin.presentation.util.isUserCancellation
 import com.apptolast.baselogin.util.ValidationError
 import com.apptolast.baselogin.util.Validators
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -73,7 +74,7 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
                 is AuthResult.Failure -> {
                     _uiState.update { it.copy(loadingProvider = null) }
-                    _effect.emit(LoginEffect.ShowError(result.error))
+                    if (!result.error.isUserCancellation) _effect.emit(LoginEffect.ShowError(result.error))
                 }
 
                 else -> {

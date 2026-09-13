@@ -92,7 +92,7 @@ Scenario [AC-04]: El timeout configurado llega a la plataforma
 
 | AC | Test(s) | ¿Rojo antes? |
 |----|---------|--------------|
-| AC-01 | `009 verifyPhoneOtp returns the full user, not the platform stub` | **sí** |
+| AC-01 | `009 verifyPhoneOtp returns the full user and not the platform stub` | **sí** |
 | AC-02 | `009 verifyPhoneOtp forwards the code to the platform` | no — el puerto es refactor sin cambio de comportamiento; queda como guardia |
 | AC-03 | `009 a rejected otp is propagated untouched` | no — guardia de la rama `else` |
 | AC-04 | `009 sendPhoneOtp forwards the timeout to the platform` | no — guardia |

@@ -20,7 +20,7 @@ import kotlin.test.assertTrue
  * invariants below break silently every time someone adds a key to the base and forgets the other
  * eight files.
  *
- * Covers AC-01 (nine locales, the same 92 keys), AC-02 (no escaped apostrophe) and AC-03 (the two
+ * Covers AC-01 (nine locales, the same keys — 92 in spec 012, 99 since spec 013 AC-18), AC-02 (no escaped apostrophe) and AC-03 (the two
  * placeholders of the base survive translation).
  */
 class StringResourcesLocaleParityTest {
@@ -60,6 +60,17 @@ class StringResourcesLocaleParityTest {
                 "$locale is missing keys — a half-translated locale is worse than an absent one",
             )
             assertEquals(emptyList(), (keys - baseKeys.toSet()).sorted(), "$locale declares keys the base does not")
+        }
+    }
+
+    @Test
+    fun `013 the seven new auth error keys exist in every locale`() {
+        // Given the keys spec 013 adds for the new AuthError variants
+        // When the keys of each locale are read
+        // Then every locale declares all seven
+        EXPECTED_LOCALES.forEach { locale ->
+            val keys = keysOf(locale).toSet()
+            assertEquals(emptyList(), SPEC_013_KEYS.filterNot { it in keys }, "$locale is missing spec 013 keys")
         }
     }
 
@@ -119,11 +130,21 @@ class StringResourcesLocaleParityTest {
             "values-ro",
         )
 
-        const val EXPECTED_KEY_COUNT = 92
+        const val EXPECTED_KEY_COUNT = 99
 
         val EXPECTED_PLACEHOLDER_KEYS = listOf(
             "magic_link_screen_success_description",
             "phone_auth_screen_otp_description",
+        )
+
+        val SPEC_013_KEYS = listOf(
+            "auth_error_account_exists_with_different_credential",
+            "auth_error_credential_already_in_use",
+            "auth_error_requires_recent_login",
+            "auth_error_verification_code_expired",
+            "auth_error_quota_exceeded",
+            "auth_error_sign_in_cancelled",
+            "auth_error_provider_not_configured",
         )
 
         const val ESCAPED_APOSTROPHE = "\\'"

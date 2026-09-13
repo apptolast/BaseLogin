@@ -216,6 +216,11 @@ class FakeSocialTokenProvider : SocialTokenProvider {
         tokenByProvider[provider.id] = null
     }
 
+    /** The platform flow failed for a reason other than cancellation (spec 013). */
+    fun returnsFailure(provider: IdentityProvider, code: String?, message: String) {
+        tokenByProvider[provider.id] = SocialTokenResult.Failed(code, message)
+    }
+
     override suspend fun tokenFor(provider: IdentityProvider): SocialTokenResult? {
         requested += provider
         return tokenByProvider[provider.id]

@@ -152,10 +152,19 @@ Two invariants inside the adapter:
 - **Lazy resolution.** `Firebase.auth` is a getter, never a field: Koin builds the graph before the
   host app initialises `FirebaseApp`. For the same reason no binding may be `createdAtStart` — in
   Koin 4.2.x `koinApplication { }` creates eager instances by default.
-- **Every throwable becomes `FirebaseAuthFailure` with the message untouched**, because
-  `mapFirebaseErrorMessage` classifies by message. Catching `FirebaseAuthException` alone is not
-  enough: `FirebaseNetworkException` and `FirebaseTooManyRequestsException` extend
-  `FirebaseException` and are its *siblings*, so they slip through and get mis-mapped as `Unknown`.
+- **Every throwable becomes `FirebaseAuthFailure` with the message untouched and the error `code`
+  when the SDK has one** (spec 013). `mapFirebaseError(code, message, cause)` classifies by code
+  first — by equality after normalising the Android (`ERROR_*`), web (`auth/…`), REST and iOS numeric
+  (`17007`) spellings — and only then falls back to `mapFirebaseErrorMessage`. The code is not
+  optional on Android: the native message is human text with no code in it, so reading only the
+  message turned almost every Android error into `Unknown`. Catching `FirebaseAuthException` alone is
+  not enough either: `FirebaseNetworkException` and `FirebaseTooManyRequestsException` extend
+  `FirebaseException` and are its *siblings*, so they carry no code and the adapter gives them a
+  synthetic one (`ERROR_NETWORK_REQUEST_FAILED`, `ERROR_TOO_MANY_REQUESTS`).
+
+`runAuth` logs every failure with its code, exception class and resulting `AuthError` type, built by
+the pure `authFailureLogLine`. **Never the message**: on iOS it is `NSError.toString()`, whose
+`userInfo` can carry the user's email.
 
 ### Social token format
 Packed strings crossing Swift → Kotlin. The separators are literal and shared with the host app's

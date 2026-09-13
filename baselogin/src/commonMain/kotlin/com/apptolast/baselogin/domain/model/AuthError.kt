@@ -38,6 +38,28 @@ sealed class AuthError(open val message: String, open val cause: Throwable? = nu
 
     data class InvalidVerificationCode(override val message: String = "Invalid verification code") : AuthError(message)
 
+    data class AccountExistsWithDifferentCredential(
+        override val message: String = "An account already exists with the same email but a different sign-in method",
+    ) : AuthError(message)
+
+    data class CredentialAlreadyInUse(
+        override val message: String = "This credential is already associated with another account",
+    ) : AuthError(message)
+
+    data class RequiresRecentLogin(override val message: String = "This operation requires a recent sign-in") :
+        AuthError(message)
+
+    data class VerificationCodeExpired(override val message: String = "The verification code has expired") :
+        AuthError(message)
+
+    data class QuotaExceeded(override val message: String = "The quota for this operation has been exceeded") :
+        AuthError(message)
+
+    data class SignInCancelled(override val message: String = "Sign-in was cancelled") : AuthError(message)
+
+    data class ProviderNotConfigured(override val message: String = "This sign-in method is not configured") :
+        AuthError(message)
+
     data class Unknown(
         override val message: String = "An unknown error occurred",
         override val cause: Throwable? = null,

@@ -61,21 +61,28 @@
     <string name="auth_error_invalid_credentials">Onjuist e-mailadres of wachtwoord</string>
     <string name="auth_error_user_not_found">Er is geen account gevonden met dit e-mailadres</string>
     <string name="auth_error_email_already_in_use">Dit e-mailadres is al geregistreerd</string>
-    <string name="auth_error_weak_password">Het wachtwoord is te zwak</string>
-    <string name="auth_error_invalid_email">Ongeldig e-mailadres</string>
+    <string name="auth_error_weak_password">Het wachtwoord is te zwak. Kies een langer wachtwoord dat moeilijker te raden is.</string>
+    <string name="auth_error_invalid_email">Voer een geldig e-mailadres in.</string>
     <string name="auth_error_invalid_reset_code">Ongeldige of verlopen link om het wachtwoord opnieuw in te stellen</string>
     <string name="auth_error_network_error">Netwerkfout. Controleer je verbinding</string>
     <string name="auth_error_too_many_requests">Te veel pogingen. Probeer het later opnieuw</string>
-    <string name="auth_error_user_disabled">Dit account is uitgeschakeld</string>
-    <string name="auth_error_operation_not_allowed">Deze bewerking is niet toegestaan</string>
+    <string name="auth_error_user_disabled">Dit account is uitgeschakeld. Neem contact op met de ondersteuning.</string>
+    <string name="auth_error_operation_not_allowed">Deze inlogmethode is momenteel niet beschikbaar.</string>
     <string name="auth_error_session_expired">Je sessie is verlopen. Log opnieuw in</string>
     <string name="auth_error_requires_email_verification">Bevestig je e-mailadres voordat je inlogt</string>
-    <string name="auth_error_unknown">Er is een onverwachte fout opgetreden</string>
+    <string name="auth_error_unknown">We konden de bewerking niet voltooien. Probeer het opnieuw.</string>
     <string name="auth_error_registration_failed">Registratie mislukt. Probeer het opnieuw</string>
     <string name="auth_error_phone_unexpected">Onverwachte fout tijdens de telefoonverificatie</string>
     <string name="auth_error_phone_verification_failed">Telefoonverificatie mislukt</string>
     <string name="auth_error_phone_invalid">Ongeldig telefoonnummer</string>
-    <string name="auth_error_invalid_otp">Ongeldige verificatiecode</string>
+    <string name="auth_error_invalid_otp">De code is onjuist. Controleer de code of vraag een nieuwe aan.</string>
+    <string name="auth_error_account_exists_with_different_credential">Er bestaat al een account met dit e-mailadres. Log in met de methode die je de eerste keer hebt gebruikt.</string>
+    <string name="auth_error_credential_already_in_use">Dit account is al gekoppeld aan een andere gebruiker.</string>
+    <string name="auth_error_requires_recent_login">Log voor je veiligheid opnieuw in om door te gaan.</string>
+    <string name="auth_error_verification_code_expired">De code is verlopen. Vraag een nieuwe aan.</string>
+    <string name="auth_error_quota_exceeded">De verzendlimiet is bereikt. Probeer het later opnieuw.</string>
+    <string name="auth_error_sign_in_cancelled">Het inloggen is geannuleerd.</string>
+    <string name="auth_error_provider_not_configured">Deze inlogmethode is niet ingesteld.</string>
 
     <!-- Phone Auth Screen -->
     <string name="phone_auth_screen_title">Inloggen met telefoonnummer</string>

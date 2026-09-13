@@ -229,13 +229,16 @@ class AuthRepositoryImplTest {
     }
 
     @Test
-    fun `sendMagicLink returns OperationNotAllowed when magicLinkConfig is null`() = runTest {
+    fun `013 sendMagicLink returns ProviderNotConfigured when magicLinkConfig is null`() = runTest {
+        // Given (AC-11)
         val r = repo(LoginLibraryConfig(magicLinkConfig = null))
 
+        // When
         val result = r.sendMagicLink("user@example.com")
 
+        // Then
         assertIs<AuthResult.Failure>(result)
-        assertIs<AuthError.OperationNotAllowed>(result.error)
+        assertIs<AuthError.ProviderNotConfigured>(result.error)
     }
 
     // ── getCurrentSession ────────────────────────────────────────────────
