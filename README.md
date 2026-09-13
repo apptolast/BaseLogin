@@ -112,7 +112,7 @@ All providers are **opt-in** via `LoginLibraryConfig`. Disabled providers are no
 2. [Architecture Overview](#architecture-overview)
 3. [Prerequisites](#prerequisites)
 4. [Project Setup](#project-setup)
-5. [Migrating to 2.0.0](#migrating-to-200)
+5. [Migrating to 3.0.0](#migrating-to-300) · [Migrating to 2.0.0](#migrating-to-200)
 6. [Initialization](#initialization)
 7. [Integrating the Navigation Flow](#integrating-the-navigation-flow)
 8. [Provider Configuration](#provider-configuration)
@@ -219,7 +219,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.apptolast:baselogin:2.0.0")
+            implementation("io.github.apptolast:baselogin:3.0.0")
         }
     }
 }
@@ -228,7 +228,7 @@ kotlin {
 Android-only host:
 ```kotlin
 dependencies {
-    implementation("io.github.apptolast:baselogin:2.0.0")
+    implementation("io.github.apptolast:baselogin:3.0.0")
 }
 ```
 
@@ -306,6 +306,72 @@ This is what `composeApp/` does in this repository.
 The library's own dependencies (Firebase, Koin, Compose, etc.) are defined in `baselogin/build.gradle.kts` and are transitively available.
 
 ---
+
+## Migrating to 3.0.0
+
+3.0.0 makes authentication errors say what happened. Most of it needs nothing from you, but a
+`sealed` type gained cases and some errors are reported differently, so it is a major version.
+
+### New `AuthError` variants
+
+| Variant | When |
+|---|---|
+| `AccountExistsWithDifferentCredential` | The email already has an account with another sign-in method |
+| `CredentialAlreadyInUse` | The social account is already linked to another user |
+| `RequiresRecentLogin` | Firebase wants a fresh sign-in before a sensitive operation |
+| `VerificationCodeExpired` | The SMS code expired |
+| `QuotaExceeded` | The SMS quota of the Firebase project is exhausted |
+| `SignInCancelled` | The user backed out of a social sign-in |
+| `ProviderNotConfigured` | The sign-in method is not set up (see below) |
+
+A `when (error)` over `AuthError` **without an `else`** stops compiling: add the seven branches or an
+`else`. The same applies, far less likely, to an exhaustive `when` over `RegisterEffect` (new
+`EmailVerificationRequired`) or `SocialTokenResult` (new `Failed`), if you implement
+`SocialTokenProvider` yourself.
+
+### Errors that are reported differently
+
+| Situation | 2.x | 3.0.0 |
+|---|---|---|
+| The user cancels a social sign-in | `OperationNotAllowed` | `SignInCancelled` |
+| A provider the library cannot build a credential for | `OperationNotAllowed` | `ProviderNotConfigured` |
+| `sendMagicLink` without `MagicLinkConfig` | `OperationNotAllowed` | `ProviderNotConfigured` |
+| Restricted or invalid API key, app not authorised, missing configuration | `Unknown` | `ProviderNotConfigured` |
+| Almost any Firebase error on Android (email in use, weak password, …) | `Unknown` | its own type |
+
+If you detected cancellation with `is AuthError.OperationNotAllowed`, switch to
+`is AuthError.SignInCancelled`. `OperationNotAllowed` now only means a sign-in method disabled in the
+Firebase console.
+
+The Android fix is the one users will notice: the native SDK puts the error code in
+`FirebaseAuthException.errorCode`, not in the message, and the library used to read only the message.
+
+### Cancelling is silent
+
+The login, register and re-authentication screens no longer show anything when a social sign-in is
+cancelled; they only clear the loading state. On Android a real failure of the Google picker or of
+the web OAuth flow (Apple, GitHub, Microsoft, …) is still shown with its type.
+
+**On iOS a social failure now looks like a cancellation.** The Swift handlers hand back only a
+`String?`, so the library cannot tell "the user closed the sheet" from "the sign-in failed": both
+become `SignInCancelled` and nothing is shown, where 2.x showed "This operation is not allowed". Every
+missing token is logged with its provider (`social token null for google.com -> SignInCancelled`),
+so a broken integration is still visible in the console.
+
+A successful sign-up that still needs email verification is no longer a `ShowError`: it is
+`RegisterEffect.EmailVerificationRequired`, and `RegisterScreen` shows it as a message.
+
+### Logging on iOS no longer crashes
+
+In 2.0.1 every `Logger` call on iOS crashed with `EXC_BAD_ACCESS`: the text reached `NSLog`'s `%@` as
+a C string instead of an `NSString`. It happened, for example, on sign-out without a `signOutHandler`.
+3.0.0 fixes it, and also logs each failed auth operation with its error code, exception class and
+resulting type — never the message, which on iOS can contain the user's email.
+
+### Texts
+
+Six existing `auth_error_*` strings were rewritten to tell the user what to do, and seven were added,
+in all nine locales. If you display `Res.string.auth_error_*` yourself you will see the new wording.
 
 ## Migrating to 2.0.0
 
@@ -1156,11 +1222,18 @@ when (val result = authRepository.signIn(credentials)) {
 | `TooManyRequests` | Rate-limited by Firebase |
 | `UserDisabled` | Account disabled in Firebase console |
 | `OperationNotAllowed` | Sign-in method not enabled in Firebase |
+| `ProviderNotConfigured` | Sign-in method not set up: missing config, restricted API key, app not authorised |
+| `SignInCancelled` | The user cancelled a social sign-in (the library screens show nothing) |
+| `AccountExistsWithDifferentCredential` | Email already registered with another sign-in method |
+| `CredentialAlreadyInUse` | Social account already linked to another user |
+| `RequiresRecentLogin` | Sensitive operation needs a fresh sign-in |
 | `NetworkError` | No connectivity or request timeout |
 | `SessionExpired` | Token expired, user needs to sign in again |
 | `RequiresEmailVerification` | Account exists but email not verified |
 | `PhoneNumberInvalid` | Malformed E.164 phone number |
-| `InvalidVerificationCode` | Wrong or expired SMS OTP |
+| `InvalidVerificationCode` | Wrong SMS OTP |
+| `VerificationCodeExpired` | SMS OTP expired |
+| `QuotaExceeded` | SMS quota of the Firebase project exhausted |
 | `Unknown` | Unrecognised Firebase error |
 
 ---
