@@ -189,4 +189,24 @@ class ReauthViewModelTest {
 
         assertNull(viewModel.uiState.value.loadingProvider)
     }
+
+    // ── 013: cancelar no es un error ───────────────────────────────────────
+
+    @Test
+    fun `013 cancelling an oauth reauthentication shows no error and clears the loading provider`() = runTest {
+        // Given (AC-14)
+        repo.reauthenticateResult = AuthResult.Failure(AuthError.SignInCancelled())
+        val effects = mutableListOf<ReauthEffect>()
+        val job = launch(dispatcher) { viewModel.effect.collect { effects.add(it) } }
+
+        // When
+        viewModel.onAction(ReauthAction.SubmitOAuth(IdentityProvider.Google))
+        advanceUntilIdle()
+
+        // Then
+        assertNull(viewModel.uiState.value.authError)
+        assertTrue(effects.none { it is ReauthEffect.ShowError }, "unexpected effects: $effects")
+        assertNull(viewModel.uiState.value.loadingProvider)
+        job.cancel()
+    }
 }
