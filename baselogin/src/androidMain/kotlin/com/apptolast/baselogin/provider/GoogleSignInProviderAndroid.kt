@@ -8,6 +8,7 @@ import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.credentials.exceptions.GetCredentialException
 import androidx.credentials.exceptions.NoCredentialException
+import com.apptolast.baselogin.SocialTokenResult
 import com.apptolast.baselogin.config.GoogleSignInConfig
 import com.apptolast.baselogin.platform.ActivityHolder
 import com.apptolast.baselogin.util.Logger
@@ -34,24 +35,40 @@ class GoogleSignInProviderAndroid(private val config: GoogleSignInConfig, privat
 
     /**
      * Initiates the Google Sign-In flow and returns the ID token, or null if cancelled/failed.
+     *
+     * Kept for source compatibility; the library itself uses [signInForToken], which does not
+     * collapse a failure into a cancellation.
      */
-    suspend fun signIn(): String? {
+    suspend fun signIn(): String? = (signInForToken() as? SocialTokenResult.Token)?.value
+
+    /**
+     * Same flow as [signIn], but tells a cancellation (`null`) apart from a real failure
+     * ([SocialTokenResult.Failed]) so a misconfigured Google sign-in is not silenced.
+     *
+     * Only [GetCredentialCancellationException] is a cancellation. A [NoCredentialException] is a
+     * reason to try the full-screen fallback in the first pass, but after that fallback it means there
+     * is no way to get a credential at all (Play Services, SHA-1, client id) and is a failure.
+     */
+    internal suspend fun signInForToken(): SocialTokenResult? {
         val activity = try {
             ActivityHolder.requireActivity()
         } catch (e: IllegalStateException) {
             Logger.e("GoogleSignIn", "No activity available for sign-in", e)
-            return null
+            return SocialTokenResult.Failed(code = null, message = e.message ?: "No activity available for sign-in")
         }
 
         // Pass 1: bottom-sheet picker (requires an existing Google account on device)
-        val idTokenFromPicker = tryGetGoogleIdOption(activity)
-        if (idTokenFromPicker != null) return idTokenFromPicker
+        when (val picker = tryGetGoogleIdOption(activity)) {
+            PickerOutcome.Cancelled -> return null
+            is PickerOutcome.Token -> return SocialTokenResult.Token(picker.idToken)
+            PickerOutcome.TryFallback -> Unit
+        }
 
         // Pass 2: full-screen Google Sign-In UI (works on emulators / fresh devices)
         return trySignInWithGoogleOption(activity)
     }
 
-    private suspend fun tryGetGoogleIdOption(activity: android.app.Activity): String? = try {
+    private suspend fun tryGetGoogleIdOption(activity: android.app.Activity): PickerOutcome = try {
         val option = GetGoogleIdOption.Builder()
             .setServerClientId(config.webClientId)
             .setFilterByAuthorizedAccounts(false)
@@ -66,19 +83,19 @@ class GoogleSignInProviderAndroid(private val config: GoogleSignInConfig, privat
             context = activity,
             request = request,
         )
-        handleSignInResult(result)
-    } catch (e: NoCredentialException) {
-        Logger.w("GoogleSignIn", "No credentials for GetGoogleIdOption, trying fallback: ${e.message}")
-        null
+        handleSignInResult(result)?.let { PickerOutcome.Token(it) } ?: PickerOutcome.TryFallback
     } catch (e: GetCredentialCancellationException) {
         Logger.d("GoogleSignIn", "Sign-In cancelled by user")
-        null
+        PickerOutcome.Cancelled
+    } catch (e: NoCredentialException) {
+        Logger.w("GoogleSignIn", "No credentials for GetGoogleIdOption, trying fallback: ${e.message}")
+        PickerOutcome.TryFallback
     } catch (e: GetCredentialException) {
         Logger.w("GoogleSignIn", "GetGoogleIdOption failed, trying fallback: ${e.message}")
-        null
+        PickerOutcome.TryFallback
     }
 
-    private suspend fun trySignInWithGoogleOption(activity: android.app.Activity): String? = try {
+    private suspend fun trySignInWithGoogleOption(activity: android.app.Activity): SocialTokenResult? = try {
         val option = GetSignInWithGoogleOption.Builder(config.webClientId).build()
 
         val request = GetCredentialRequest.Builder()
@@ -89,16 +106,18 @@ class GoogleSignInProviderAndroid(private val config: GoogleSignInConfig, privat
             context = activity,
             request = request,
         )
-        handleSignInResult(result)
+        handleSignInResult(result)?.let { SocialTokenResult.Token(it) }
+            ?: SocialTokenResult.Failed(code = null, message = "Google Sign-In returned no ID token")
     } catch (e: GetCredentialCancellationException) {
         Logger.d("GoogleSignIn", "Sign-In cancelled by user")
         null
     } catch (e: GetCredentialException) {
-        Logger.e("GoogleSignIn", "Sign-In failed: ${e.message}", e)
-        null
+        // Includes NoCredentialException: after the full-screen fallback it is not a cancellation.
+        Logger.e("GoogleSignIn", "Sign-In failed: ${e.type}", e)
+        SocialTokenResult.Failed(code = e.type, message = e.message ?: "Google Sign-In failed")
     } catch (e: IllegalStateException) {
         Logger.e("GoogleSignIn", "Sign-In failed: ${e.message}", e)
-        null
+        SocialTokenResult.Failed(code = null, message = e.message ?: "Google Sign-In failed")
     }
 
     private fun handleSignInResult(result: GetCredentialResponse): String? {
@@ -117,5 +136,12 @@ class GoogleSignInProviderAndroid(private val config: GoogleSignInConfig, privat
                 null
             }
         }
+    }
+
+    /** What the first pass (bottom-sheet picker) leaves for the flow to do next. */
+    private sealed interface PickerOutcome {
+        data class Token(val idToken: String) : PickerOutcome
+        data object Cancelled : PickerOutcome
+        data object TryFallback : PickerOutcome
     }
 }

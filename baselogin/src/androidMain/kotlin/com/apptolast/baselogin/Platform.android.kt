@@ -5,6 +5,7 @@ import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import com.apptolast.baselogin.SocialTokenResult
 import com.apptolast.baselogin.config.GoogleSignInConfig
+import com.apptolast.baselogin.data.firebase.toAuthError
 import com.apptolast.baselogin.di.LoginLibraryConfig
 import com.apptolast.baselogin.di.OAuthProviderConfig
 import com.apptolast.baselogin.domain.model.AuthError
@@ -69,18 +70,18 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
         is IdentityProvider.Google -> {
             val config = PlatformKoinHelper.googleSignInConfig
             if (config == null) {
-                Logger.w(
-                    "Platform",
-                    "Google Sign-In is not configured. Provide GoogleSignInConfig in LoginLibraryConfig.",
-                )
-                return null
+                val message = "Google Sign-In is not configured. Provide GoogleSignInConfig in LoginLibraryConfig."
+                Logger.w("Platform", message)
+                // A missing configuration is the integrator's error, not a cancellation: surfacing it as
+                // ProviderNotConfigured keeps it visible instead of silently doing nothing.
+                return SocialTokenResult.Failed(CONFIGURATION_NOT_FOUND, message)
             }
 
             val googleProvider = GoogleSignInProviderAndroid(
                 config = config,
                 context = appContext,
             )
-            googleProvider.signIn()?.let { SocialTokenResult.Token(it) }
+            googleProvider.signInForToken()
         }
         is IdentityProvider.Apple ->
             WebOAuthProviderAndroid.signIn(
@@ -96,11 +97,15 @@ actual suspend fun getSocialIdToken(provider: IdentityProvider): SocialTokenResu
         is IdentityProvider.Facebook ->
             signInWithWebOAuth("facebook.com", PlatformKoinHelper.loginConfig.facebookOAuthConfig)
         else -> {
-            Logger.w("Platform", "Social sign-in for ${provider.id} is not implemented on Android yet.")
-            null
+            val message = "Social sign-in for ${provider.id} is not implemented on Android yet."
+            Logger.w("Platform", message)
+            SocialTokenResult.Failed(CONFIGURATION_NOT_FOUND, message)
         }
     }
 }
+
+/** Classified as `ProviderNotConfigured` by `mapFirebaseError`. */
+private const val CONFIGURATION_NOT_FOUND = "CONFIGURATION_NOT_FOUND"
 
 private suspend fun signInWithWebOAuth(providerId: String, config: OAuthProviderConfig): SocialTokenResult? =
     WebOAuthProviderAndroid.signIn(
@@ -148,11 +153,7 @@ actual suspend fun sendPhoneVerificationCode(phoneNumber: String, timeoutSeconds
                     .addOnFailureListener { e ->
                         if (cont.isActive) {
                             cont.resume(
-                                PhoneAuthResult.Failure(
-                                    AuthError.Unknown(
-                                        e.message ?: "Auto verification failed",
-                                    ),
-                                ),
+                                PhoneAuthResult.Failure(e.toAuthError("Auto verification failed")),
                             )
                         }
                     }
@@ -160,7 +161,7 @@ actual suspend fun sendPhoneVerificationCode(phoneNumber: String, timeoutSeconds
 
             override fun onVerificationFailed(e: com.google.firebase.FirebaseException) {
                 if (cont.isActive) {
-                    cont.resume(PhoneAuthResult.Failure(AuthError.Unknown(e.message ?: "Phone verification failed")))
+                    cont.resume(PhoneAuthResult.Failure(e.toAuthError("Phone verification failed")))
                 }
             }
 
@@ -210,7 +211,7 @@ actual suspend fun verifyPhoneCode(verificationId: String, otpCode: String): Aut
             }
             .addOnFailureListener { e ->
                 if (cont.isActive) {
-                    cont.resume(AuthResult.Failure(AuthError.Unknown(e.message ?: "Phone OTP verification failed")))
+                    cont.resume(AuthResult.Failure(e.toAuthError("Phone OTP verification failed")))
                 }
             }
     }

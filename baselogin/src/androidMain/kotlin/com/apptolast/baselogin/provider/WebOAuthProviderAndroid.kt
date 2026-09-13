@@ -1,6 +1,7 @@
 package com.apptolast.baselogin.provider
 
 import com.apptolast.baselogin.SocialTokenResult
+import com.apptolast.baselogin.data.firebase.firebaseErrorCode
 import com.apptolast.baselogin.platform.ActivityHolder
 import com.apptolast.baselogin.util.Logger
 import com.google.firebase.Firebase
@@ -51,8 +52,18 @@ object WebOAuthProviderAndroid {
                     if (cont.isActive) cont.resume(SocialTokenResult.PlatformHandled)
                 }
                 .addOnFailureListener { e ->
-                    Logger.e("WebOAuth", "$providerId sign-in failed: ${e.message}")
-                    if (cont.isActive) cont.resume(null)
+                    val code = e.firebaseErrorCode()
+                    Logger.w("WebOAuth", "$providerId sign-in failed: code=$code exception=${e::class.simpleName}")
+                    // A real failure, not a cancellation: the user cancelling the Custom Tab also lands
+                    // here (ERROR_WEB_CONTEXT_CANCELED) and the common mapper turns it into SignInCancelled.
+                    if (cont.isActive) {
+                        cont.resume(
+                            SocialTokenResult.Failed(
+                                code,
+                                e.message ?: "$providerId sign-in failed",
+                            ),
+                        )
+                    }
                 }
                 .addOnCanceledListener {
                     if (cont.isActive) cont.resume(null)
