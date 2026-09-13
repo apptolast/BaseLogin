@@ -19,7 +19,7 @@ buildscript {
         providers.gradleProperty("skipKtlint").orNull != "true"
     if (enabled) {
         repositories { gradlePluginPortal() }
-        dependencies { classpath("org.jlleitschuh.gradle:ktlint-gradle:14.0.1") }
+        dependencies { classpath(libs.ktlint.gradle) }
     }
 }
 

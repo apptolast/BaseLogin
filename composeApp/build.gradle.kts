@@ -33,11 +33,11 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                implementation(compose.components.resources)
-                implementation(compose.components.uiToolingPreview)
+                implementation(libs.runtime)
+                implementation(libs.foundation)
+                implementation(libs.material3)
+                implementation(libs.components.resources)
+                implementation(libs.ui.tooling.preview)
 
                 // Add dependency to our new login module
                 api(project(":baselogin"))
@@ -46,8 +46,8 @@ kotlin {
                 implementation(libs.navigation.compose)
 
                 // Material Icons
-                implementation(compose.materialIconsExtended)
-                implementation(compose.ui)
+                implementation(libs.material.icons.extended)
+                implementation(libs.ui)
 
                 // Coil for KMP
                 implementation(libs.coil.compose)
