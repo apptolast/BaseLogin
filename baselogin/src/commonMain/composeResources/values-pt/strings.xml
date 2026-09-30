@@ -58,7 +58,7 @@
     <string name="validation_otp_empty">O código de verificação não pode estar vazio</string>
 
     <!-- Auth Error Messages -->
-    <string name="auth_error_invalid_credentials">E-mail ou senha incorretos</string>
+    <string name="auth_error_invalid_credentials">E-mail ou senha incorretos. Se criou a conta com o Google, entre com o Google.</string>
     <string name="auth_error_user_not_found">Nenhuma conta encontrada com este e-mail</string>
     <string name="auth_error_email_already_in_use">Este e-mail já está cadastrado</string>
     <string name="auth_error_weak_password">A senha é muito fraca. Tente uma senha mais longa e difícil de adivinhar.</string>
