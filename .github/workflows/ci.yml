@@ -32,6 +32,13 @@ jobs:
       # compileSdk 37 is newer than the runner image ships with; this accepts the
       # licences so AGP can pull the missing platform itself.
       - uses: android-actions/setup-android@v3
+        with:
+          # Declared explicitly to override the action's default package list, which asks for
+          # `tools` -- a package Google has RETIRED from the SDK. Without this the job dies in
+          # setup with `Failed to find package 'tools'`, before compiling a single line, and
+          # takes the release job down with it: `release` needs this one, so it is skipped and
+          # the tag publishes nothing. That is exactly how 3.0.1 failed to ship (2026-09-30).
+          packages: platform-tools
 
       - uses: gradle/actions/setup-gradle@v4
 
