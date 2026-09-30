@@ -58,7 +58,7 @@
     <string name="validation_otp_empty">Le code de vérification ne peut pas être vide</string>
 
     <!-- Auth Error Messages -->
-    <string name="auth_error_invalid_credentials">Adresse e-mail ou mot de passe incorrect</string>
+    <string name="auth_error_invalid_credentials">Adresse e-mail ou mot de passe incorrect. Si tu as créé le compte avec Google, connecte-toi avec Google.</string>
     <string name="auth_error_user_not_found">Aucun compte trouvé avec cette adresse e-mail</string>
     <string name="auth_error_email_already_in_use">Cette adresse e-mail est déjà enregistrée</string>
     <string name="auth_error_weak_password">Le mot de passe est trop faible. Choisissez-en un plus long et plus difficile à deviner.</string>
