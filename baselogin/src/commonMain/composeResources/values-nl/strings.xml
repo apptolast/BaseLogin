@@ -58,7 +58,7 @@
     <string name="validation_otp_empty">De verificatiecode mag niet leeg zijn</string>
 
     <!-- Auth Error Messages -->
-    <string name="auth_error_invalid_credentials">Onjuist e-mailadres of wachtwoord</string>
+    <string name="auth_error_invalid_credentials">Onjuist e-mailadres of wachtwoord. Als je het account met Google hebt gemaakt, meld je dan aan met Google.</string>
     <string name="auth_error_user_not_found">Er is geen account gevonden met dit e-mailadres</string>
     <string name="auth_error_email_already_in_use">Dit e-mailadres is al geregistreerd</string>
     <string name="auth_error_weak_password">Het wachtwoord is te zwak. Kies een langer wachtwoord dat moeilijker te raden is.</string>

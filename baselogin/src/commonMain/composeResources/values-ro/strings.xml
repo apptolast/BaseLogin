@@ -58,7 +58,7 @@
     <string name="validation_otp_empty">Codul de verificare nu poate fi gol</string>
 
     <!-- Auth Error Messages -->
-    <string name="auth_error_invalid_credentials">Adresă de e-mail sau parolă incorectă</string>
+    <string name="auth_error_invalid_credentials">Adresă de e-mail sau parolă incorectă. Dacă ai creat contul cu Google, conectează-te cu Google.</string>
     <string name="auth_error_user_not_found">Nu a fost găsit niciun cont cu acest e-mail</string>
     <string name="auth_error_email_already_in_use">Această adresă de e-mail este deja înregistrată</string>
     <string name="auth_error_weak_password">Parola este prea slabă. Alege o parolă mai lungă, mai greu de ghicit.</string>

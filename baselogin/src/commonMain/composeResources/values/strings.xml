@@ -58,7 +58,7 @@
     <string name="validation_otp_empty">Verification code cannot be empty</string>
 
     <!-- Auth Error Messages -->
-    <string name="auth_error_invalid_credentials">Invalid email or password</string>
+    <string name="auth_error_invalid_credentials">Invalid email or password. If you created the account with Google, sign in with Google.</string>
     <string name="auth_error_user_not_found">No account found with this email</string>
     <string name="auth_error_email_already_in_use">This email is already registered</string>
     <string name="auth_error_weak_password">The password is too weak. Try a longer password that is harder to guess.</string>

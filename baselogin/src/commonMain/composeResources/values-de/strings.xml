@@ -58,7 +58,7 @@
     <string name="validation_otp_empty">Der Bestätigungscode darf nicht leer sein</string>
 
     <!-- Auth Error Messages -->
-    <string name="auth_error_invalid_credentials">E-Mail-Adresse oder Passwort ist falsch</string>
+    <string name="auth_error_invalid_credentials">E-Mail-Adresse oder Passwort ist falsch. Wenn du das Konto mit Google erstellt hast, melde dich mit Google an.</string>
     <string name="auth_error_user_not_found">Mit dieser E-Mail-Adresse wurde kein Konto gefunden</string>
     <string name="auth_error_email_already_in_use">Diese E-Mail-Adresse ist bereits registriert</string>
     <string name="auth_error_weak_password">Das Passwort ist zu schwach. Wähle ein längeres Passwort, das schwerer zu erraten ist.</string>
