@@ -219,7 +219,7 @@ dependencyResolutionManagement {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.apptolast:baselogin:3.0.1")
+            implementation("io.github.apptolast:baselogin:3.0.2")
         }
     }
 }
@@ -228,7 +228,7 @@ kotlin {
 Android-only host:
 ```kotlin
 dependencies {
-    implementation("io.github.apptolast:baselogin:3.0.1")
+    implementation("io.github.apptolast:baselogin:3.0.2")
 }
 ```
 
